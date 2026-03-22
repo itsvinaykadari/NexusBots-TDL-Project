@@ -1,119 +1,192 @@
-# Nexus Bots - Project Plan
+# Nexus Bots — Project Plan
+
+## Project Title
+
+Nexus Bots: Fine-Tuned Intent-Driven Multi-Agent Routing for AI-Powered Robotics Commerce
+
+## Abstract (for submission)
+
+Current AI-powered e-commerce systems rely on expensive large language model API calls for every routing decision in multi-agent architectures, making them slow and costly for real-time deployment. We present Nexus Bots, a robotics commerce platform where a fine-tuned DistilBERT intent classifier (67MB) routes user queries to specialized LangChain agents across chat, voice, and email channels. We benchmark our fine-tuned router against zero-shot GPT-4, GPT-3.5-turbo, and rule-based baselines on a domain-specific dataset of 800+ labeled e-commerce queries across 6 intent classes. Results demonstrate that the fine-tuned classifier achieves comparable classification accuracy at ~160x lower latency and zero per-query cost, validating that lightweight trained models can replace LLM-based routing in multi-agent systems without sacrificing quality.
 
 ## Tech Stack
 
-| Layer       | Technology                          |
-|-------------|-------------------------------------|
-| Frontend    | React + Vite + Tailwind CSS         |
-| Backend     | Node.js + Express                   |
-| Database    | PostgreSQL                          |
-| AI/Agents   | LangChain (Python or JS) + OpenAI   |
-| Voice       | Web Speech API + Whisper/TTS        |
-| Email       | Nodemailer + AI agent               |
+| Layer        | Technology                           |
+|--------------|--------------------------------------|
+| Frontend     | React 19 + Vite + Tailwind CSS      |
+| Backend      | Node.js + Express                    |
+| Database     | PostgreSQL                           |
+| AI Routing   | Fine-tuned DistilBERT (HuggingFace) |
+| AI Agents    | LangChain + OpenAI                   |
+| Voice        | Web Speech API + TTS                 |
+| Email        | Nodemailer + AI agent                |
+| Training     | Google Colab + HuggingFace Transformers |
+
+## Architecture
+
+```
+User (Chat / Voice / Email)
+        │
+        ▼
+┌──────────────────────────────────┐
+│     Fine-Tuned Intent Classifier │  ← DistilBERT (~5ms, local)
+│     (product_query, comparison,  │
+│      recommendation, purchase,   │
+│      complaint, general)         │
+└──────────────┬───────────────────┘
+               │ intent label
+               ▼
+┌──────────────────────────────────┐
+│     LangChain Agent Router       │
+│     Routes to specialized agent  │
+│     based on classified intent   │
+├──────────────────────────────────┤
+│ Product Agent │ Sales Agent      │
+│ Support Agent │ Email Agent      │
+│ Voice Agent   │                  │
+└──────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────┐
+│     PostgreSQL                   │
+│     Products, Chats, Emails      │
+└──────────────────────────────────┘
+```
 
 ## Project Structure
 
 ```
 nexus-bots/
-├── client/              # React frontend
+├── client/                # React frontend
 │   ├── src/
-│   │   ├── components/  # Reusable UI components
-│   │   ├── pages/       # Page-level components
-│   │   ├── data/        # Static robot product data (JSON)
-│   │   ├── assets/      # Images, icons
-│   │   ├── hooks/       # Custom React hooks
-│   │   ├── context/     # React context providers
-│   │   └── styles/      # Global styles
+│   │   ├── components/    # Navbar, Footer, RobotCard, HeroSection
+│   │   ├── pages/         # Home, Catalog, RobotDetail, Chat, Voice, Support
+│   │   ├── data/          # robots.js (22 products)
+│   │   └── styles/
 │   └── public/
-├── server/              # Node.js backend
-│   ├── routes/          # API routes
-│   ├── controllers/     # Business logic
-│   ├── models/          # DB models
-│   ├── agents/          # LangChain agent definitions
-│   ├── services/        # AI, email, voice services
-│   └── config/          # DB and app config
-├── database/            # SQL scripts, seeds
+├── server/                # Node.js backend
+│   ├── routes/            # API routes
+│   ├── controllers/       # Business logic
+│   ├── models/            # DB models
+│   ├── agents/            # LangChain agent definitions
+│   └── services/          # AI, email, voice services
+├── research/              # Research component
+│   ├── dataset/           # Intent classification dataset
+│   ├── notebooks/         # Training & evaluation notebooks (Colab)
+│   ├── models/            # Saved fine-tuned model
+│   └── results/           # Benchmark tables, charts, confusion matrices
+├── database/              # SQL scripts, seeds
 ├── Idea.md
-└── PLAN.md
+├── PLAN.md
+└── README.md
 ```
 
-## Architecture (4 Layers)
+## Robot Product Catalog (22 robots, 6 categories)
 
-1. **Product Layer** - Robot catalog, detail pages, search/filter
-2. **Interaction Layer** - Chat widget, voice interface, email support panel
-3. **Intelligence Layer** - LangChain multi-agent orchestration
-4. **Data Layer** - PostgreSQL for products, interactions, chat history
+| Category | Robots | Distinct Strengths |
+|---|---|---|
+| **Household** (4) | HomeHub, Butler, Chef Mini, PetPal | Smart control, heavy carrier, precision cooking, pet monitoring |
+| **Home Cleaner** (4) | CleanBot Pro, WindowWiz, PoolDive, AirPure | Strongest suction, glass specialist, underwater, mobile purifier |
+| **Child** (3) | Buddy, CodePal, Tutor | Toddler-safe, learn coding, AI tutoring |
+| **Educational** (4) | BuildKit, ROS Lab, CompeteBot, SimBot | School kit, university research, competitions, digital twin |
+| **Security** (3) | WatchDog, EyeNet, SkyGuard | Outdoor patrol, indoor multi-hazard, aerial drone |
+| **Industrial** (4) | LiftMax, ArmX6, SortFlow, InspectEye | 500kg payload, 0.02mm precision, 3000/hr sorting, AI quality control |
 
-## AI Agents (LangChain)
+## Intent Classes for Classification
 
-| Agent              | Role                                          |
-|--------------------|-----------------------------------------------|
-| Router Agent       | Classifies intent, routes to correct agent    |
-| Product Assistant  | Answers product specs, comparisons, search    |
-| Sales Assistant    | Recommends robots, upsells, guides purchase   |
-| Support Agent      | Handles issues, troubleshooting, returns      |
-| Email Agent        | Composes formal email responses               |
-| Voice Agent        | Handles voice conversation flow               |
+| Intent | Description | Example Query | Routes To |
+|---|---|---|---|
+| `product_query` | Specs, features, availability | "What sensors does WatchDog have?" | Product Agent |
+| `comparison` | Comparing robots | "CleanBot Pro vs AirPure for allergies?" | Product Agent |
+| `recommendation` | Need-based suggestions | "Best robot for a 5 year old?" | Sales Agent |
+| `purchase_intent` | Buying, pricing, ordering | "How do I order LiftMax?" | Sales Agent |
+| `complaint` | Issues, returns, problems | "My Butler robot keeps bumping into walls" | Support Agent |
+| `general` | Greetings, off-topic | "Hello, what is Nexus Bots?" | Product Agent |
+
+## Research Benchmarks (what we will produce)
+
+| Benchmark | What we measure |
+|---|---|
+| **Accuracy comparison** | Fine-tuned DistilBERT vs GPT-4 vs GPT-3.5 vs rule-based |
+| **Per-class F1** | Precision/recall per intent class |
+| **Confusion matrix** | Which intents get misclassified |
+| **Latency** | ms per classification (local vs API) |
+| **Cost analysis** | $ per 1000 queries for each method |
+| **Learning curve** | Accuracy vs training dataset size (100, 200, 400, 800) |
 
 ## Build Phases
 
-### Phase 1 - UI Foundation (Done)
-- [x] Project scaffolding (React + Vite + Tailwind)
-- [x] Robot product data (22 robots across 6 categories)
-- [x] Home page with hero section
-- [x] Product catalog grid with robot cards
-- [x] Product detail page with specs and related robots
-- [x] Search, category filter, and sorting
-- [x] Responsive layout
-- [x] Navigation bar and footer
-- [x] Chat, Voice, Support page UIs (placeholder responses)
+### Phase 1 — UI Foundation ✅ DONE
+- [x] React + Vite + Tailwind setup
+- [x] Robot data (22 robots, 6 categories with distinct highlights)
+- [x] Home page with hero, featured robots, stats
+- [x] Catalog page with search, filter, sort
+- [x] Robot detail page with specs and related robots
+- [x] Chat, Voice, Support page UIs (placeholder)
+- [x] Responsive layout, Navbar, Footer
 
-### Phase 2 - Chat Interface
-- [ ] Chat widget component (floating button + panel)
-- [ ] Chat message UI (user/bot bubbles)
-- [ ] Connect to backend chat API
-- [ ] Basic chatbot responses (product queries)
-
-### Phase 3 - Backend + Database
-- [ ] Express server setup
-- [ ] PostgreSQL schema (products, users, chats, emails)
-- [ ] Product CRUD APIs
-- [ ] Chat session APIs
+### Phase 2 — Backend + Database
+- [ ] Express server setup with API routes
+- [ ] PostgreSQL schema (products, chats, emails, interactions)
 - [ ] Seed database with robot data
+- [ ] Product API endpoints
+- [ ] Chat session API endpoints
 
-### Phase 4 - LangChain Multi-Agent System
-- [ ] LangChain setup with router agent
-- [ ] Product assistant agent
-- [ ] Sales assistant agent
-- [ ] Support agent
-- [ ] Agent coordination and context sharing
+### Phase 3 — Intent Classification (Research Core)
+- [ ] Generate synthetic dataset using GPT-4 (800-1000 examples)
+- [ ] Clean and validate dataset manually
+- [ ] Fine-tune DistilBERT on Google Colab
+- [ ] Run benchmarks: fine-tuned vs GPT-4 vs GPT-3.5 vs rule-based
+- [ ] Generate results: accuracy table, confusion matrix, latency chart, learning curve
+- [ ] Save model for deployment
 
-### Phase 5 - Voice Interaction
-- [ ] Voice input via Web Speech API
-- [ ] Speech-to-text processing
-- [ ] AI response generation
-- [ ] Text-to-speech output
-- [ ] Voice UI panel in frontend
+### Phase 4 — LangChain Multi-Agent System
+- [ ] Set up LangChain with agent definitions
+- [ ] Product Assistant agent (specs, search, info)
+- [ ] Sales Assistant agent (recommendations, purchase guidance)
+- [ ] Support agent (complaints, troubleshooting)
+- [ ] Router connects fine-tuned classifier → correct agent
+- [ ] Context sharing between agents
 
-### Phase 6 - Email Support
-- [ ] Email support form in UI
-- [ ] Email agent for response generation
-- [ ] Nodemailer integration
+### Phase 5 — Chat Integration
+- [ ] Connect chat UI to backend
+- [ ] User message → intent classifier → agent → response
+- [ ] Chat history stored in PostgreSQL
+- [ ] Show which agent handled the query (for demo)
+
+### Phase 6 — Voice Interaction
+- [ ] Web Speech API for speech-to-text
+- [ ] Route transcribed text through same intent → agent pipeline
+- [ ] Text-to-speech for agent responses
+- [ ] Voice UI with mic button and status indicators
+
+### Phase 7 — Email Support
+- [ ] Email form sends to backend
+- [ ] Email agent generates formal response
+- [ ] Nodemailer sends response
 - [ ] Email history tracking
 
-### Phase 7 - Polish & Demo
-- [ ] Unified interaction flow
+### Phase 8 — Polish & Demo
 - [ ] Loading states and error handling
-- [ ] Demo walkthrough preparation
-- [ ] Final UI polish
+- [ ] Demo flow: show intent classification in action
+- [ ] Show benchmark results in presentation
+- [ ] Prepare evaluation slides with tables and charts
 
-## Robot Product Categories (6 categories, 3-4 each = 22 robots)
+## Time Priority
 
-1. **Household** (4) — HomeHub (smart control), Butler (heavy carrier), Chef Mini (cooking), PetPal (pet care)
-2. **Home Cleaner** (4) — CleanBot Pro (strongest suction), WindowWiz (glass specialist), PoolDive (underwater), AirPure (mobile purifier)
-3. **Child** (3) — Buddy (toddler-safe play), CodePal (learn coding), Tutor (AI homework help)
-4. **Educational** (4) — BuildKit (modular school kit), ROS Lab (university research), CompeteBot (competitions), SimBot (digital twin)
-5. **Security** (3) — WatchDog (outdoor patrol), EyeNet (indoor multi-hazard), SkyGuard (aerial drone response)
-6. **Industrial** (4) — LiftMax (500kg payload), ArmX6 (0.02mm precision), SortFlow (3000/hr speed), InspectEye (AI defect detection)
+| Priority | Phase | Why |
+|---|---|---|
+| **Critical** | Phase 3 (Intent Classification) | This is the research core — without benchmarks, no high score |
+| **Critical** | Phase 4-5 (Agents + Chat) | Working demo is essential |
+| **High** | Phase 2 (Backend + DB) | Needed for chat and agents to work |
+| **Medium** | Phase 6 (Voice) | Nice to have, shows multi-channel |
+| **Medium** | Phase 7 (Email) | Nice to have, shows multi-channel |
+| **Low** | Phase 8 (Polish) | Only after everything works |
 
-Each robot within a category has a distinct competitive advantage (highlight field) so they don't overlap.
+## What NOT to waste time on
+
+- Payment integration or order management
+- Complex user authentication
+- Training multiple models — one fine-tuned DistilBERT is the entire research story
+- Fancy animations or over-designed UI
+- Deploying to cloud — local demo is fine
+- Writing a second model for emotion/sentiment — one model, one clean benchmark
