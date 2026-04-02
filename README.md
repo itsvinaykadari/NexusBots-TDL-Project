@@ -35,7 +35,7 @@ User (Chat / Voice / Email)  — English, Hindi, Telugu
                │
                ▼
 ┌──────────────────────────────────┐
-│  PostgreSQL                      │
+│  SQLite (Phase 2)                │
 │  Products, Chats, Emails         │
 └──────────────────────────────────┘
 ```
@@ -69,7 +69,7 @@ User (Chat / Voice / Email)  — English, Hindi, Telugu
 |---|---|
 | Frontend | React 19 + Vite + Tailwind CSS |
 | Backend | Node.js + Express |
-| Database | PostgreSQL |
+| Database | SQLite (`better-sqlite3`) |
 | AI Routing | Fine-tuned DistilBERT (HuggingFace) |
 | AI Retrieval | Sentence-transformers + FAISS |
 | AI Agents | LangChain + OpenAI |
@@ -86,7 +86,12 @@ nexus-bots/
 │   │   ├── pages/         # Home, Catalog, RobotDetail, Chat, Voice, Support
 │   │   ├── data/          # robots.js — 22 robot products
 │   │   └── ...
-├── server/                # Node.js backend
+├── server/                # Node.js backend (Phase 2 complete)
+│   ├── config/
+│   ├── database/          # schema.sql, seed.sql, init.js, nexusbots.db
+│   ├── models/
+│   ├── routes/
+│   └── index.js
 ├── research/              # Intent classification + RAG training & benchmarks
 │   ├── dataset/           # Labeled intent dataset (EN + HI + TE)
 │   ├── notebooks/         # Colab training notebooks
@@ -102,14 +107,32 @@ nexus-bots/
 
 ```bash
 git clone <repo-url>
-cd "Nexus Bots TDL Project"
+cd NexusBots-TDL-Project
 
+# 1) Frontend
 cd client
 npm install
 npm run dev
+
+# 2) Backend (new terminal)
+cd ../server
+npm install
+npm run init-db
+npm run dev
 ```
 
-Open **http://localhost:5173** in your browser.
+Open **http://localhost:5173** for UI and use **http://localhost:5000** for backend APIs.
+
+## Backend API (Phase 2)
+
+- `GET /api/health` — health check
+- `GET /api/products` — all products
+- `GET /api/products/:id` — product by id
+- `GET /api/products?category=Security` — category filter
+- `GET /api/products?search=vacuum` — search
+- `POST /api/chats` — create chat session
+- `GET /api/chats/:id` — fetch chat + messages
+- `POST /api/chats/:id/messages` — add message to chat
 
 ## Pages
 
@@ -123,7 +146,7 @@ Open **http://localhost:5173** in your browser.
 ## Build Status
 
 - [x] Phase 1 — UI Foundation
-- [ ] Phase 2 — Backend + Database
+- [x] Phase 2 — Backend + Database
 - [ ] Phase 3 — Intent Classification + Multilingual Benchmarks
 - [ ] Phase 4 — RAG Pipeline + Retrieval Benchmarks
 - [ ] Phase 5 — LangChain Multi-Agent System
