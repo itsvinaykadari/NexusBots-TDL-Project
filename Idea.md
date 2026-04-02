@@ -85,7 +85,7 @@ The system follows a 4-layer architecture:
    - A coordinator agent manages context sharing between agents.
 
 4. Data Layer
-   PostgreSQL stores products, chat history, email logs, and interaction records.
+   SQLite stores products, chat history, email logs, and interaction records.
 
 Intent Classification (Research Core)
 
@@ -129,7 +129,7 @@ Tech Stack
 |--------------|--------------------------------------|
 | Frontend     | React 19 + Vite + Tailwind CSS      |
 | Backend      | Node.js + Express                    |
-| Database     | PostgreSQL                           |
+| Database     | SQLite (`better-sqlite3`)        |
 | AI Routing   | Fine-tuned DistilBERT (HuggingFace) |
 | AI Retrieval | Sentence-transformers + FAISS        |
 | AI Agents    | LangChain + OpenAI                   |
@@ -148,7 +148,7 @@ What makes this project novel
 Build Order
 
 1. Build the robotics catalog UI (React frontend with all pages).
-2. Set up backend with Express and PostgreSQL.
+2. Set up backend with Express and SQLite (better-sqlite3).
 3. Generate intent classification dataset (English + Hindi + Telugu) and fine-tune DistilBERT.
 4. Build RAG pipeline with sentence-transformers and FAISS.
 5. Run benchmarks (intent: fine-tuned vs zero-shot vs rule-based; retrieval: embeddings vs TF-IDF vs BM25).

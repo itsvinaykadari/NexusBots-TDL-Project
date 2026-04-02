@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Send, CheckCircle } from "lucide-react";
+import { useUserActivity } from "../context/UserActivityContext";
 
 export default function Support() {
+  const { setPage } = useUserActivity();
+  useEffect(() => setPage("support"), []);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -157,8 +160,7 @@ export default function Support() {
             <h3 className="text-white font-semibold mb-3">Other Channels</h3>
             <p className="text-slate-400 text-sm">
               Need faster help? Try our{" "}
-              <a href="/chat" className="text-accent hover:text-neon">Chat</a> or{" "}
-              <a href="/voice" className="text-accent hover:text-neon">Voice</a> assistants
+              <a href="/assistant" className="text-accent hover:text-neon">AI Assistant</a>
               for instant responses.
             </p>
           </div>

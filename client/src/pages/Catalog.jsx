@@ -1,12 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import RobotCard from "../components/RobotCard";
 import robots, { categories } from "../data/robots";
+import { useUserActivity } from "../context/UserActivityContext";
 
 export default function Catalog() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("name");
+  const { setPage, setSearch: trackSearch, setCategory: trackCategory } = useUserActivity();
+
+  useEffect(() => setPage("catalog"), []);
 
   const filtered = useMemo(() => {
     let result = robots;
@@ -61,7 +65,7 @@ export default function Catalog() {
             type="text"
             placeholder="Search robots by name, description, or tags..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); trackSearch(e.target.value); }}
             className="w-full pl-10 pr-4 py-2.5 bg-surface border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all"
           />
         </div>
@@ -87,7 +91,7 @@ export default function Catalog() {
         {categories.map((cat) => (
           <button
             key={cat}
-            onClick={() => setCategory(cat)}
+            onClick={() => { setCategory(cat); trackCategory(cat); }}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
               category === cat
                 ? "bg-accent text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]"

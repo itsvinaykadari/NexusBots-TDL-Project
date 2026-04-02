@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import HeroSection from "../components/HeroSection";
 import FeaturedRobots from "../components/FeaturedRobots";
 import { MessageCircle, Mic, Mail, Cpu } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useUserActivity } from "../context/UserActivityContext";
 
 function AIFeatureCard({ icon, title, description, link, color }) {
   return (
@@ -21,6 +23,9 @@ function AIFeatureCard({ icon, title, description, link, color }) {
 }
 
 export default function Home() {
+  const { setPage } = useUserActivity();
+  useEffect(() => setPage("home"), []);
+
   return (
     <div>
       <HeroSection />
@@ -40,16 +45,16 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <AIFeatureCard
             icon={<MessageCircle size={24} className="text-accent" />}
-            title="Chat Assistant"
-            description="Ask questions about robots, get recommendations, and receive instant support through our AI chatbot."
-            link="/chat"
+            title="AI Assistant"
+            description="Chat or use voice to ask questions, get recommendations, and receive instant AI-powered support."
+            link="/assistant"
             color="bg-accent/10"
           />
           <AIFeatureCard
             icon={<Mic size={24} className="text-neon" />}
             title="Voice Interaction"
             description="Talk naturally with our voice AI for a hands-free shopping and support experience."
-            link="/voice"
+            link="/assistant"
             color="bg-neon/10"
           />
           <AIFeatureCard

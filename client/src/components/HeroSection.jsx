@@ -42,7 +42,7 @@ export default function HeroSection() {
               <ArrowRight size={18} />
             </Link>
             <Link
-              to="/chat"
+              to="/assistant"
               className="flex items-center gap-2 px-8 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 hover:border-white/20 transition-all"
             >
               <MessageCircle size={18} />

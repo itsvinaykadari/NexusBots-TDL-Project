@@ -5,7 +5,7 @@ const Chat = require('../models/Chat');
 // POST /api/chats - Create new chat session
 router.post('/', (req, res) => {
   try {
-    const { language } = req.body;
+    const language = req.body?.language || 'en';
     const chat = Chat.create(language);
     res.status(201).json(chat);
   } catch (error) {

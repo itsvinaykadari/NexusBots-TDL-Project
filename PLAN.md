@@ -6,30 +6,35 @@ Nexus Bots: Fine-Tuned Intent Routing and RAG-Based Retrieval for Multilingual M
 
 ## Abstract
 
-Multi-agent AI systems in e-commerce typically rely on large language model API calls for both intent routing and context retrieval, which can be slow and costly for real-time use. We present Nexus Bots, a robotics commerce platform that combines a fine-tuned DistilBERT intent classifier for agent routing with retrieval-augmented generation (RAG) using sentence-transformer embeddings for product-aware responses. The system routes user queries across chat, voice, and email channels to specialized LangChain agents including product assistant, sales, and support agents, while RAG retrieves relevant product context from a catalog of 22 robots across 6 categories. We fine-tune DistilBERT on a domain-specific dataset of labeled e-commerce queries across 6 intent classes and benchmark it against zero-shot GPT, Gemini, and rule-based keyword matching on accuracy, F1, latency, and cost. We also compare RAG retrieval approaches (sentence-transformers vs TF-IDF vs BM25) on recall and relevance. Additionally, we evaluate whether routing to specialized agents produces better responses than a single monolithic chatbot. As a case study, we test multilingual intent classification on English, Hindi, and Telugu queries, and compare intent accuracy across text and voice input modalities.
+Multi-agent AI systems in e-commerce typically rely on large language model API calls for both intent routing and context retrieval, which can be slow and costly for real-time use. We present Nexus Bots, a robotics commerce platform that combines a fine-tuned DistilBERT intent classifier for agent routing with retrieval-augmented generation (RAG) using sentence-transformer embeddings for product-aware responses. The system routes user queries across chat, voice, and email channels to specialized LangChain agents including product assistant, sales, and support agents, while RAG retrieves relevant product context from a catalog of 22 real-world robots across 6 categories. We fine-tune DistilBERT on a domain-specific dataset of labeled e-commerce queries across 6 intent classes and benchmark it against zero-shot GPT, Gemini, and rule-based keyword matching on accuracy, F1, latency, and cost. We also compare RAG retrieval approaches (sentence-transformers vs TF-IDF vs BM25) on recall and relevance. Additionally, we evaluate whether routing to specialized agents produces better responses than a single monolithic chatbot. As a case study, we test multilingual intent classification on English, Hindi, and Telugu queries, and compare intent accuracy across text and voice input modalities.
 
 ## Tech Stack
 
-| Layer        | Technology                           |
-|--------------|--------------------------------------|
-| Frontend     | React 19 + Vite + Tailwind CSS      |
-| Backend      | Node.js + Express                    |
-| Database     | PostgreSQL                           |
-| AI Routing   | Fine-tuned DistilBERT (HuggingFace) |
-| AI Retrieval | Sentence-transformers + FAISS        |
-| AI Agents    | LangChain + OpenAI                   |
-| Voice        | Web Speech API + TTS                 |
-| Email        | Nodemailer + AI agent                |
-| Training     | Google Colab + HuggingFace Transformers |
+| Layer        | Technology                             |
+|--------------|----------------------------------------|
+| Frontend     | React 19 + Vite + Tailwind CSS        |
+| Backend      | Node.js + Express                      |
+| Database     | SQLite (`better-sqlite3`)              |
+| AI Routing   | Fine-tuned DistilBERT (HuggingFace)   |
+| AI Retrieval | Sentence-transformers + FAISS          |
+| AI Agents    | LangChain + OpenAI                     |
+| Voice        | Web Speech API + TTS                   |
+| Email        | Nodemailer + AI agent                  |
+| Training     | Google Colab + HuggingFace Transformers|
 
 ## Architecture
 
 ```
-User (Chat / Voice / Email)  — English, Hindi, Telugu
+User (Chat Widget / AI Assistant / Email)  — English, Hindi, Telugu
         │
         ├── [Voice] → Web Speech API → text transcript
         │
         ▼
+┌──────────────────────────────────┐
+│  Context-Aware Activity Tracker  │  ← Tracks views, cart, search, current product
+└──────────┬───────────────────────┘
+           │ user context
+           ▼
 ┌──────────────────────────────────┐
 │  Fine-Tuned Intent Classifier    │  ← DistilBERT (~5ms, local)
 │  (product_query, comparison,     │
@@ -42,7 +47,7 @@ User (Chat / Voice / Email)  — English, Hindi, Telugu
 │  RAG Retrieval                   │  ← Sentence-transformers + FAISS
 │  Top-3 relevant products         │
 └──────────┬───────────────────────┘
-           │ intent + product context
+           │ intent + product context + user activity
            ▼
 ┌──────────────────────────────────┐
 │  LangChain Agent Router          │
@@ -54,7 +59,7 @@ User (Chat / Voice / Email)  — English, Hindi, Telugu
            ├── [Voice] → TTS → speech output
            ▼
 ┌──────────────────────────────────┐
-│  PostgreSQL                      │
+│  SQLite                          │
 │  Products, Chats, Emails         │
 └──────────────────────────────────┘
 ```
@@ -63,50 +68,78 @@ User (Chat / Voice / Email)  — English, Hindi, Telugu
 
 ```
 nexus-bots/
-├── client/                # React frontend
+├── client/                # React frontend (Vite + Tailwind)
 │   ├── src/
-│   │   ├── components/    # Navbar, Footer, RobotCard, HeroSection
-│   │   ├── pages/         # Home, Catalog, RobotDetail, Chat, Voice, Support
-│   │   ├── data/          # robots.js (22 products)
+│   │   ├── components/    # Navbar, Footer, RobotCard, HeroSection, FeaturedRobots, ChatWidget
+│   │   ├── context/       # UserActivityContext (views, cart, search tracking)
+│   │   ├── pages/         # Home, Catalog, RobotDetail, AIAssistant, Support
+│   │   ├── data/          # robots.js — 22 real-world robot products
 │   │   └── styles/
-│   └── public/
+│   └── public/            # favicon, icons
 ├── server/                # Node.js backend
-│   ├── routes/            # API routes
-│   ├── controllers/       # Business logic
-│   ├── models/            # DB models
-│   ├── agents/            # LangChain agent definitions
-│   └── services/          # AI, email, voice, RAG services
-├── research/              # Research component
-│   ├── dataset/           # Intent classification dataset (EN + HI + TE)
-│   ├── notebooks/         # Training & evaluation notebooks (Colab)
+│   ├── config/            # db.js (SQLite connection)
+│   ├── database/          # schema.sql, seed.sql, init.js, nexusbots.db
+│   ├── models/            # Product.js, Chat.js
+│   ├── routes/            # products.js, chats.js
+│   └── index.js           # Express server entry
+├── research/              # Research component (Phase 3+)
+│   ├── dataset/           # Labeled intent dataset (EN + HI + TE)
+│   ├── notebooks/         # Colab training notebooks
 │   ├── models/            # Saved fine-tuned model
-│   └── results/           # Benchmark tables, charts, confusion matrices
-├── database/              # SQL scripts, seeds
+│   └── results/           # Benchmark tables and charts
 ├── Idea.md
 ├── PLAN.md
 └── README.md
 ```
 
-## Robot Product Catalog (22 robots, 6 categories)
+## Pages & Navigation
 
-| Category | Robots | Distinct Strengths |
+| Nav Item | Route | Description |
 |---|---|---|
-| **Household** (4) | HomeHub, Butler, Chef Mini, PetPal | Smart control, heavy carrier, precision cooking, pet monitoring |
-| **Home Cleaner** (4) | CleanBot Pro, WindowWiz, PoolDive, AirPure | Strongest suction, glass specialist, underwater, mobile purifier |
-| **Child** (3) | Buddy, CodePal, Tutor | Toddler-safe, learn coding, AI tutoring |
-| **Educational** (4) | BuildKit, ROS Lab, CompeteBot, SimBot | School kit, university research, competitions, digital twin |
-| **Security** (3) | WatchDog, EyeNet, SkyGuard | Outdoor patrol, indoor multi-hazard, aerial drone |
-| **Industrial** (4) | LiftMax, ArmX6, SortFlow, InspectEye | 500kg payload, 0.02mm precision, 3000/hr sorting, AI quality control |
+| Home | `/` | Hero section, featured robots, AI feature cards, stats |
+| Products | `/catalog` | Full catalog with search, category filter, sorting |
+| AI Assistant | `/assistant` | Combined chat + voice full-page experience |
+| Support | `/support` | Email support form with AI agent |
+| — | (floating widget) | Bottom-right chatbot available on ALL pages |
+
+The floating ChatWidget is context-aware — it knows what product the user is viewing, what's in their cart, and what they've browsed, and can proactively offer help.
+
+## Robot Product Catalog (22 real-world robots, 6 categories)
+
+| Category | Count | Products (Real Brands) |
+|---|---|---|
+| **Household** | 4 | Amazon Astro, Samsung Ballie, Enabot EBO X, Unitree Go2 Air |
+| **Home Cleaner** | 4 | iRobot Roomba j9+, Roborock S8 MaxV Ultra, Ecovacs WINBOT W2, Aiper Surfer S1 |
+| **Child** | 3 | Miko 3, Wonder Workshop Dash, LEGO Spike Prime |
+| **Educational** | 4 | DJI RoboMaster S1, TurtleBot 4, Makeblock mBot2, Unitree Go2 EDU |
+| **Security** | 3 | Ring Always Home Cam, Xiaomi CyberDog 2, DJI Matrice 30T |
+| **Industrial** | 4 | Universal Robots UR10e, Boston Dynamics Stretch, FANUC CRX-25iA, ABB YuMi |
+
+All data uses real product names, real specifications, and real pricing from official sources.
+
+## Context-Aware Bot Features
+
+The system tracks user activity through React Context:
+- **Viewed products** — what the user has clicked on
+- **Cart contents** — what they've added to cart
+- **Current product** — what they're looking at right now
+- **Search queries** — what they've searched for
+- **Category filter** — what category they're browsing
+
+This context is passed to the AI agents so they can proactively help:
+- *"I see you're looking at the Roomba j9+ — want to compare it with the Roborock S8?"*
+- *"You have 2 items in your cart. Ready to checkout?"*
+- *"You've been browsing Security robots — need a recommendation?"*
 
 ## Intent Classes
 
 | Intent | Example (EN) | Example (HI) | Example (TE) | Routes To |
 |---|---|---|---|---|
-| `product_query` | "What sensors does WatchDog have?" | "WatchDog mein kaunse sensors hain?" | "WatchDog lo em sensors untayi?" | Product Agent |
-| `comparison` | "CleanBot Pro vs AirPure?" | "CleanBot Pro aur AirPure mein kya fark hai?" | "CleanBot Pro vs AirPure lo difference enti?" | Product Agent |
-| `recommendation` | "Best robot for a 5 year old?" | "5 saal ke bacche ke liye kaunsa robot?" | "5 years pilladi ki best robot edi?" | Sales Agent |
-| `purchase_intent` | "How do I order LiftMax?" | "LiftMax kaise order karun?" | "LiftMax ela order cheyali?" | Sales Agent |
-| `complaint` | "My Butler keeps bumping into walls" | "Mera Butler deewar se takrata rehta hai" | "Na Butler wall ki kottukontondi" | Support Agent |
+| `product_query` | "What sensors does CyberDog 2 have?" | "CyberDog 2 mein kaunse sensors hain?" | "CyberDog 2 lo em sensors untayi?" | Product Agent |
+| `comparison` | "Roomba j9+ vs Roborock S8?" | "Roomba aur Roborock mein kya fark hai?" | "Roomba vs Roborock lo difference enti?" | Product Agent |
+| `recommendation` | "Best robot for a 6 year old?" | "6 saal ke bacche ke liye kaunsa robot?" | "6 years pilladi ki best robot edi?" | Sales Agent |
+| `purchase_intent` | "How do I order the UR10e?" | "UR10e kaise order karun?" | "UR10e ela order cheyali?" | Sales Agent |
+| `complaint` | "My Roomba keeps getting stuck" | "Mera Roomba baar baar atakta hai" | "Na Roomba ikkukontondi" | Support Agent |
 | `general` | "Hello, what is Nexus Bots?" | "Hello, Nexus Bots kya hai?" | "Hello, Nexus Bots enti?" | Product Agent |
 
 ## Research Benchmarks
@@ -149,28 +182,34 @@ nexus-bots/
 
 ### Phase 1 — UI Foundation ✅ DONE
 - [x] React + Vite + Tailwind setup
-- [x] Robot data (22 robots, 6 categories with distinct highlights)
-- [x] Home page with hero, featured robots, stats
-- [x] Catalog page with search, filter, sort
-- [x] Robot detail page with specs and related robots
-- [x] Chat, Voice, Support page UIs (placeholder)
-- [x] Responsive layout, Navbar, Footer
+- [x] Robot data (22 real-world robots, 6 categories)
+- [x] Home page with hero, featured robots, AI feature cards, stats
+- [x] Products/Catalog page with search, filter, sort
+- [x] Robot detail page with specs, related robots, add to cart
+- [x] AI Assistant page (combined chat + voice with mode toggle)
+- [x] Support page (email form with AI support info)
+- [x] Floating ChatWidget (bottom-right, context-aware, text + voice)
+- [x] UserActivityContext (tracks views, cart, search, current product)
+- [x] Responsive layout, Navbar with mobile menu, Footer
+- [x] Context-aware proactive bot messages
 
-### Phase 2 — Backend + Database
-- [ ] Express server setup with API routes
-- [ ] PostgreSQL schema (products, chats, emails, interactions)
-- [ ] Seed database with robot data
-- [ ] Product API endpoints
-- [ ] Chat session API endpoints
+### Phase 2 — Backend + Database ✅ DONE
+- [x] Express server setup with CORS and error handling
+- [x] SQLite database with better-sqlite3
+- [x] Schema: products (with brand), chats, chat_messages, emails tables
+- [x] Seed data: 22 real-world robots via init.js
+- [x] Product API: GET /api/products (filter + search), GET /api/products/:id
+- [x] Chat API: POST /api/chats, GET /api/chats/:id, POST /api/chats/:id/messages
+- [x] Health check: GET /api/health
 
 ### Phase 3 — Intent Classification (Research Core)
 - [ ] Generate synthetic dataset using GPT (800-1000 examples)
 - [ ] Include English, Hindi, Telugu (code-mixed) examples
 - [ ] Clean and validate dataset manually
-- [ ] Fine-tune DistilBERT (or multilingual DistilBERT) on Google Colab
+- [ ] Fine-tune DistilBERT (or multilingual variant) on Google Colab
 - [ ] Run benchmarks: fine-tuned vs GPT vs Gemini vs rule-based
 - [ ] Run multilingual benchmark: accuracy per language
-- [ ] Generate results: accuracy table, confusion matrix, latency chart, learning curve
+- [ ] Generate results: accuracy table, confusion matrix, latency chart
 
 ### Phase 4 — RAG Pipeline
 - [ ] Embed all 22 robot descriptions using sentence-transformers
@@ -184,34 +223,44 @@ nexus-bots/
 - [ ] Product Assistant agent (specs, search, info)
 - [ ] Sales Assistant agent (recommendations, purchase guidance)
 - [ ] Support agent (complaints, troubleshooting)
-- [ ] Router connects intent classifier + RAG → correct agent with context
+- [ ] Router connects intent classifier + RAG + user context → correct agent
 - [ ] Run benchmark: multi-agent vs single-agent response quality
 
-### Phase 6 — Chat Integration
-- [ ] Connect chat UI to backend
-- [ ] User message → intent classifier → RAG → agent → response
-- [ ] Chat history stored in PostgreSQL
-- [ ] Show which agent handled the query (for demo)
-- [ ] Support Hindi/Telugu input in chat
+### Phase 6 — Full Integration
+- [ ] Connect ChatWidget to backend → intent → RAG → agent pipeline
+- [ ] Connect AI Assistant page to same pipeline
+- [ ] Pass user activity context to agents for personalized responses
+- [ ] Chat history stored in SQLite
+- [ ] Support Hindi/Telugu input
 
 ### Phase 7 — Voice Interaction (Multimodal)
-- [ ] Web Speech API for speech-to-text
-- [ ] Route transcribed text through same intent → RAG → agent pipeline
+- [ ] Web Speech API for speech-to-text in ChatWidget + AI Assistant
+- [ ] Route transcribed text through same pipeline
 - [ ] Text-to-speech for agent responses
-- [ ] Voice UI with mic button and status indicators
 - [ ] Run benchmark: text vs voice-transcribed intent accuracy
 
 ### Phase 8 — Email Support
 - [ ] Email form sends to backend
 - [ ] Email agent generates formal response
 - [ ] Nodemailer integration
-- [ ] Email history tracking
+- [ ] Email history tracking in SQLite
 
 ### Phase 9 — Polish & Demo
 - [ ] Loading states and error handling
-- [ ] Demo flow: show intent classification + RAG + agent routing in action
+- [ ] Demo flow: show intent → RAG → agent routing in action
 - [ ] Show all benchmark results in presentation
 - [ ] Prepare evaluation slides with tables and charts
+
+## Backend API Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/health` | Health check |
+| GET | `/api/products` | All products (supports `?category=` and `?search=`) |
+| GET | `/api/products/:id` | Single product by ID (includes brand) |
+| POST | `/api/chats` | Create new chat session |
+| GET | `/api/chats/:id` | Get chat session with messages |
+| POST | `/api/chats/:id/messages` | Add message to chat |
 
 ## Time Priority
 
@@ -219,9 +268,8 @@ nexus-bots/
 |---|---|---|
 | **Critical** | Phase 3 (Intent Classification) | Research core — benchmarks needed for score |
 | **Critical** | Phase 4 (RAG) | Second research component + better agent responses |
-| **Critical** | Phase 5-6 (Agents + Chat) | Working demo is essential |
-| **High** | Phase 2 (Backend + DB) | Needed for everything to connect |
-| **Medium** | Phase 7 (Voice) | Multimodal bonus marks |
+| **Critical** | Phase 5-6 (Agents + Integration) | Working demo with context-aware bot |
+| **High** | Phase 7 (Voice) | Multimodal bonus marks |
 | **Medium** | Phase 8 (Email) | Shows multi-channel capability |
 | **Low** | Phase 9 (Polish) | Only after everything works |
 
@@ -229,8 +277,8 @@ nexus-bots/
 
 - Payment integration or order management
 - Complex user authentication
-- Training models from scratch — fine-tuning is the entire research story
+- Training models from scratch — fine-tuning is the research story
 - Fancy animations or over-designed UI
 - Deploying to cloud — local demo is fine
-- More than 3 languages — English + Hindi + Telugu is sufficient for bonus
-- Emotion/sentiment detection — not needed, adds complexity without payoff
+- More than 3 languages — English + Hindi + Telugu is sufficient
+- Emotion/sentiment detection — adds complexity without payoff

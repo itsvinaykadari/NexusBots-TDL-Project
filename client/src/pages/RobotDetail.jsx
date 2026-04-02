@@ -1,10 +1,18 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { ArrowLeft, Star, ShoppingCart, MessageCircle, Tag } from "lucide-react";
 import robots from "../data/robots";
+import { useUserActivity } from "../context/UserActivityContext";
 
 export default function RobotDetail() {
   const { id } = useParams();
   const robot = robots.find((r) => r.id === parseInt(id));
+  const { viewProduct, addToCart, setPage } = useUserActivity();
+
+  useEffect(() => {
+    setPage("robot");
+    if (robot) viewProduct(robot);
+  }, [robot?.id]);
 
   if (!robot) {
     return (
@@ -103,13 +111,14 @@ export default function RobotDetail() {
           <div className="flex gap-4">
             <button
               disabled={!robot.inStock}
+              onClick={() => robot.inStock && addToCart(robot)}
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
             >
               <ShoppingCart size={18} />
               {robot.inStock ? "Add to Cart" : "Unavailable"}
             </button>
             <Link
-              to="/chat"
+              to="/assistant"
               className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 hover:border-white/20 transition-all"
             >
               <MessageCircle size={18} />

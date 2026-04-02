@@ -1,14 +1,17 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bot, ShoppingCart, MessageCircle, Mic, Mail } from "lucide-react";
+import { Bot, ShoppingCart, MessageCircle, Mail, Menu, X } from "lucide-react";
+import { useUserActivity } from "../context/UserActivityContext";
 
 export default function Navbar() {
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { cart } = useUserActivity();
 
   const navLinks = [
     { path: "/", label: "Home" },
-    { path: "/catalog", label: "Catalog" },
-    { path: "/chat", label: "Chat", icon: <MessageCircle size={16} /> },
-    { path: "/voice", label: "Voice", icon: <Mic size={16} /> },
+    { path: "/catalog", label: "Products" },
+    { path: "/assistant", label: "AI Assistant", icon: <MessageCircle size={16} /> },
     { path: "/support", label: "Support", icon: <Mail size={16} /> },
   ];
 
@@ -45,19 +48,43 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <button className="relative p-2 text-slate-300 hover:text-white transition-colors">
               <ShoppingCart size={20} />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-neon text-primary text-[10px] font-bold rounded-full flex items-center justify-center">
-                0
-              </span>
+              {cart.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-neon text-primary text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                </span>
+              )}
             </button>
 
-            {/* Mobile menu button */}
-            <button className="md:hidden p-2 text-slate-300 hover:text-white">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <button
+              className="md:hidden p-2 text-slate-300 hover:text-white"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
+
+        {mobileOpen && (
+          <div className="md:hidden pb-4 border-t border-white/10 mt-1">
+            <div className="flex flex-col gap-1 pt-3">
+              {navLinks.map(({ path, label, icon }) => (
+                <Link
+                  key={path}
+                  to={path}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    location.pathname === path
+                      ? "bg-accent/20 text-neon"
+                      : "text-slate-300 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {icon}
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
