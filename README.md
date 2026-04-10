@@ -1,147 +1,94 @@
 # Nexus Bots
 
-**Fine-Tuned Intent Routing and RAG-Based Retrieval for Multilingual Multi-Agent Robotics Commerce**
+**Domain-Specific Function Calling with Fine-Tuned Small LLMs and Context-Aware RAG for Persona-Adaptive Multilingual Robotics Commerce**
 
 > Course Project — Topics in Deep Learning (CS6420), IIT Hyderabad
 
 ## Abstract
 
-Multi-agent AI systems in e-commerce typically rely on large language model API calls for both intent routing and context retrieval, which can be slow and costly for real-time use. We present Nexus Bots, a robotics commerce platform that combines a fine-tuned DistilBERT intent classifier for agent routing with retrieval-augmented generation (RAG) using sentence-transformer embeddings for product-aware responses. The system routes user queries across chat, voice, and email channels to specialized LangChain agents including product assistant, sales, and support agents, while RAG retrieves relevant product context from a catalog of 22 real-world robots across 6 categories. We fine-tune DistilBERT on a domain-specific dataset of labeled e-commerce queries across 6 intent classes and benchmark it against zero-shot GPT, Gemini, and rule-based keyword matching on accuracy, F1, latency, and cost. We also compare RAG retrieval approaches (sentence-transformers vs TF-IDF vs BM25) on recall and relevance. Additionally, we evaluate whether routing to specialized agents produces better responses than a single monolithic chatbot. As a case study, we test multilingual intent classification on English, Hindi, and Telugu queries, and compare intent accuracy across text and voice input modalities.
+We present Nexus Bots, a robotics commerce platform that investigates whether a fine-tuned small language model (~360M parameters) can match large models (GPT-4, Claude, Gemini) at domain-specific function calling — selecting the right tool and generating correct arguments for robotics e-commerce queries. The system combines: (1) a QLoRA-fine-tuned SmolLM2/Qwen2 for structured function calls, (2) context-aware RAG re-ranked by real-time user activity, and (3) automatic user proficiency detection for persona-adaptive responses via Sarvam AI, orchestrated by LangChain. We benchmark across English, Hindi, and Telugu.
 
 ## System Architecture
 
 ```mermaid
 flowchart TB
-    subgraph Input["User Input"]
-        CW["Floating ChatWidget\n(all pages)"]
-        AI["AI Assistant Page\n(chat + voice)"]
-        Email["Email Support"]
+    subgraph INPUT["🎤 User Input"]
+        direction LR
+        TEXT["Text Chat"]
+        VOICE["Voice"]
     end
 
-    subgraph Languages["Multilingual Support"]
-        EN["English"]
-        HI["Hindi"]
-        TE["Telugu"]
-    end
-
-    AI -->|Voice: Web Speech API| STT["Speech-to-Text"]
-    CW -->|Voice: Web Speech API| STT
+    VOICE -->|"Web Speech API"| STT["Speech → Text"]
     STT --> CTX
-    CW --> CTX
-    AI --> CTX
-    Email --> CTX
+    TEXT --> CTX
 
-    CTX["Context-Aware Activity Tracker\n(views, cart, search, current product)"]
-
-    CTX --> IC["Fine-Tuned DistilBERT\nIntent Classifier\n~5ms latency"]
-
-    IC -->|intent label| RAG["RAG Retrieval\nSentence-Transformers + FAISS\nTop-3 products"]
-
-    RAG -->|intent + context| Router["LangChain Agent Router"]
-
-    subgraph Agents["Specialized Agents"]
-        PA["Product\nAssistant"]
-        SA["Sales\nAssistant"]
-        SU["Support\nAgent"]
+    subgraph CONTEXT["📍 Page-Aware Context Layer"]
+        CTX["UserActivityContext"]
+        CTX --- D1["Current Page\n& Visible Products"]
+        CTX --- D2["Browsing History\n& Search Queries"]
+        CTX --- D3["Cart Contents\n& Category Filter"]
     end
 
-    Router --> PA
-    Router --> SA
-    Router --> SU
+    CTX -->|"query + full context"| SLM
 
-    PA --> Response["Response"]
-    SA --> Response
-    SU --> Response
+    subgraph RESEARCH["🔬 Research Core — Deep Learning"]
+        direction TB
+        SLM["🧠 Fine-Tuned Small LLM\nSmolLM2 / Qwen2 (~360M params)\nQLoRA on Google Colab\n\nOutputs: tool_name + arguments"]
 
-    Response -->|Text| CW
-    Response -->|Text + TTS| AI
-    Response -->|Email| Email
+        SLM -->|"compare_products(5, 6)"| LC
 
-    subgraph Storage["SQLite Database"]
-        Products["Products (22)"]
-        Chats["Chat History"]
-        Emails_DB["Email Logs"]
+        subgraph LANG["LangChain Orchestrator"]
+            LC["Tool Router"]
+            LC --> T1["search_products()"]
+            LC --> T2["get_product()"]
+            LC --> T3["compare_products()"]
+            LC --> T4["recommend()"]
+            LC --> T5["navigate_to()"]
+            LC --> T6["get_support()"]
+        end
+
+        LANG -->|"fetch product data"| DB[(SQLite\n22 Real Robots)]
+
+        LANG -->|"retrieve similar"| RAG["📚 Context-Aware RAG\nSentence-Transformers + FAISS\nRe-ranked by user activity"]
+
+        PROF["👤 Proficiency Detector\nbeginner ↔ expert"]
     end
 
-    Response --> Storage
+    RAG --> PACK["Pack: tool results + products\n+ proficiency + page context + language"]
+    LANG --> PACK
+    PROF --> PACK
 
-    style IC fill:#4f46e5,color:#fff
+    PACK --> SARVAM
+
+    subgraph RESPONSE["🌐 Response Generation"]
+        SARVAM["Sarvam AI\nMultilingual: EN | HI | TE\nPersona-Adaptive"]
+    end
+
+    SARVAM -->|"text response"| CW["💬 Floating ChatWidget\n(every page)"]
+    SARVAM -->|"text + TTS"| AI["🖥️ AI Assistant Page\n(full experience)"]
+
+    subgraph BENCHMARKS["📊 5 Research Benchmarks"]
+        direction LR
+        BM1["1. Function Calling\nSmolLM vs GPT-4\nvs Claude vs Gemini"]
+        BM2["2. Context RAG\nvs Standard FAISS\nvs TF-IDF vs BM25"]
+        BM3["3. Proficiency\nTrained vs Zero-shot\nvs Heuristic"]
+        BM4["4. Multilingual\nEN vs HI vs TE\nTool Accuracy"]
+        BM5["5. Persona Quality\nBeginner vs Expert\nvs One-size-fits-all"]
+    end
+
+    style SLM fill:#4f46e5,color:#fff
     style RAG fill:#0891b2,color:#fff
-    style Router fill:#7c3aed,color:#fff
+    style LC fill:#7c3aed,color:#fff
     style CTX fill:#d97706,color:#fff
-    style PA fill:#059669,color:#fff
-    style SA fill:#059669,color:#fff
-    style SU fill:#059669,color:#fff
-```
-
-## Intent Classification Pipeline
-
-```mermaid
-flowchart LR
-    Q["User Query"] --> IC["DistilBERT\nClassifier"]
-
-    IC --> PQ["product_query"]
-    IC --> CMP["comparison"]
-    IC --> REC["recommendation"]
-    IC --> PI["purchase_intent"]
-    IC --> COM["complaint"]
-    IC --> GEN["general"]
-
-    PQ --> PA["Product Agent"]
-    CMP --> PA
-    REC --> SA["Sales Agent"]
-    PI --> SA
-    COM --> SUA["Support Agent"]
-    GEN --> PA
-
-    style IC fill:#4f46e5,color:#fff
-    style PA fill:#059669,color:#fff
-    style SA fill:#0891b2,color:#fff
-    style SUA fill:#dc2626,color:#fff
-```
-
-## Research Benchmarks
-
-```mermaid
-flowchart TB
-    subgraph B1["Benchmark 1: Intent Classification"]
-        B1a["Fine-tuned DistilBERT"]
-        B1b["Zero-shot GPT"]
-        B1c["Zero-shot Gemini"]
-        B1d["Rule-based Keywords"]
-    end
-
-    subgraph B2["Benchmark 2: Retrieval (RAG)"]
-        B2a["Sentence-Transformers + FAISS"]
-        B2b["TF-IDF"]
-        B2c["BM25"]
-    end
-
-    subgraph B3["Benchmark 3: Agent Quality"]
-        B3a["Multi-Agent (Routed)"]
-        B3b["Single Agent (Monolithic)"]
-    end
-
-    subgraph B4["Benchmark 4: Multilingual"]
-        B4a["English"]
-        B4b["Hindi"]
-        B4c["Telugu"]
-    end
-
-    subgraph B5["Benchmark 5: Multimodal"]
-        B5a["Text Input"]
-        B5b["Voice Input"]
-    end
-
-    Metrics["Metrics: Accuracy, F1, Recall@3, MRR, Latency, Cost"]
-
-    B1 --> Metrics
-    B2 --> Metrics
-    B3 --> Metrics
-    B4 --> Metrics
-    B5 --> Metrics
-
-    style Metrics fill:#4f46e5,color:#fff
+    style SARVAM fill:#059669,color:#fff
+    style PROF fill:#dc2626,color:#fff
+    style PACK fill:#6b7280,color:#fff
+    style DB fill:#92400e,color:#fff
+    style BM1 fill:#1e3a5f,color:#fff
+    style BM2 fill:#1e3a5f,color:#fff
+    style BM3 fill:#1e3a5f,color:#fff
+    style BM4 fill:#1e3a5f,color:#fff
+    style BM5 fill:#1e3a5f,color:#fff
 ```
 
 ## Product Catalog
@@ -157,34 +104,19 @@ flowchart TB
 | **Security** | 3 | Ring Always Home Cam, Xiaomi CyberDog 2, DJI Matrice 30T |
 | **Industrial** | 4 | Universal Robots UR10e, Boston Dynamics Stretch, FANUC CRX-25iA, ABB YuMi |
 
-All data uses real product names, real specifications, and real pricing from official sources.
-
-## Context-Aware Bot
-
-The system tracks user activity through React Context and provides proactive assistance:
-
-- **Viewed products** — what the user has clicked on
-- **Cart contents** — what they've added to cart
-- **Current product** — what they're looking at right now
-- **Search queries** — what they've searched for
-- **Category filter** — what category they're browsing
-
-This enables context-aware responses like:
-- *"I see you're looking at the Roomba j9+ — want to compare it with the Roborock S8?"*
-- *"You have 2 items in your cart. Ready to checkout?"*
-
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Frontend | React 19 + Vite + Tailwind CSS |
 | Backend | Node.js + Express |
-| Database | SQLite (`better-sqlite3`) |
-| AI Routing | Fine-tuned DistilBERT (HuggingFace) |
-| AI Retrieval | Sentence-transformers + FAISS |
-| AI Agents | LangChain + OpenAI |
+| Database | SQLite (better-sqlite3) |
+| Function Calling | Fine-tuned SmolLM2/Qwen2 (QLoRA, ~360M) |
+| Retrieval | Sentence-transformers + FAISS (context-aware) |
+| Orchestration | LangChain |
+| Reasoning | Sarvam AI (EN/HI/TE) |
 | Voice | Web Speech API + TTS |
-| Email | Nodemailer + AI agent |
+| Training | Google Colab + Unsloth + HuggingFace |
 
 ## Project Structure
 
@@ -192,22 +124,21 @@ This enables context-aware responses like:
 nexus-bots/
 ├── client/                # React frontend (Vite + Tailwind)
 │   ├── src/
-│   │   ├── components/    # Navbar, Footer, RobotCard, HeroSection, FeaturedRobots, ChatWidget
-│   │   ├── context/       # UserActivityContext (views, cart, search tracking)
+│   │   ├── components/    # Navbar, Footer, RobotCard, HeroSection, ChatWidget
+│   │   ├── context/       # UserActivityContext (views, cart, search, page)
 │   │   ├── pages/         # Home, Catalog, RobotDetail, AIAssistant, Support
-│   │   ├── data/          # robots.js — 22 real-world robot products
+│   │   ├── data/          # robots.js — 22 real-world robots
 │   │   └── styles/
-│   └── public/            # favicon, icons
 ├── server/                # Node.js backend
-│   ├── config/            # db.js (SQLite connection)
-│   ├── database/          # schema.sql, seed.sql, init.js, nexusbots.db
+│   ├── config/            # db.js (SQLite)
+│   ├── database/          # schema.sql, seed.sql, init.js
 │   ├── models/            # Product.js, Chat.js
-│   ├── routes/            # products.js, chats.js
-│   └── index.js           # Express server entry
-├── research/              # Research component (Phase 3+)
-│   ├── dataset/           # Labeled intent dataset (EN + HI + TE)
-│   ├── notebooks/         # Colab training notebooks
-│   ├── models/            # Saved fine-tuned model
+│   ├── routes/            # products.js, chats.js, ai.js
+│   └── index.js
+├── research/              # DL research component
+│   ├── dataset/           # Function-calling dataset (EN/HI/TE)
+│   ├── notebooks/         # Colab notebooks (fine-tuning, RAG, benchmarks)
+│   ├── models/            # Saved model weights
 │   └── results/           # Benchmark tables and charts
 ├── Idea.md
 ├── PLAN.md
@@ -220,55 +151,22 @@ nexus-bots/
 git clone <repo-url>
 cd NexusBots-TDL-Project
 
-# 1) Frontend
-cd client
-npm install
-npm run dev
+# Frontend
+cd client && npm install && npm run dev
 
-# 2) Backend (new terminal)
-cd ../server
-npm install
-npm run init-db    # Creates SQLite DB and seeds 22 robots
-npm run dev
+# Backend (new terminal)
+cd server && npm install && npm run init-db && npm run dev
 ```
 
 - Frontend: **http://localhost:5173**
-- Backend API: **http://localhost:5000**
-
-## Backend API
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Health check |
-| `GET` | `/api/products` | All products (`?category=Security`, `?search=vacuum`) |
-| `GET` | `/api/products/:id` | Single product by ID (includes brand) |
-| `POST` | `/api/chats` | Create new chat session |
-| `GET` | `/api/chats/:id` | Get chat session with messages |
-| `POST` | `/api/chats/:id/messages` | Add message to chat |
-
-## Pages & Navigation
-
-| Nav Item | Route | Description |
-|---|---|---|
-| Home | `/` | Hero section, featured robots, AI feature cards, stats |
-| Products | `/catalog` | Full catalog with search, category filter, sorting |
-| AI Assistant | `/assistant` | Combined chat + voice full-page experience |
-| Support | `/support` | Email support form with AI agent |
-| — | (floating widget) | Bottom-right chatbot available on ALL pages |
-
-The floating ChatWidget is context-aware — it knows what product the user is viewing, what's in their cart, and what they've browsed, and can proactively offer help.
+- Backend: **http://localhost:5000**
 
 ## Build Status
 
-- [x] Phase 1 — UI Foundation (React + Tailwind, responsive, mobile nav, floating ChatWidget, AI Assistant page)
-- [x] Phase 2 — Backend + Database (Express + SQLite, product + chat APIs, 22 real robots seeded)
-- [ ] Phase 3 — Intent Classification + Multilingual Benchmarks
-- [ ] Phase 4 — RAG Pipeline + Retrieval Benchmarks
-- [ ] Phase 5 — LangChain Multi-Agent System
-- [ ] Phase 6 — Full Integration (ChatWidget + AI Assistant → backend pipeline)
-- [ ] Phase 7 — Voice Interaction (Multimodal)
-- [ ] Phase 8 — Email Support
-- [ ] Phase 9 — Polish & Demo
+- [x] Phase 1 — UI + Backend (React + Tailwind, Express + SQLite, 22 real robots, ChatWidget, AI Assistant, context tracking)
+- [ ] Phase 2 — Research Core (dataset, fine-tune small LLM, proficiency classifier, context-aware RAG)
+- [ ] Phase 3 — Integration (LangChain + Sarvam + frontend pipeline)
+- [ ] Phase 4 — Voice + Evaluation + Demo
 
 ## Team
 
