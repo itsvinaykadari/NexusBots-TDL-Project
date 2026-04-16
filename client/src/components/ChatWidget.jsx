@@ -1,207 +1,264 @@
-import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Mic, MicOff, Bot, User } from "lucide-react";
-import { useUserActivity } from "../context/UserActivityContext";
+import { useMemo, useState } from "react";
+import { MessageCircle, X, Bot, CheckCircle2, PhoneCall } from "lucide-react";
+import { getOrCreateUserId } from "../utils/user";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const FAQS = [
+    {
+        key: "where-order",
+        question: "Where is my order?",
+        answer:
+            "You can track your order from Order History using your User ID. If you share User ID and Order ID, we can validate and show the latest status.",
+    },
+    {
+        key: "cancel-order",
+        question: "How do I cancel my order?",
+        answer:
+            "If the order status is Processing, cancellation is usually possible. Please share your order details in support and we will help initiate cancellation.",
+    },
+    {
+        key: "damaged-product",
+        question: "I received a damaged product",
+        answer:
+            "Sorry about that. Please keep your Order ID ready and upload photos when asked. We will prioritize replacement or refund based on inspection.",
+    },
+    {
+        key: "refund",
+        question: "I want a refund",
+        answer:
+            "Refunds are available for eligible cases such as damaged delivery or failed fulfillment. After verification, refund is processed to original payment method.",
+    },
+    {
+        key: "delivery-time",
+        question: "How long does delivery take?",
+        answer:
+            "Typical delivery is 2-7 days depending on your location and item availability. You can see estimated delivery on your order details.",
+    },
+];
 
 export default function ChatWidget() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [isListening, setIsListening] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
-  const { getContextSummary, currentProduct, cart, viewedProducts } = useUserActivity();
+    const [isOpen, setIsOpen] = useState(false);
+    const [messages, setMessages] = useState([]);
+    const [activeFaq, setActiveFaq] = useState(null);
+    const [showResolution, setShowResolution] = useState(false);
+    const [showCallbackForm, setShowCallbackForm] = useState(false);
+    const [callbackStatus, setCallbackStatus] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [callbackForm, setCallbackForm] = useState({
+        userId: getOrCreateUserId(),
+        orderId: "",
+        issueDescription: "",
+    });
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
-  }, [isOpen]);
-
-  // Proactive greeting based on context
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      const greeting = getProactiveGreeting();
-      setMessages([{ role: "bot", content: greeting, timestamp: Date.now() }]);
-    }
-  }, [isOpen]);
-
-  // Proactive message when user views a product
-  useEffect(() => {
-    if (isOpen && currentProduct && messages.length > 0) {
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg.role === "bot" && !lastMsg.content.includes(currentProduct.name)) {
-        setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
+    const visibleMessages = useMemo(() => {
+        if (messages.length > 0) return messages;
+        return [
             {
-              role: "bot",
-              content: `I see you're looking at the **${currentProduct.name}**! Want me to tell you more about it, compare it with alternatives, or help you decide?`,
-              timestamp: Date.now(),
+                role: "bot",
+                content:
+                    "Hi! I can quickly help with common issues. Please choose one of the questions below.",
             },
-          ]);
-        }, 2000);
-      }
+        ];
+    }, [messages]);
+
+    function handleFaqClick(faq) {
+        setActiveFaq(faq);
+        setMessages((prev) => [
+            ...prev,
+            { role: "user", content: faq.question },
+            { role: "bot", content: `${faq.answer}\n\nDid this resolve your issue?` },
+        ]);
+        setShowResolution(true);
+        setShowCallbackForm(false);
+        setCallbackStatus("");
     }
-  }, [currentProduct]);
 
-  function getProactiveGreeting() {
-    if (currentProduct) {
-      return `Hi! I see you're checking out the **${currentProduct.name}**. I can answer questions about specs, compare it with similar products, or help you decide. What would you like to know?`;
+    function handleResolvedYes() {
+        setMessages((prev) => [
+            ...prev,
+            { role: "user", content: "Yes" },
+            { role: "bot", content: "Great! Glad I could help. Reach out anytime." },
+        ]);
+        setShowResolution(false);
+        setShowCallbackForm(false);
     }
-    if (cart.length > 0) {
-      return `Welcome back! You have ${cart.length} item${cart.length > 1 ? "s" : ""} in your cart. Need help with anything before checkout?`;
+
+    function handleResolvedNo() {
+        setMessages((prev) => [
+            ...prev,
+            { role: "user", content: "No" },
+            {
+                role: "bot",
+                content:
+                    "No worries! Our support agent will call you shortly. Please submit a callback request below.",
+            },
+        ]);
+        setShowResolution(false);
+        setShowCallbackForm(true);
+        setCallbackForm((prev) => ({
+            ...prev,
+            issueDescription: activeFaq?.question || prev.issueDescription,
+        }));
     }
-    if (viewedProducts.length > 0) {
-      return `Hi again! You've been browsing our ${viewedProducts[viewedProducts.length - 1]?.category} robots. Want a recommendation based on what you've viewed?`;
+
+    async function submitCallbackRequest(e) {
+        e.preventDefault();
+        if (!callbackForm.userId.trim() || !callbackForm.issueDescription.trim()) {
+            setCallbackStatus("Please provide user_id and issue description.");
+            return;
+        }
+
+        setLoading(true);
+        setCallbackStatus("");
+        try {
+            const response = await fetch(`${API_BASE}/api/chats/support/request-callback`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: callbackForm.userId.trim(),
+                    order_id: callbackForm.orderId.trim() || null,
+                    issue_description: callbackForm.issueDescription.trim(),
+                }),
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Failed to request callback.");
+            }
+
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "bot",
+                    content: "Callback request saved successfully. Our support agent will call you shortly.",
+                },
+            ]);
+            setCallbackStatus("Callback requested successfully.");
+            setShowCallbackForm(false);
+        } catch (error) {
+            setCallbackStatus(error.message || "Failed to request callback.");
+        } finally {
+            setLoading(false);
+        }
     }
-    return "Hi! I'm the Nexus Bots assistant. I can help you find the right robot, answer product questions, or provide support. What are you looking for?";
-  }
 
-  function handleSend() {
-    if (!input.trim()) return;
-    const userMsg = { role: "user", content: input.trim(), timestamp: Date.now() };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setIsTyping(true);
-
-    // Placeholder response — will be replaced by real AI in Phase 6
-    setTimeout(() => {
-      const context = getContextSummary();
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          content: `[Placeholder] I understood your query. Once the AI agents are connected, I'll route this based on intent classification and provide product-aware responses using RAG.\n\n**Your context:** ${context}`,
-          timestamp: Date.now(),
-        },
-      ]);
-      setIsTyping(false);
-    }, 1500);
-  }
-
-  function toggleVoice() {
-    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-      alert("Speech recognition is not supported in this browser.");
-      return;
-    }
-    setIsListening(!isListening);
-    // Actual speech recognition will be connected in Phase 7
-  }
-
-  return (
-    <>
-      {/* Floating button */}
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-accent hover:bg-neon text-white rounded-full shadow-lg shadow-accent/30 flex items-center justify-center transition-all hover:scale-110"
-        >
-          <MessageCircle size={24} />
-        </button>
-      )}
-
-      {/* Chat panel */}
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] bg-secondary rounded-2xl shadow-2xl shadow-black/40 border border-white/10 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-accent/20 border-b border-white/10">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                <Bot size={18} className="text-white" />
-              </div>
-              <div>
-                <p className="text-white text-sm font-semibold">Nexus Assistant</p>
-                <p className="text-green-400 text-[11px]">Online • Context-aware</p>
-              </div>
-            </div>
-            <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors">
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                {msg.role === "bot" && (
-                  <div className="w-6 h-6 bg-accent/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot size={14} className="text-neon" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[80%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-accent text-white rounded-br-sm"
-                      : "bg-white/5 text-slate-200 rounded-bl-sm"
-                  }`}
+    return (
+        <>
+            {!isOpen && (
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-accent hover:bg-neon text-white rounded-full shadow-lg shadow-accent/30 flex items-center justify-center transition-all hover:scale-110"
                 >
-                  {msg.content}
-                </div>
-                {msg.role === "user" && (
-                  <div className="w-6 h-6 bg-neon/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <User size={14} className="text-neon" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {isTyping && (
-              <div className="flex gap-2">
-                <div className="w-6 h-6 bg-accent/30 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot size={14} className="text-neon" />
-                </div>
-                <div className="bg-white/5 px-4 py-2 rounded-xl rounded-bl-sm">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-neon/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 bg-neon/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 bg-neon/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                  </div>
-                </div>
-              </div>
+                    <MessageCircle size={24} />
+                </button>
             )}
-            <div ref={messagesEndRef} />
-          </div>
 
-          {/* Input */}
-          <div className="p-3 border-t border-white/10">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="flex items-center gap-2"
-            >
-              <button
-                type="button"
-                onClick={toggleVoice}
-                className={`p-2 rounded-lg transition-colors ${
-                  isListening ? "bg-red-500/20 text-red-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-              </button>
-              <input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about any robot..."
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-accent/50"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim()}
-                className="p-2 bg-accent hover:bg-accent/80 disabled:opacity-30 disabled:hover:bg-accent text-white rounded-lg transition-colors"
-              >
-                <Send size={18} />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
-  );
+            {isOpen && (
+                <div className="fixed bottom-6 right-6 z-50 w-[390px] max-w-[95vw] h-[560px] bg-secondary rounded-2xl shadow-2xl shadow-black/40 border border-white/10 flex flex-col overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 bg-accent/20 border-b border-white/10">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                                <Bot size={18} className="text-white" />
+                            </div>
+                            <div>
+                                <p className="text-white text-sm font-semibold">Support Chat</p>
+                                <p className="text-green-400 text-[11px]">FAQ + Callback</p>
+                            </div>
+                        </div>
+                        <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                        {visibleMessages.map((msg, i) => (
+                            <div key={i} className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                                <div
+                                    className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed whitespace-pre-line ${msg.role === "user"
+                                            ? "bg-accent text-white rounded-br-sm"
+                                            : "bg-white/5 text-slate-200 rounded-bl-sm"
+                                        }`}
+                                >
+                                    {msg.content}
+                                </div>
+                            </div>
+                        ))}
+
+                        <div className="space-y-2">
+                            <p className="text-slate-400 text-xs">Common questions</p>
+                            {FAQS.map((faq) => (
+                                <button
+                                    key={faq.key}
+                                    onClick={() => handleFaqClick(faq)}
+                                    className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 px-3 py-2 rounded-lg text-sm"
+                                >
+                                    {faq.question}
+                                </button>
+                            ))}
+                        </div>
+
+                        {showResolution && (
+                            <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                                <p className="text-slate-200 text-sm mb-2">Did this resolve your issue?</p>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleResolvedYes}
+                                        className="flex-1 bg-neon-green/20 hover:bg-neon-green/30 text-neon-green rounded-lg py-2 text-sm"
+                                    >
+                                        Yes
+                                    </button>
+                                    <button
+                                        onClick={handleResolvedNo}
+                                        className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg py-2 text-sm"
+                                    >
+                                        No
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {showCallbackForm && (
+                            <form onSubmit={submitCallbackRequest} className="bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
+                                <p className="text-white text-sm font-medium flex items-center gap-2">
+                                    <PhoneCall size={14} /> Request a Call Back
+                                </p>
+                                <input
+                                    value={callbackForm.userId}
+                                    onChange={(e) => setCallbackForm((prev) => ({ ...prev, userId: e.target.value }))}
+                                    placeholder="User ID"
+                                    className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                />
+                                <input
+                                    value={callbackForm.orderId}
+                                    onChange={(e) => setCallbackForm((prev) => ({ ...prev, orderId: e.target.value }))}
+                                    placeholder="Order ID (optional)"
+                                    className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                />
+                                <textarea
+                                    value={callbackForm.issueDescription}
+                                    onChange={(e) => setCallbackForm((prev) => ({ ...prev, issueDescription: e.target.value }))}
+                                    placeholder="Issue description"
+                                    rows={3}
+                                    className="w-full bg-primary border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-accent hover:bg-accent-dark disabled:opacity-50 text-white rounded-lg py-2 text-sm"
+                                >
+                                    {loading ? "Submitting..." : "Request a Call Back"}
+                                </button>
+                                {callbackStatus && (
+                                    <p className="text-xs text-slate-300 flex items-center gap-1">
+                                        <CheckCircle2 size={12} /> {callbackStatus}
+                                    </p>
+                                )}
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
+        </>
+    );
 }

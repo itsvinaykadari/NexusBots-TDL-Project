@@ -1,0 +1,51 @@
+{
+  "file": "/home/cs412/Downloads/Subjects/TDL/NexusBots-TDL-Project/research/dataset/final/function_calling_v1.jsonl",
+  "generated_at": "2026-04-16T17:26:02.221Z",
+  "counts": {
+    "total": 1000,
+    "byLanguage": {
+      "en": 500,
+      "hi": 250,
+      "te": 250
+    },
+    "byProficiency": {
+      "beginner": 500,
+      "expert": 500
+    },
+    "byFunction": {
+      "search_products": 144,
+      "get_product": 144,
+      "compare_products": 144,
+      "recommend": 144,
+      "add_to_cart": 144,
+      "navigate_to": 142,
+      "get_support": 138
+    },
+    "byLanguageProficiency": {
+      "en:beginner": 250,
+      "en:expert": 250,
+      "hi:beginner": 125,
+      "hi:expert": 125,
+      "te:beginner": 125,
+      "te:expert": 125
+    }
+  },
+  "targets": {
+    "total": 1000,
+    "byLanguage": {
+      "en": 500,
+      "hi": 250,
+      "te": 250
+    },
+    "byLanguageProficiency": {
+      "en:beginner": 250,
+      "en:expert": 250,
+      "hi:beginner": 125,
+      "hi:expert": 125,
+      "te:beginner": 125,
+      "te:expert": 125
+    }
+  },
+  "invalid_count": 0,
+  "invalid_rows": []
+}

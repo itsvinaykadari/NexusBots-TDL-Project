@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Chat = require('../models/Chat');
+const Order = require('../models/Order');
+const CallbackRequest = require('../models/CallbackRequest');
 
 // POST /api/chats - Create new chat session
 router.post('/', (req, res) => {
@@ -35,6 +37,73 @@ router.post('/:id/messages', (req, res) => {
     res.status(201).json(message);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/chats/support/validate-order
+router.post('/support/validate-order', (req, res) => {
+  try {
+    const { user_id: userId, order_id: orderId } = req.body || {};
+    if (!userId || !orderId) {
+      return res.status(400).json({
+        valid: false,
+        message: 'user_id and order_id are required.',
+      });
+    }
+
+    const order = Order.getByUserAndOrderId(userId, orderId);
+    if (!order) {
+      return res.status(404).json({
+        valid: false,
+        message: 'No order found with those details, please double-check',
+      });
+    }
+
+    return res.json({ valid: true, order });
+  } catch (error) {
+    res.status(500).json({ valid: false, message: error.message });
+  }
+});
+
+// POST /api/chats/support/request-callback
+router.post('/support/request-callback', (req, res) => {
+  try {
+    const {
+      user_id: userId,
+      order_id: orderId,
+      issue_description: issueDescription,
+    } = req.body || {};
+
+    if (!userId || !issueDescription) {
+      return res.status(400).json({
+        success: false,
+        message: 'user_id and issue_description are required.',
+      });
+    }
+
+    const callback = CallbackRequest.create({
+      userId,
+      orderId: orderId || null,
+      issueDescription,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'No worries! Our support agent will call you shortly.',
+      callback,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET /api/chats/support/callbacks
+router.get('/support/callbacks', (req, res) => {
+  try {
+    const callbacks = CallbackRequest.getAll();
+    return res.json({ callbacks });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

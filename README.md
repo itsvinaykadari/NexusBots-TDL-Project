@@ -151,6 +151,11 @@ nexus-bots/
 git clone <repo-url>
 cd NexusBots-TDL-Project
 
+# Node.js runtime (required)
+# Recommended: nvm + Node 20
+nvm install
+nvm use
+
 # Frontend
 cd client && npm install && npm run dev
 

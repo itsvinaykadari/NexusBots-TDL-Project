@@ -213,14 +213,26 @@ Everything built and verified working.
 This is where all the deep learning happens. Done entirely on Google Colab.
 
 **2A. Function-Calling Dataset (1-2 days)**
-- [ ] Define 7 tool schemas (search, get_product, compare, recommend, add_to_cart, navigate, get_support)
-- [ ] Generate 800-1000 synthetic examples using GPT-4:
+- [x] Define 7 tool schemas (search, get_product, compare, recommend, add_to_cart, navigate, get_support)
+- [x] Generate 800-1000 synthetic examples using GPT-4/template pipeline:
   - Input: user query + page context
   - Output: function_name(arg1, arg2, ...)
-- [ ] Include English (~500), Hindi (~250), Telugu (~250) examples
-- [ ] Include beginner and expert style queries
-- [ ] Format in function-calling training format (messages + tool_calls)
-- [ ] Manual review and cleanup
+- [x] Include English (~500), Hindi (~250), Telugu (~250) examples
+- [x] Include beginner and expert style queries
+- [x] Format in function-calling training format (messages + tool_calls)
+- [ ] Manual review and cleanup (sample set generated; full pass pending)
+
+**2A Progress Update (Implemented):**
+- [x] Dataset workspace created: `research/dataset/raw`, `research/dataset/processed`, `research/dataset/review`, `research/dataset/final`
+- [x] Source files created: `research/dataset/tool_schemas.json`, `research/dataset/product_catalog.json`
+- [x] Pipeline scripts created: generator, formatter, validator, review sampler in `research/dataset/scripts/`
+- [x] Generated raw dataset: `research/dataset/raw/function_calls_raw_v1.jsonl` (1000 rows)
+- [x] Generated training dataset: `research/dataset/processed/function_calling_train_v1.jsonl` (1000 rows)
+- [x] Generated final dataset: `research/dataset/final/function_calling_v1.jsonl` (1000 rows)
+- [x] Validation report: `research/dataset/processed/validation_report_v1.json` (invalid_count: 0)
+- [x] Manual review sample: `research/dataset/review/manual_review_sample_v1.jsonl` (120 rows)
+- [x] Language split met: EN 500, HI 250, TE 250
+- [x] Proficiency split met: beginner 500, expert 500
 
 **2B. Fine-Tune Small LLM for Function Calling (2-3 days)**
 - [ ] Choose base model: SmolLM2-360M or Qwen2-0.5B
@@ -325,7 +337,7 @@ Connect all trained components into a working system.
 | Phase | Duration | Status |
 |---|---|---|
 | Phase 1 — UI + Backend | Done | ✅ |
-| Phase 2 — Research (dataset + training + RAG) | 5-8 days | Next |
+| Phase 2 — Research (dataset + training + RAG) | 5-8 days | In Progress (2A mostly done) |
 | Phase 3 — Integration (LangChain + Sarvam + frontend) | 4-7 days | After Phase 2 |
 | Phase 4 — Voice + Evaluation + Demo | 3-4 days | Final |
 | **Total remaining** | **12-19 days** | |

@@ -47,6 +47,32 @@ CREATE TABLE IF NOT EXISTS emails (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Orders table
+CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id TEXT UNIQUE NOT NULL,
+    user_id TEXT NOT NULL,
+    items_json TEXT NOT NULL,
+    total_amount REAL NOT NULL,
+    status TEXT DEFAULT 'Processing',
+    estimated_delivery TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Callback requests table
+CREATE TABLE IF NOT EXISTS callback_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    order_id TEXT,
+    issue_description TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_chat_id ON chat_messages(chat_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_order_id ON orders(order_id);
+CREATE INDEX IF NOT EXISTS idx_callback_user_id ON callback_requests(user_id);
+CREATE INDEX IF NOT EXISTS idx_callback_order_id ON callback_requests(order_id);
