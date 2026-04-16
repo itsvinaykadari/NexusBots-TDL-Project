@@ -32,8 +32,26 @@ function activityReducer(state, action) {
       }
       return { ...state, cart: [...state.cart, { ...action.payload, quantity: 1 }] };
     }
+    case "INCREASE_QUANTITY":
+      return {
+        ...state,
+        cart: state.cart.map((item) =>
+          item.id === action.payload ? { ...item, quantity: item.quantity + 1 } : item
+        ),
+      };
+    case "DECREASE_QUANTITY":
+      return {
+        ...state,
+        cart: state.cart
+          .map((item) =>
+            item.id === action.payload ? { ...item, quantity: item.quantity - 1 } : item
+          )
+          .filter((item) => item.quantity > 0),
+      };
     case "REMOVE_FROM_CART":
       return { ...state, cart: state.cart.filter((item) => item.id !== action.payload) };
+    case "CLEAR_CART":
+      return { ...state, cart: [] };
     case "SET_PAGE":
       return { ...state, currentPage: action.payload };
     case "SET_SEARCH":
@@ -55,11 +73,32 @@ export function UserActivityProvider({ children }) {
   }, []);
 
   const addToCart = useCallback((product) => {
-    dispatch({ type: "ADD_TO_CART", payload: { id: product.id, name: product.name, price: product.price } });
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+      },
+    });
+  }, []);
+
+  const increaseQuantity = useCallback((id) => {
+    dispatch({ type: "INCREASE_QUANTITY", payload: id });
+  }, []);
+
+  const decreaseQuantity = useCallback((id) => {
+    dispatch({ type: "DECREASE_QUANTITY", payload: id });
   }, []);
 
   const removeFromCart = useCallback((id) => {
     dispatch({ type: "REMOVE_FROM_CART", payload: id });
+  }, []);
+
+  const clearCart = useCallback(() => {
+    dispatch({ type: "CLEAR_CART" });
   }, []);
 
   const setPage = useCallback((page) => {
@@ -106,7 +145,10 @@ export function UserActivityProvider({ children }) {
         ...state,
         viewProduct,
         addToCart,
+        increaseQuantity,
+        decreaseQuantity,
         removeFromCart,
+        clearCart,
         setPage,
         setSearch,
         setCategory,

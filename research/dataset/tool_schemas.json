@@ -1,0 +1,216 @@
+{
+    "version": "1.0",
+    "categories": [
+        "Household",
+        "Home Cleaner",
+        "Child",
+        "Educational",
+        "Security",
+        "Industrial"
+    ],
+    "pages": [
+        "home",
+        "catalog",
+        "assistant",
+        "support",
+        "product",
+        "cart"
+    ],
+    "focus_options": [
+        "price",
+        "suction",
+        "battery",
+        "payload",
+        "safety",
+        "maintenance",
+        "camera",
+        "mobility",
+        "specs",
+        "warranty"
+    ],
+    "tools": [
+        {
+            "name": "search_products",
+            "description": "Search products using natural query and optional category filter.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "query",
+                    "category"
+                ],
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "category": {
+                        "type": "string",
+                        "enumRef": "categories"
+                    }
+                }
+            }
+        },
+        {
+            "name": "get_product",
+            "description": "Fetch full details for a single product by id.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "product_id"
+                ],
+                "properties": {
+                    "product_id": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 22
+                    }
+                }
+            }
+        },
+        {
+            "name": "compare_products",
+            "description": "Compare two products with an optional focus dimension.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "product_id_1",
+                    "product_id_2",
+                    "focus"
+                ],
+                "properties": {
+                    "product_id_1": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 22
+                    },
+                    "product_id_2": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 22
+                    },
+                    "focus": {
+                        "type": "string",
+                        "enumRef": "focus_options"
+                    }
+                }
+            }
+        },
+        {
+            "name": "recommend",
+            "description": "Recommend products based on need, budget, and category.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "need",
+                    "budget",
+                    "category"
+                ],
+                "properties": {
+                    "need": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "budget": {
+                        "type": "integer",
+                        "minimum": 50,
+                        "maximum": 20000
+                    },
+                    "category": {
+                        "type": "string",
+                        "enumRef": "categories"
+                    }
+                }
+            }
+        },
+        {
+            "name": "add_to_cart",
+            "description": "Add one product into user cart by id.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "product_id"
+                ],
+                "properties": {
+                    "product_id": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 22
+                    }
+                }
+            }
+        },
+        {
+            "name": "navigate_to",
+            "description": "Navigate user to a route with optional parameters.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "page",
+                    "params"
+                ],
+                "properties": {
+                    "page": {
+                        "type": "string",
+                        "enumRef": "pages"
+                    },
+                    "params": {
+                        "type": "object",
+                        "required": [],
+                        "properties": {
+                            "category": {
+                                "type": "string",
+                                "enumRef": "categories"
+                            },
+                            "product_id": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 22
+                            },
+                            "query": {
+                                "type": "string"
+                            },
+                            "sort": {
+                                "type": "string",
+                                "enum": [
+                                    "price_asc",
+                                    "price_desc",
+                                    "rating_desc",
+                                    "latest"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "get_support",
+            "description": "Open support workflow for an issue, optionally linked to product id.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "issue",
+                    "product_id"
+                ],
+                "properties": {
+                    "issue": {
+                        "type": "string",
+                        "minLength": 3
+                    },
+                    "product_id": {
+                        "oneOf": [
+                            {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 22
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}
