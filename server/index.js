@@ -5,6 +5,7 @@ require('dotenv').config();
 const productRoutes = require('./routes/products');
 const chatRoutes = require('./routes/chats');
 const orderRoutes = require('./routes/orders');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/api/products', productRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

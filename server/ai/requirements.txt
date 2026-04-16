@@ -1,0 +1,7 @@
+# Core inference + retrieval dependencies for Phase 3 AI pipeline
+transformers>=4.41.0
+sentence-transformers>=2.7.0
+faiss-cpu>=1.8.0
+numpy>=1.26.0
+# Install torch build suitable for your machine (CPU/GPU)
+torch>=2.2.0

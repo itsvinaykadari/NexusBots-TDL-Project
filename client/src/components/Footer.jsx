@@ -22,19 +22,19 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Products</h3>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li className="hover:text-neon cursor-pointer transition-colors">Household Robots</li>
+              <li className="hover:text-neon cursor-pointer transition-colors">Kitchen Robots</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Home Cleaners</li>
-              <li className="hover:text-neon cursor-pointer transition-colors">Child & Educational</li>
-              <li className="hover:text-neon cursor-pointer transition-colors">Security & Industrial</li>
+              <li className="hover:text-neon cursor-pointer transition-colors">Drone Robots</li>
+              <li className="hover:text-neon cursor-pointer transition-colors">Humanoid Robots</li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">AI Services</h3>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li className="hover:text-neon cursor-pointer transition-colors">Chat Assistant</li>
-              <li className="hover:text-neon cursor-pointer transition-colors">Voice Support</li>
-              <li className="hover:text-neon cursor-pointer transition-colors">Email Support</li>
+              <li className="hover:text-neon cursor-pointer transition-colors">Unified AI Assistant</li>
+              <li className="hover:text-neon cursor-pointer transition-colors">Voice Interaction</li>
+              <li className="hover:text-neon cursor-pointer transition-colors">Support Chat</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Sales Guidance</li>
             </ul>
           </div>

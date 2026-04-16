@@ -28,7 +28,7 @@ export default function HeroSection() {
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
-            Browse cutting-edge robots and get AI-powered assistance through chat, voice, and email.
+            Browse cutting-edge robots and get AI-powered assistance through one unified assistant across chat and voice.
             Your intelligent robotics shopping experience starts here.
           </p>
 
@@ -56,8 +56,8 @@ export default function HeroSection() {
               <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
                 <Bot size={24} className="text-accent" />
               </div>
-              <h3 className="text-white font-semibold">22 Robots</h3>
-              <p className="text-slate-400 text-sm">Household, cleaners, child, educational, security & industrial</p>
+              <h3 className="text-white font-semibold">12 Robots</h3>
+              <p className="text-slate-400 text-sm">Kitchen, home cleaner, drone, and humanoid categories</p>
             </div>
             <div className="flex flex-col items-center gap-3 p-6 bg-surface/50 rounded-2xl border border-white/5">
               <div className="w-12 h-12 bg-neon/10 rounded-xl flex items-center justify-center">

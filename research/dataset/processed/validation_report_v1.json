@@ -1,6 +1,6 @@
 {
   "file": "/home/cs412/Downloads/Subjects/TDL/NexusBots-TDL-Project/research/dataset/final/function_calling_v1.jsonl",
-  "generated_at": "2026-04-16T17:26:02.221Z",
+  "generated_at": "2026-04-16T20:55:24.129Z",
   "counts": {
     "total": 1000,
     "byLanguage": {
@@ -13,13 +13,12 @@
       "expert": 500
     },
     "byFunction": {
-      "search_products": 144,
-      "get_product": 144,
-      "compare_products": 144,
-      "recommend": 144,
-      "add_to_cart": 144,
-      "navigate_to": 142,
-      "get_support": 138
+      "search_products": 168,
+      "get_product": 168,
+      "compare_products": 168,
+      "recommend": 168,
+      "add_to_cart": 166,
+      "navigate_to": 162
     },
     "byLanguageProficiency": {
       "en:beginner": 250,
@@ -28,7 +27,94 @@
       "hi:expert": 125,
       "te:beginner": 125,
       "te:expert": 125
+    },
+    "byContextPage": {
+      "catalog": 167,
+      "cart": 169,
+      "product": 177,
+      "home": 148,
+      "orders": 153,
+      "assistant": 186
+    },
+    "byContextCategory": {
+      "Humanoid": 240,
+      "Drone": 245,
+      "Kitchen": 247,
+      "Home Cleaner": 268
     }
+  },
+  "strict_checks": {
+    "allowed": {
+      "categories": [
+        "Kitchen",
+        "Home Cleaner",
+        "Drone",
+        "Humanoid"
+      ],
+      "pages": [
+        "home",
+        "catalog",
+        "assistant",
+        "product",
+        "cart",
+        "orders"
+      ],
+      "tools": [
+        "search_products",
+        "get_product",
+        "compare_products",
+        "recommend",
+        "add_to_cart",
+        "navigate_to"
+      ],
+      "product_id_min": 1,
+      "product_id_max": 12
+    },
+    "seen": {
+      "categories": [
+        "Drone",
+        "Home Cleaner",
+        "Humanoid",
+        "Kitchen"
+      ],
+      "pages": [
+        "assistant",
+        "cart",
+        "catalog",
+        "home",
+        "orders",
+        "product"
+      ],
+      "tools": [
+        "add_to_cart",
+        "compare_products",
+        "get_product",
+        "navigate_to",
+        "recommend",
+        "search_products"
+      ],
+      "product_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    "disallowed_values": {
+      "categories": [],
+      "pages": [],
+      "tools": [],
+      "product_ids": []
+    },
+    "pass": true
   },
   "targets": {
     "total": 1000,

@@ -6,7 +6,7 @@ const initialState = {
   viewedProducts: [],     // [{ id, name, category, timestamp }]
   cart: [],               // [{ id, name, price, quantity }]
   currentProduct: null,   // { id, name, category } — what user is looking at right now
-  currentPage: "home",    // home | catalog | robot | assistant | support
+  currentPage: "home",    // home | catalog | robot | assistant
   searchQuery: "",        // last search term
   selectedCategory: "",   // last selected category filter
 };

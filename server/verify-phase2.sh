@@ -18,7 +18,7 @@ echo ""
 # 2. Check database content
 echo "✓ Checking database content..."
 PRODUCTS=$(node -e "const db=require('./config/db');console.log(db.prepare('SELECT COUNT(*) as count FROM products').get().count)")
-echo "  ✓ Products in DB: $PRODUCTS/22"
+echo "  ✓ Products in DB: $PRODUCTS/12"
 echo ""
 
 # 3. Check server is running
@@ -40,15 +40,15 @@ HEALTH=$(curl -s http://localhost:5000/api/health | grep -o '"status":"ok"')
 
 # Get all products
 PROD_COUNT=$(curl -s http://localhost:5000/api/products | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).length)")
-[ "$PROD_COUNT" = "22" ] && echo "  ✓ GET /api/products returns 22 products" || echo "  ✗ Products endpoint failed"
+[ "$PROD_COUNT" = "12" ] && echo "  ✓ GET /api/products returns 12 products" || echo "  ✗ Products endpoint failed"
 
 # Get single product
 PROD_NAME=$(curl -s http://localhost:5000/api/products/1 | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).name)")
-[ "$PROD_NAME" = "Nexus HomeHub" ] && echo "  ✓ GET /api/products/:id works" || echo "  ✗ Single product failed"
+[ "$PROD_NAME" = "Amazon Astro" ] && echo "  ✓ GET /api/products/:id works" || echo "  ✗ Single product failed"
 
 # Filter by category
-SEC_COUNT=$(curl -s "http://localhost:5000/api/products?category=Security" | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).length)")
-[ "$SEC_COUNT" = "3" ] && echo "  ✓ GET /api/products?category=Security returns 3 robots" || echo "  ✗ Category filter failed"
+DRONE_COUNT=$(curl -s "http://localhost:5000/api/products?category=Drone" | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).length)")
+[ "$DRONE_COUNT" = "3" ] && echo "  ✓ GET /api/products?category=Drone returns 3 robots" || echo "  ✗ Category filter failed"
 
 # Search
 SEARCH_COUNT=$(curl -s "http://localhost:5000/api/products?search=vacuum" | node -e "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).length)")
@@ -76,6 +76,6 @@ echo ""
 echo "Summary:"
 echo "- Express server: ✓"
 echo "- SQLite database: ✓"
-echo "- 22 robot products seeded: ✓"
+echo "- 12 robot products seeded: ✓"
 echo "- Product API endpoints: ✓"
 echo "- Chat session API endpoints: ✓"
