@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import HeroSection from "../components/HeroSection";
 import FeaturedRobots from "../components/FeaturedRobots";
-import { MessageCircle, Mic, Mail, Cpu } from "lucide-react";
+import { MessageCircle, Mic, Cpu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserActivity } from "../context/UserActivityContext";
 
@@ -37,12 +37,12 @@ export default function Home() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-white mb-3">AI-Powered Assistance</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
-            Interact with our intelligent agents through multiple channels. Get product recommendations,
-            support, and sales guidance powered by LangChain multi-agent orchestration.
+            Get product recommendations and support with one unified AI assistant for both
+            chat and voice interactions.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AIFeatureCard
             icon={<MessageCircle size={24} className="text-accent" />}
             title="AI Assistant"
@@ -56,13 +56,6 @@ export default function Home() {
             description="Talk naturally with our voice AI for a hands-free shopping and support experience."
             link="/assistant"
             color="bg-neon/10"
-          />
-          <AIFeatureCard
-            icon={<Mail size={24} className="text-neon-green" />}
-            title="Email Support"
-            description="Send detailed inquiries and get comprehensive AI-generated responses via email."
-            link="/support"
-            color="bg-neon-green/10"
           />
           <AIFeatureCard
             icon={<Cpu size={24} className="text-purple-400" />}
@@ -79,10 +72,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: "22", label: "Robot Products" },
+              { value: "12", label: "Robot Products" },
               { value: "6", label: "AI Agents" },
-              { value: "3", label: "Interaction Channels" },
-              { value: "6", label: "Product Categories" },
+              { value: "2", label: "Interaction Channels" },
+              { value: "4", label: "Product Categories" },
             ].map(({ value, label }) => (
               <div key={label}>
                 <div className="text-3xl font-bold text-neon mb-1">{value}</div>

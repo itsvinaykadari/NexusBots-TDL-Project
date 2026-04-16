@@ -4,8 +4,8 @@ This folder contains the complete Phase 2A pipeline for function-calling dataset
 
 ## Structure
 
-- `tool_schemas.json` - source-of-truth schemas for 7 tools.
-- `product_catalog.json` - 22-product catalog used for argument generation.
+- `tool_schemas.json` - source-of-truth schemas for 6 tools.
+- `product_catalog.json` - 12-product catalog used for argument generation.
 - `raw/` - synthetic raw examples with context and canonical function call.
 - `processed/` - converted training records (`messages` + `tool_calls`).
 - `review/` - sampled records for manual QA and cleanup logs.
@@ -34,6 +34,9 @@ Generated outputs:
 
 ## Notes
 
+- Current ontology is fixed to 4 categories: Kitchen, Home Cleaner, Drone, Humanoid.
+- Current tool set is 6 tools (support tool removed).
+- Product id range is restricted to 1..12 across schema, generation, and validation.
 - This pipeline creates the target split: EN 500, HI 250, TE 250.
 - Proficiency split is balanced per language: beginner/expert.
 - Queries are romanized for HI/TE to keep plain UTF-8-safe text and avoid script encoding issues in early iterations.

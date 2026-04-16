@@ -1,20 +1,18 @@
 {
     "version": "1.0",
     "categories": [
-        "Household",
+        "Kitchen",
         "Home Cleaner",
-        "Child",
-        "Educational",
-        "Security",
-        "Industrial"
+        "Drone",
+        "Humanoid"
     ],
     "pages": [
         "home",
         "catalog",
         "assistant",
-        "support",
         "product",
-        "cart"
+        "cart",
+        "orders"
     ],
     "focus_options": [
         "price",
@@ -62,7 +60,7 @@
                     "product_id": {
                         "type": "integer",
                         "minimum": 1,
-                        "maximum": 22
+                        "maximum": 12
                     }
                 }
             }
@@ -81,12 +79,12 @@
                     "product_id_1": {
                         "type": "integer",
                         "minimum": 1,
-                        "maximum": 22
+                        "maximum": 12
                     },
                     "product_id_2": {
                         "type": "integer",
                         "minimum": 1,
-                        "maximum": 22
+                        "maximum": 12
                     },
                     "focus": {
                         "type": "string",
@@ -134,7 +132,7 @@
                     "product_id": {
                         "type": "integer",
                         "minimum": 1,
-                        "maximum": 22
+                        "maximum": 12
                     }
                 }
             }
@@ -164,7 +162,7 @@
                             "product_id": {
                                 "type": "integer",
                                 "minimum": 1,
-                                "maximum": 22
+                                "maximum": 12
                             },
                             "query": {
                                 "type": "string"
@@ -179,35 +177,6 @@
                                 ]
                             }
                         }
-                    }
-                }
-            }
-        },
-        {
-            "name": "get_support",
-            "description": "Open support workflow for an issue, optionally linked to product id.",
-            "parameters": {
-                "type": "object",
-                "required": [
-                    "issue",
-                    "product_id"
-                ],
-                "properties": {
-                    "issue": {
-                        "type": "string",
-                        "minLength": 3
-                    },
-                    "product_id": {
-                        "oneOf": [
-                            {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 22
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
                     }
                 }
             }

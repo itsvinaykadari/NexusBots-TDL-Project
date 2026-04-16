@@ -1,4 +1,4 @@
-import { Star, ShoppingCart } from "lucide-react";
+import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function RobotCard({ robot }) {
@@ -18,13 +18,7 @@ export default function RobotCard({ robot }) {
             {robot.category}
           </span>
         </div>
-        {!robot.inStock ? (
-          <div className="absolute top-3 right-3">
-            <span className="px-2.5 py-1 bg-red-500/80 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
-              Out of Stock
-            </span>
-          </div>
-        ) : robot.highlight ? (
+        {robot.highlight ? (
           <div className="absolute top-3 right-3">
             <span className="px-2.5 py-1 bg-accent/80 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
               {robot.highlight}

@@ -4,14 +4,21 @@ import RobotCard from "./RobotCard";
 import robots from "../data/robots";
 
 export default function FeaturedRobots() {
-  const featured = robots.filter((r) => r.rating >= 4.7).slice(0, 6);
+  const featuredCategories = ["Kitchen", "Home Cleaner", "Drone"];
+  const featured = featuredCategories
+    .map((category) =>
+      [...robots]
+        .filter((r) => r.category === category)
+        .sort((a, b) => b.rating - a.rating)[0]
+    )
+    .filter(Boolean);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-3xl font-bold text-white">Top Rated Robots</h2>
-          <p className="text-slate-400 mt-1">Our highest-rated picks across all categories</p>
+          <h2 className="text-3xl font-bold text-white">Most Rated Products</h2>
+          <p className="text-slate-400 mt-1">Top pick from kitchen, home cleaner, and drone categories</p>
         </div>
         <Link
           to="/catalog"

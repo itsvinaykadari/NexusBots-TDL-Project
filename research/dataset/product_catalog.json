@@ -2,111 +2,61 @@
     {
         "id": 1,
         "name": "Amazon Astro",
-        "category": "Household"
+        "category": "Kitchen"
     },
     {
         "id": 2,
         "name": "Samsung Ballie",
-        "category": "Household"
+        "category": "Kitchen"
     },
     {
         "id": 3,
         "name": "Enabot EBO X",
-        "category": "Household"
+        "category": "Kitchen"
     },
     {
         "id": 4,
-        "name": "Unitree Go2 Air",
-        "category": "Household"
-    },
-    {
-        "id": 5,
         "name": "iRobot Roomba j9+",
         "category": "Home Cleaner"
     },
     {
-        "id": 6,
+        "id": 5,
         "name": "Roborock S8 MaxV Ultra",
         "category": "Home Cleaner"
     },
     {
-        "id": 7,
-        "name": "Ecovacs WINBOT W2",
+        "id": 6,
+        "name": "Ecovacs WINBOT W2 Omni",
         "category": "Home Cleaner"
+    },
+    {
+        "id": 7,
+        "name": "Ring Always Home Cam",
+        "category": "Drone"
     },
     {
         "id": 8,
-        "name": "Aiper Surfer S1",
-        "category": "Home Cleaner"
+        "name": "DJI Matrice 30T",
+        "category": "Drone"
     },
     {
         "id": 9,
-        "name": "Miko 3",
-        "category": "Child"
+        "name": "Aiper Surfer S1",
+        "category": "Drone"
     },
     {
         "id": 10,
-        "name": "Wonder Workshop Dash",
-        "category": "Child"
+        "name": "Miko 3",
+        "category": "Humanoid"
     },
     {
         "id": 11,
-        "name": "LEGO Spike Prime",
-        "category": "Child"
+        "name": "Wonder Workshop Dash",
+        "category": "Humanoid"
     },
     {
         "id": 12,
-        "name": "DJI RoboMaster S1",
-        "category": "Educational"
-    },
-    {
-        "id": 13,
-        "name": "TurtleBot 4",
-        "category": "Educational"
-    },
-    {
-        "id": 14,
-        "name": "Makeblock mBot2",
-        "category": "Educational"
-    },
-    {
-        "id": 15,
-        "name": "Unitree Go2 EDU",
-        "category": "Educational"
-    },
-    {
-        "id": 16,
-        "name": "Ring Always Home Cam",
-        "category": "Security"
-    },
-    {
-        "id": 17,
-        "name": "Xiaomi CyberDog 2",
-        "category": "Security"
-    },
-    {
-        "id": 18,
-        "name": "DJI Matrice 30T",
-        "category": "Security"
-    },
-    {
-        "id": 19,
-        "name": "Universal Robots UR10e",
-        "category": "Industrial"
-    },
-    {
-        "id": 20,
-        "name": "Boston Dynamics Stretch",
-        "category": "Industrial"
-    },
-    {
-        "id": 21,
-        "name": "FANUC CRX-25iA",
-        "category": "Industrial"
-    },
-    {
-        "id": 22,
-        "name": "ABB YuMi",
-        "category": "Industrial"
+        "name": "LEGO Education Spike Prime",
+        "category": "Humanoid"
     }
 ]

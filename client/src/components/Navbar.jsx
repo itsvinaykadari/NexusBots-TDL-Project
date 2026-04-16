@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bot, ShoppingCart, MessageCircle, Mail, Menu, X, Package } from "lucide-react";
+import { Bot, ShoppingCart, MessageCircle, Menu, X, Package } from "lucide-react";
 import { useUserActivity } from "../context/UserActivityContext";
 
 export default function Navbar({ onCartClick }) {
@@ -13,7 +13,6 @@ export default function Navbar({ onCartClick }) {
     { path: "/catalog", label: "Products" },
     { path: "/orders", label: "Order History", icon: <Package size={16} /> },
     { path: "/assistant", label: "AI Assistant", icon: <MessageCircle size={16} /> },
-    { path: "/support", label: "Support", icon: <Mail size={16} /> },
   ];
 
   return (

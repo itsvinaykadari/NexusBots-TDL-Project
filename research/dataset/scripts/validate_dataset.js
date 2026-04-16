@@ -5,10 +5,14 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const schema = JSON.parse(fs.readFileSync(path.join(root, "tool_schemas.json"), "utf8"));
+const catalog = JSON.parse(fs.readFileSync(path.join(root, "product_catalog.json"), "utf8"));
 const inPath = path.join(root, "final", "function_calling_v1.jsonl");
 const outPath = path.join(root, "processed", "validation_report_v1.json");
 
 const toolMap = new Map(schema.tools.map((t) => [t.name, t]));
+const validProductIds = new Set(catalog.map((p) => p.id));
+const categorySet = new Set(schema.categories || []);
+const pageSet = new Set(schema.pages || []);
 
 function loadJsonl(filePath) {
     const text = fs.readFileSync(filePath, "utf8").trim();
@@ -20,6 +24,54 @@ function typeOfVal(v) {
     if (v === null) return "null";
     if (Array.isArray(v)) return "array";
     return typeof v;
+}
+
+function parseContextFromRow(row) {
+    if (!row.messages || !Array.isArray(row.messages) || row.messages.length < 2) return null;
+    const userMessage = row.messages.find((m) => m && m.role === "user");
+    if (!userMessage || typeof userMessage.content !== "string") return null;
+    const marker = "\nContext: ";
+    const idx = userMessage.content.indexOf(marker);
+    if (idx === -1) return null;
+    const contextText = userMessage.content.slice(idx + marker.length).trim();
+    try {
+        return JSON.parse(contextText);
+    } catch (err) {
+        return null;
+    }
+}
+
+function validateProductIdValue(value, keyPath, errors) {
+    if (!Number.isInteger(value)) {
+        errors.push(`${keyPath}: expected integer product id`);
+        return;
+    }
+    if (!validProductIds.has(value)) {
+        errors.push(`${keyPath}: unknown product id ${value}`);
+    }
+}
+
+function validateContext(context, index, errors) {
+    if (!context || typeOfVal(context) !== "object") {
+        errors.push(`row[${index}].context: missing or invalid context object`);
+        return;
+    }
+
+    if (!pageSet.has(context.current_page)) {
+        errors.push(`row[${index}].context.current_page: invalid page ${context.current_page}`);
+    }
+    if (!categorySet.has(context.active_category)) {
+        errors.push(`row[${index}].context.active_category: invalid category ${context.active_category}`);
+    }
+
+    for (const key of ["viewed_products", "cart_items", "visible_products"]) {
+        const value = context[key];
+        if (!Array.isArray(value)) {
+            errors.push(`row[${index}].context.${key}: expected array`);
+            continue;
+        }
+        value.forEach((id, i) => validateProductIdValue(id, `row[${index}].context.${key}[${i}]`, errors));
+    }
 }
 
 function validateSchemaValue(spec, value, rootSchema, keyPath, errors) {
@@ -129,12 +181,28 @@ function validateRow(row, index) {
     const fnSchema = toolMap.get(fnName).parameters;
     validateSchemaValue(fnSchema, args, schema, `row[${index}].arguments`, errors);
 
+    ["product_id", "product_id_1", "product_id_2"].forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(args, key) && args[key] !== null) {
+            validateProductIdValue(args[key], `row[${index}].arguments.${key}`, errors);
+        }
+    });
+
     if (!["en", "hi", "te"].includes(row.language)) {
         errors.push(`language: unsupported value ${row.language}`);
     }
     if (!["beginner", "expert"].includes(row.proficiency)) {
         errors.push(`proficiency: unsupported value ${row.proficiency}`);
     }
+
+    const userMessage = row.messages.find((m) => m && m.role === "user");
+    if (!userMessage || typeof userMessage.content !== "string") {
+        errors.push(`row[${index}].messages.user: missing user content`);
+    } else if (userMessage.content.includes("[object Object]")) {
+        errors.push(`row[${index}].messages.user: contains malformed token [object Object]`);
+    }
+
+    const context = parseContextFromRow(row);
+    validateContext(context, index, errors);
 
     return errors;
 }
@@ -145,7 +213,9 @@ function buildCounts(rows) {
         byLanguage: {},
         byProficiency: {},
         byFunction: {},
-        byLanguageProficiency: {}
+        byLanguageProficiency: {},
+        byContextPage: {},
+        byContextCategory: {}
     };
 
     for (const row of rows) {
@@ -155,9 +225,87 @@ function buildCounts(rows) {
         counts.byFunction[fnName] = (counts.byFunction[fnName] || 0) + 1;
         const key = `${row.language}:${row.proficiency}`;
         counts.byLanguageProficiency[key] = (counts.byLanguageProficiency[key] || 0) + 1;
+
+        const context = parseContextFromRow(row);
+        if (context && context.current_page) {
+            counts.byContextPage[context.current_page] = (counts.byContextPage[context.current_page] || 0) + 1;
+        }
+        if (context && context.active_category) {
+            counts.byContextCategory[context.active_category] =
+                (counts.byContextCategory[context.active_category] || 0) + 1;
+        }
     }
 
     return counts;
+}
+
+function strictChecks(rows) {
+    const seen = {
+        categories: new Set(),
+        pages: new Set(),
+        tools: new Set(),
+        productIds: new Set()
+    };
+
+    for (const row of rows) {
+        const toolName = row.tool_calls[0].function.name;
+        seen.tools.add(toolName);
+
+        try {
+            const args = JSON.parse(row.tool_calls[0].function.arguments);
+            ["product_id", "product_id_1", "product_id_2"].forEach((k) => {
+                if (Object.prototype.hasOwnProperty.call(args, k) && Number.isInteger(args[k])) {
+                    seen.productIds.add(args[k]);
+                }
+            });
+        } catch (err) {
+            // Keep strict checks running even if some rows have malformed argument payloads.
+        }
+
+        const context = parseContextFromRow(row);
+        if (context && context.active_category) seen.categories.add(context.active_category);
+        if (context && context.current_page) seen.pages.add(context.current_page);
+        if (context) {
+            ["viewed_products", "cart_items", "visible_products"].forEach((k) => {
+                if (Array.isArray(context[k])) {
+                    context[k].forEach((id) => {
+                        if (Number.isInteger(id)) seen.productIds.add(id);
+                    });
+                }
+            });
+        }
+    }
+
+    const allowed = {
+        categories: schema.categories,
+        pages: schema.pages,
+        tools: schema.tools.map((t) => t.name),
+        product_id_min: Math.min(...catalog.map((p) => p.id)),
+        product_id_max: Math.max(...catalog.map((p) => p.id))
+    };
+
+    const disallowedValues = {
+        categories: [...seen.categories].filter((v) => !categorySet.has(v)).sort(),
+        pages: [...seen.pages].filter((v) => !pageSet.has(v)).sort(),
+        tools: [...seen.tools].filter((v) => !toolMap.has(v)).sort(),
+        product_ids: [...seen.productIds].filter((v) => !validProductIds.has(v)).sort((a, b) => a - b)
+    };
+
+    return {
+        allowed,
+        seen: {
+            categories: [...seen.categories].sort(),
+            pages: [...seen.pages].sort(),
+            tools: [...seen.tools].sort(),
+            product_ids: [...seen.productIds].sort((a, b) => a - b)
+        },
+        disallowed_values: disallowedValues,
+        pass:
+            disallowedValues.categories.length === 0 &&
+            disallowedValues.pages.length === 0 &&
+            disallowedValues.tools.length === 0 &&
+            disallowedValues.product_ids.length === 0
+    };
 }
 
 function main() {
@@ -172,10 +320,12 @@ function main() {
     });
 
     const counts = buildCounts(rows);
+    const strict = strictChecks(rows);
     const report = {
         file: inPath,
         generated_at: new Date().toISOString(),
         counts,
+        strict_checks: strict,
         targets: {
             total: 1000,
             byLanguage: { en: 500, hi: 250, te: 250 },
@@ -201,6 +351,7 @@ function main() {
                 report: outPath,
                 total: counts.total,
                 invalid_count: invalidRows.length,
+                strict_pass: strict.pass,
                 byLanguage: counts.byLanguage,
                 byLanguageProficiency: counts.byLanguageProficiency
             },

@@ -6,7 +6,7 @@ import { useUserActivity } from "../context/UserActivityContext";
 
 export default function RobotDetail() {
   const { id } = useParams();
-  const robot = robots.find((r) => r.id === parseInt(id));
+  const robot = robots.find((r) => r.id === parseInt(id, 10));
   const { viewProduct, addToCart, setPage } = useUserActivity();
 
   useEffect(() => {
@@ -36,17 +36,32 @@ export default function RobotDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Image */}
-        <div className="relative rounded-2xl overflow-hidden border border-white/10">
-          <img
-            src={robot.image}
-            alt={robot.name}
-            className="w-full h-[400px] object-cover"
-          />
-          <div className="absolute top-4 left-4">
-            <span className="px-3 py-1.5 bg-primary/80 backdrop-blur-sm text-neon text-sm font-semibold rounded-full border border-neon/30">
-              {robot.category}
-            </span>
+        {/* Image + Detailed Description */}
+        <div>
+          <div className="relative rounded-2xl overflow-hidden border border-white/10">
+            <img
+              src={robot.image}
+              alt={robot.name}
+              className="w-full h-[400px] object-cover"
+            />
+            <div className="absolute top-4 left-4">
+              <span className="px-3 py-1.5 bg-primary/80 backdrop-blur-sm text-neon text-sm font-semibold rounded-full border border-neon/30">
+                {robot.category}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-5 bg-surface rounded-xl p-5 border border-white/5">
+            <h3 className="text-white font-semibold mb-2">Detailed Description</h3>
+            <p className="text-slate-300 leading-relaxed text-sm mb-3">
+              {robot.description}
+            </p>
+            <p className="text-slate-400 leading-relaxed text-sm mb-3">
+              {robot.purpose}
+            </p>
+            <p className="text-slate-400 leading-relaxed text-sm">
+              {robot.shortDesc}
+            </p>
           </div>
         </div>
 
@@ -64,14 +79,8 @@ export default function RobotDetail() {
                 {robot.highlight}
               </span>
             )}
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                robot.inStock
-                  ? "bg-neon-green/10 text-neon-green border border-neon-green/20"
-                  : "bg-red-500/10 text-red-400 border border-red-500/20"
-              }`}
-            >
-              {robot.inStock ? "In Stock" : "Out of Stock"}
+            <span className="px-3 py-1 rounded-full text-sm font-medium bg-neon-green/10 text-neon-green border border-neon-green/20">
+              Available
             </span>
           </div>
 
@@ -110,12 +119,11 @@ export default function RobotDetail() {
           {/* Actions */}
           <div className="flex gap-4">
             <button
-              disabled={!robot.inStock}
-              onClick={() => robot.inStock && addToCart(robot)}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+              onClick={() => addToCart(robot)}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
             >
               <ShoppingCart size={18} />
-              {robot.inStock ? "Add to Cart" : "Unavailable"}
+              Add to Cart
             </button>
             <Link
               to="/assistant"

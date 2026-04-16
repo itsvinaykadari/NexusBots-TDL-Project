@@ -24,8 +24,7 @@ const functions = [
     "compare_products",
     "recommend",
     "add_to_cart",
-    "navigate_to",
-    "get_support"
+    "navigate_to"
 ];
 
 const byCategory = new Map();
@@ -339,7 +338,7 @@ function argsFor(fn, c1, c2, cat, focus, budget, need, page) {
         if (rnd() > 0.5) params.sort = pick(["price_asc", "price_desc", "rating_desc", "latest"]);
         return { page, params };
     }
-    return { issue: need, product_id: rnd() > 0.2 ? c1.id : null };
+    throw new Error(`Unsupported function: ${fn}`);
 }
 
 function buildExamples() {
@@ -366,7 +365,8 @@ function buildExamples() {
                     "STEM education"
                 ]);
                 const page = pick(pages);
-                const userQuery = makeQuery(lang, fn, proficiency, c1, c2, focus, budget, need, page);
+                const queryEntity = fn === "search_products" ? cat : c1;
+                const userQuery = makeQuery(lang, fn, proficiency, queryEntity, c2, focus, budget, need, page);
                 const fcArgs = argsFor(fn, c1, c2, cat, focus, budget, need, page);
                 const context = samplePageContext(cat, c1, c2);
 
