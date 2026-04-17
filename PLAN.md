@@ -1,372 +1,219 @@
-# Nexus Bots — Project Plan
+# Nexus Bots — 24-Hour Sprint Plan
 
-## Project Title
+> **Date:** 2026-04-17 | **Deadline:** 24 hours from now
+> Revised from the multi-week plan after code audit. The codebase is further along than the previous plan claimed — most integration is already built. This plan focuses the remaining 24 hours on what is missing: the fine-tuned model, the benchmark numbers, and the demo.
 
-Nexus Bots: Domain-Specific Function Calling with Fine-Tuned Small LLMs and Context-Aware RAG for Persona-Adaptive Multilingual Robotics Commerce
+---
 
-## Abstract
+## Verified State — What Is Actually Done (post-audit)
 
-We present Nexus Bots, a robotics commerce platform that investigates whether a fine-tuned small language model (~360M parameters) can match large models (GPT-4, Claude, Gemini) at domain-specific function calling — selecting the right tool and generating correct arguments for robotics e-commerce queries. The system combines three novel components: (1) a QLoRA-fine-tuned SmolLM2/Qwen2 model that maps user queries to structured function calls (search, compare, recommend, navigate), (2) context-aware RAG that re-ranks retrieved products using real-time user activity signals (browsing history, cart, current page), and (3) automatic user proficiency detection that adapts response complexity for beginners vs experts. Sarvam AI generates the final multilingual responses in English, Hindi, and Telugu, orchestrated by LangChain. We benchmark function-calling accuracy of our fine-tuned small model against GPT-4, Claude, and Gemini, evaluate context-aware vs standard retrieval, and test multilingual function-calling accuracy across three languages.
+### ✅ Phase 1 — UI + Backend (DONE)
+- React 19 + Vite + Tailwind frontend with Home, Catalog, RobotDetail, AIAssistant, Support, OrderHistory pages, CartDrawer, Navbar/Footer, floating [ChatWidget.jsx](client/src/components/ChatWidget.jsx).
+- Express + SQLite backend with products, chats, orders routes.
+- Strict dataset in [seed.sql](server/database/seed.sql): **12 robots, 4 categories** (Kitchen, Home Cleaner, Drone, Humanoid) — reduced from 22/6 for cleaner training.
+- [UserActivityContext.jsx](client/src/context/UserActivityContext.jsx) tracks page, viewed, cart, search, category, currentProduct.
 
-## Tech Stack
+### ✅ Phase 2A — Function-Calling Dataset (DONE)
+- [research/dataset/](research/dataset/) has generator, formatter, validator, review sampler scripts.
+- Outputs: `raw/function_calls_raw_v1.jsonl`, `processed/function_calling_train_v1.jsonl`, `final/function_calling_v1.jsonl` — **1000 rows**.
+- [validation_report_v1.json](research/dataset/processed/validation_report_v1.json): `invalid_count: 0`, strict checks pass.
+- Splits met: EN 500 / HI 250 / TE 250; beginner 500 / expert 500; 6 tools evenly covered; all 12 product IDs seen; all 4 categories + 6 pages seen.
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 19 + Vite + Tailwind CSS |
-| Backend | Node.js + Express |
-| Database | SQLite (better-sqlite3) |
-| Function Calling | Fine-tuned SmolLM2/Qwen2 (QLoRA, ~360M params) |
-| Retrieval | Sentence-transformers + FAISS (context-aware re-ranking) |
-| Orchestration | LangChain |
-| Reasoning/Response | Sarvam AI (multilingual: EN/HI/TE) |
-| Voice | Web Speech API + TTS |
-| Training | Google Colab (free T4) + HuggingFace + Unsloth |
+### ✅ Phase 2D — Context-Aware RAG (DONE, needs benchmark)
+- [pipeline.py](server/ai/pipeline.py) → `RecommendationRanker`: FAISS + sentence-transformers (MiniLM), optional via `ENABLE_SEMANTIC_RAG=1`.
+- Context re-ranking: boosts by `selectedCategory`, `currentProduct`, `viewedProducts`, `cart`, and budget proximity. Falls back to lexical scoring if FAISS stack absent.
+- **Missing:** formal benchmark vs lexical/TF-IDF/BM25.
 
-## Architecture
+### ✅ Phase 3A — Pipeline Orchestrator (DONE, LangChain-free equivalent)
+- [pipeline.py](server/ai/pipeline.py) implements all 6 tools end-to-end: `search_products`, `get_product`, `compare_products`, `recommend`, `add_to_cart`, `navigate_to`.
+- Two-path decider: model-based via `ENABLE_FC_MODEL=1` + `FC_MODEL_PATH`/`FC_MODEL_ID` (HF transformers pipeline), with heuristic fallback.
+- `_sanitize_tool_call` hardens model outputs against category/page/id drift.
+- **Note:** we chose NOT to use LangChain (would add latency + indirection for 6 fixed tools). This is a considered simplification.
 
-```
-User (ChatWidget / AI Assistant) — English, Hindi, Telugu
-        │
-        ├── [Voice] → Web Speech API → text
-        │
-        ▼
-┌──────────────────────────────────────────┐
-│  Page-Aware Activity Tracker             │  ← views, cart, search, current page,
-│  (UserActivityContext)                   │     visible products, active filters
-└──────────┬───────────────────────────────┘
-           │ user context + query
-           ▼
-┌──────────────────────────────────────────┐
-│  Fine-Tuned Small LLM (QLoRA)            │  ← SmolLM2/Qwen2 (~360M params)
-│  Domain-specific function calling        │
-│  Input: query + context                  │
-│  Output: tool_name(arg1, arg2, ...)      │
-└──────────┬───────────────────────────────┘
-           │ function call
-           ▼
-┌──────────────────────────────────────────┐
-│  LangChain Orchestrator                  │  ← Executes tool calls, manages flow
-│  ├── execute function (DB lookup, etc.)  │
-│  ├── Context-Aware RAG                   │  ← FAISS + re-rank by user activity
-│  ├── User Proficiency Detector           │  ← beginner / expert
-│  └── pack context for Sarvam            │
-└──────────┬───────────────────────────────┘
-           │ product data + context + proficiency
-           ▼
-┌──────────────────────────────────────────┐
-│  Sarvam AI                               │  ← Multilingual reasoning (EN/HI/TE)
-│  Generates persona-adaptive response     │
-│  Beginner → simple, guiding language     │
-│  Expert → technical, spec-heavy language │
-└──────────┬───────────────────────────────┘
-           │
-           ├── [Voice] → TTS → speech output
-           ▼
-┌──────────────────────────────────────────┐
-│  SQLite Database                         │
-│  Products (22 real robots), Chat History │
-└──────────────────────────────────────────┘
-```
+### ✅ Phase 3B — Sarvam Integration (DONE)
+- [sarvam_client.py](server/ai/sarvam_client.py) calls Sarvam chat endpoint with persona-adaptive system prompt (beginner vs expert) and language-specific output (EN/HI/TE).
+- Deterministic fallback text generator when API key missing or request fails.
 
-## Function Calls (What the Small LLM Learns)
+### ✅ Phase 3C — Frontend Wired (DONE)
+- [server/routes/ai.js](server/routes/ai.js): `POST /api/ai/chat` spawns Python pipeline → Sarvam → persists chat history.
+- [ChatWidget.jsx](client/src/components/ChatWidget.jsx) and [AIAssistant.jsx](client/src/pages/AIAssistant.jsx) both hit `/api/ai/chat` with full UserActivityContext payload.
 
-| Function | Example Input | Example Output |
-|---|---|---|
-| search_products(query, category) | "Show me pool cleaners" | search_products("pool", "Home Cleaner") |
-| get_product(id) | "Tell me about the Roomba" | get_product(5) |
-| compare_products(id1, id2, focus) | "Roomba vs Roborock suction?" | compare_products(5, 6, "suction") |
-| recommend(need, budget, category) | "Best robot for 6yr old under $300" | recommend("kids coding", 300, "Child") |
-| add_to_cart(id) | "Add CyberDog to my cart" | add_to_cart(17) |
-| navigate_to(page, params) | "Show me security robots" | navigate_to("catalog", {category: "Security"}) |
-| get_support(issue, product_id) | "My Roomba won't charge" | get_support("not charging", 5) |
+### ✅ Phase 4A — Voice (DONE for input)
+- Web Speech API STT wired into ChatWidget + AIAssistant. TTS output not yet wired — **skip for 24h demo**.
 
-## Product Catalog (22 real-world robots, 6 categories)
+### ✅ Phase 4B — Page-Aware Context (DONE)
+- Frontend already sends `currentPage`, `viewedProducts`, `cart`, `currentProduct`, `searchQuery`, `selectedCategory` every request; pipeline normalizes and uses all of it.
 
-| Category | Count | Products (Real Brands) |
-|---|---|---|
-| **Household** | 4 | Amazon Astro, Samsung Ballie, Enabot EBO X, Unitree Go2 Air |
-| **Home Cleaner** | 4 | iRobot Roomba j9+, Roborock S8 MaxV Ultra, Ecovacs WINBOT W2, Aiper Surfer S1 |
-| **Child** | 3 | Miko 3, Wonder Workshop Dash, LEGO Spike Prime |
-| **Educational** | 4 | DJI RoboMaster S1, TurtleBot 4, Makeblock mBot2, Unitree Go2 EDU |
-| **Security** | 3 | Ring Always Home Cam, Xiaomi CyberDog 2, DJI Matrice 30T |
-| **Industrial** | 4 | Universal Robots UR10e, Boston Dynamics Stretch, FANUC CRX-25iA, ABB YuMi |
+---
 
-## Pages & Navigation
+## What Is Missing (the 24-hour scope)
 
-| Nav Item | Route | Description |
-|---|---|---|
-| Home | `/` | Hero section, featured robots, AI feature cards, stats |
-| Products | `/catalog` | Full catalog with search, category filter, sorting |
-| AI Assistant | `/assistant` | Combined chat + voice full-page experience |
-| Support | `/support` | Support form with AI chatbot |
-| — | (floating widget) | Bottom-right ChatWidget on ALL pages, context-aware |
-
-## Research Benchmarks
-
-### Benchmark 1: Function-Calling Accuracy (Core)
-| Model | Tool Accuracy | Arg Correctness | Latency | Cost/1000 |
-|---|---|---|---|---|
-| Fine-tuned SmolLM2 (360M) | TBD | TBD | TBD | ~$0 |
-| Zero-shot GPT-4 | TBD | TBD | ~800ms | ~$15 |
-| Zero-shot Claude | TBD | TBD | ~600ms | ~$10 |
-| Zero-shot Gemini | TBD | TBD | ~500ms | ~$5 |
-
-### Benchmark 2: Context-Aware RAG
-| Retrieval Method | Recall@3 | MRR | Notes |
+| # | Item | Why it is missing | Blocker for demo? |
 |---|---|---|---|
-| FAISS + activity re-ranking | TBD | TBD | Uses views, cart, page context |
-| FAISS standard (query only) | TBD | TBD | Baseline |
-| TF-IDF | TBD | TBD | Traditional baseline |
-| BM25 | TBD | TBD | Traditional baseline |
+| M1 | **Fine-tuned SmolLM2-360M / Qwen2-0.5B weights** | No Colab notebook yet, no model artifact | **YES — this IS the research.** |
+| M2 | **Function-calling benchmark** (ours vs heuristic vs GPT-4 / Claude / Gemini zero-shot) | No eval harness | YES — required numbers |
+| M3 | **RAG benchmark** (FAISS+rerank vs FAISS vs TF-IDF vs BM25) | No eval script | YES — second contribution |
+| M4 | **Proficiency benchmark** (heuristic vs zero-shot LLM) — using existing heuristic, no training | No eval script | NO — small table only |
+| M5 | **Multilingual tool-call accuracy** (EN vs HI vs TE) | Needs M1 first | NO if M1 slips |
+| M6 | **Demo slides + README benchmark tables + recorded demo** | Not started | YES |
 
-### Benchmark 3: User Proficiency Detection
+---
+
+## 24-Hour Schedule (two operators, parallelizable)
+
+Assumes ~22 usable hours after buffer. Colab T4 free tier is the long pole.
+
+### Block A — Hours 0-2 · Setup (both operators)
+- [ ] Create `research/notebooks/function_calling_finetune.ipynb` with Unsloth + QLoRA template for SmolLM2-360M.
+- [ ] Upload `research/dataset/final/function_calling_v1.jsonl` to Drive / HF.
+- [ ] Smoke-test `ENABLE_SEMANTIC_RAG=1` locally (`pip install -r server/ai/requirements.txt` if needed), confirm `recommend` returns `ragEnabled: true`.
+- [ ] Create `research/eval/` directory for benchmark scripts.
+
+### Block B — Hours 2-10 · Fine-tune (Operator 1, long-running)
+- [ ] Run QLoRA fine-tune on Colab T4 (SmolLM2-360M, 3 epochs, r=16, alpha=32, lr=2e-4). **Expect 2-4 hrs training.**
+- [ ] Save LoRA adapter + merged model; push to HF Hub as `nexus-bots/smollm2-360m-fc-v1`.
+- [ ] Download merged model locally to `research/models/smollm2-360m-fc-v1/`.
+- [ ] Set `ENABLE_FC_MODEL=1` + `FC_MODEL_PATH=<local-path>` in `server/.env`; smoke-test via `/api/ai/chat`.
+
+### Block C — Hours 2-6 · Eval harness (Operator 2, parallel with B)
+- [ ] Hold out ~100 rows from `function_calling_v1.jsonl` as test set (seed + stratified by language × tool).
+- [ ] `research/eval/bench_function_calling.py`: scores tool-accuracy + arg-F1 for (a) heuristic, (b) fine-tuned (once ready), (c) zero-shot GPT-4o, (d) zero-shot Claude Sonnet 4.6, (e) zero-shot Gemini. Parse-tolerant JSON extractor.
+- [ ] `research/eval/bench_rag.py`: Recall@3 + MRR for 50 recommend queries across FAISS+rerank, FAISS, TF-IDF, BM25.
+- [ ] `research/eval/bench_proficiency.py`: accuracy of heuristic vs zero-shot GPT-4o classifier on 100 labeled queries (pull from dataset `style` field).
+
+### Block D — Hours 10-14 · Run benchmarks (Operator 1)
+- [ ] Run B1 function-calling bench — 5 systems × 100 queries.
+- [ ] Run B2 RAG bench — 4 retrievers × 50 queries.
+- [ ] Run B3 proficiency bench — 2 systems × 100 queries.
+- [ ] Run B4 multilingual slice of B1 (EN vs HI vs TE, same 100 queries).
+- [ ] Save all results to `research/results/` as CSV + markdown tables.
+
+### Block E — Hours 10-16 · Polish (Operator 2, parallel with D)
+- [ ] Fix any pipeline bugs surfaced during smoke-test.
+- [ ] Add confidence/toolSource indicator in ChatWidget (`model` vs `heuristic`) for demo visibility.
+- [ ] Verify all 6 tools work end-to-end through the UI across EN/HI/TE.
+- [ ] Add loading states and error toasts where missing.
+
+### Block F — Hours 16-20 · Demo artifacts
+- [ ] Slides (10-12): problem, architecture, 5 benchmark tables, demo screenshots, limitations, future work.
+- [ ] Update [README.md](README.md): replace TBD rows with real numbers.
+- [ ] Record 3-min demo video: EN query → tool call → RAG → response; HI query; proactive context-aware suggestion.
+
+### Block G — Hours 20-24 · Buffer + submission
+- [ ] Fix last bugs, verify submission checklist, final git push, tag `v1.0-submission`.
+- [ ] Run `graphify update .` so the graph reflects final code.
+
+---
+
+## Revised Benchmark Tables (what we will actually produce)
+
+### B1 — Function-Calling Accuracy (primary)
+| System | Tool Accuracy | Arg F1 | Latency | $/1000 |
+|---|---|---|---|---|
+| SmolLM2-360M-FC (ours, QLoRA) | — | — | — | ~$0 |
+| Heuristic router (baseline) | — | — | ~1 ms | $0 |
+| Zero-shot GPT-4o | — | — | — | — |
+| Zero-shot Claude Sonnet 4.6 | — | — | — | — |
+| Zero-shot Gemini 2.5 | — | — | — | — |
+
+### B2 — Context-Aware RAG
+| Method | Recall@3 | MRR |
+|---|---|---|
+| FAISS + context re-rank (ours) | — | — |
+| FAISS only | — | — |
+| TF-IDF | — | — |
+| BM25 | — | — |
+
+### B3 — Proficiency Detection
 | Method | Accuracy | F1 |
 |---|---|---|
-| Trained classifier | TBD | TBD |
-| Zero-shot LLM prompt | TBD | TBD |
-| Keyword heuristic | TBD | TBD |
+| Heuristic (in pipeline.py) | — | — |
+| Zero-shot GPT-4o prompt | — | — |
 
-### Benchmark 4: Multilingual Function Calling
-| Language | Tool Accuracy | Arg Correctness |
+### B4 — Multilingual Slice of B1
+| Language | Tool Accuracy | Arg F1 |
 |---|---|---|
-| English | TBD | TBD |
-| Hindi (code-mixed) | TBD | TBD |
-| Telugu (code-mixed) | TBD | TBD |
+| English | — | — |
+| Hindi | — | — |
+| Telugu | — | — |
 
-### Benchmark 5: Persona-Adapted Response Quality
-| Proficiency | Helpfulness Score | Appropriateness |
+### B5 — Persona Quality (deferred to written report)
+LLM-as-judge score across 20 beginner + 20 expert prompts comparing Sarvam persona-adaptive vs one-size-fits-all. If time permits in Block F.
+
+---
+
+## Scope Cuts (explicit, to protect 24h deadline)
+
+- ❌ **Trained proficiency classifier** — keep heuristic in `detect_proficiency()`, only benchmark it.
+- ❌ **Qwen2-0.5B ablation** — ship only SmolLM2-360M. Qwen mention in "future work" in paper.
+- ❌ **TTS output** — STT input is already wired; skip TTS for demo.
+- ❌ **LangChain** — pipeline.py already replaces it. Frame as deliberate choice: "fixed tool set, avoided LangChain overhead."
+- ❌ **Persona LLM-as-judge benchmark** — only if Block F finishes early.
+- ❌ **Deployment** — local demo + recorded video only.
+
+---
+
+## Risk Register
+
+| Risk | Likelihood | Mitigation |
 |---|---|---|
-| Beginner responses | TBD | TBD |
-| Expert responses | TBD | TBD |
-| One-size-fits-all baseline | TBD | TBD |
-
-## Project Structure
-
-```
-nexus-bots/
-├── client/                # React frontend (Vite + Tailwind)
-│   ├── src/
-│   │   ├── components/    # Navbar, Footer, RobotCard, HeroSection, FeaturedRobots, ChatWidget
-│   │   ├── context/       # UserActivityContext (views, cart, search, page tracking)
-│   │   ├── pages/         # Home, Catalog, RobotDetail, AIAssistant, Support
-│   │   ├── data/          # robots.js — 22 real-world robot products
-│   │   └── styles/
-│   └── public/
-├── server/                # Node.js backend
-│   ├── config/            # db.js (SQLite connection)
-│   ├── database/          # schema.sql, seed.sql, init.js, nexusbots.db
-│   ├── models/            # Product.js, Chat.js
-│   ├── routes/            # products.js, chats.js, ai.js (new)
-│   └── index.js           # Express server entry
-├── research/              # Research component
-│   ├── dataset/           # Function-calling dataset (EN + HI + TE)
-│   ├── notebooks/         # Colab training notebooks
-│   │   ├── function_calling_finetune.ipynb
-│   │   ├── proficiency_classifier.ipynb
-│   │   ├── rag_evaluation.ipynb
-│   │   └── benchmarks.ipynb
-│   ├── models/            # Saved fine-tuned model weights
-│   └── results/           # Benchmark tables, charts, confusion matrices
-├── Idea.md
-├── PLAN.md
-└── README.md
-```
+| Colab T4 session expires mid-train | Medium | Checkpoint every 200 steps; restart is OK |
+| Fine-tuned model underperforms heuristic | Low-Med | Still reportable — heuristic-as-baseline is valid finding |
+| Sarvam API flakes during demo | Medium | Fallback already wired in `sarvam_client.py` |
+| GPT-4/Claude/Gemini API budget | Low | 100-query bench is cheap (~$1-2 total) |
+| RAG deps (faiss-cpu, sentence-transformers) break on server | Medium | Lexical fallback already in place; can disable `ENABLE_SEMANTIC_RAG` |
 
 ---
 
-## BUILD PHASES (4 Phases)
+## Novelty — What Sets This Apart
+
+1. **Specialized small LLM matches large frontier models** on narrow-domain function calling — 360M params (QLoRA) vs GPT-4/Claude/Gemini zero-shot, on robotics e-commerce. If accuracy is comparable, that's the core claim: domain fine-tuning beats scale for structured tasks.
+2. **Context-aware RAG re-ranking by live user activity** — not just query embedding. Re-ranker scores are boosted by `currentProduct`, `selectedCategory`, `viewedProducts`, `cart`, and budget proximity. Most published RAG treats retrieval as stateless.
+3. **Multilingual function calling with code-mixed inputs** (EN/HI/TE) — underexplored; Indian-language tool-calling benchmarks barely exist.
+4. **Dual-path decider with graceful fallback** — [pipeline.py](server/ai/pipeline.py) runs the fine-tuned model first, falls back to a deterministic heuristic router if the model is disabled/fails/produces invalid JSON. Production-safe.
+5. **Heuristic baseline as a first-class system** — we benchmark against our own rule-based router, not just LLMs. Shows when ML is actually worth the weight.
+6. **Deliberate choice to skip LangChain** — 6 fixed tools, direct Python dispatch. Lower latency, fewer moving parts, easier to reason about.
+7. **Persona-adaptive generation driven by auto-detected proficiency** — `detect_proficiency()` uses message complexity + session activity (viewed count, cart size, technical tokens) to switch Sarvam system prompt between beginner and expert registers.
 
 ---
 
-### Phase 1 — UI + Backend Foundation ✅ DONE
+## Known Inaccuracies & Bugs (fix during Blocks E/F)
 
-Everything built and verified working.
+**Documentation drift:**
+- [README.md](README.md) says "22 real robots" and lists 6 categories (Household, Educational, Security, Industrial, etc.) — actual DB is **12 robots, 4 categories** (Kitchen, Home Cleaner, Drone, Humanoid). Fix README tables + mermaid legend.
+- README and old plan list 7 tools including `get_support` — pipeline only ships **6 tools** (get_support removed). Update everywhere.
+- README Phase 1 checklist still references "Support page — support form" — verify whether support page is in scope for demo or drop from nav.
 
-**Frontend (Done):**
-- [x] React 19 + Vite + Tailwind CSS setup
-- [x] 22 real-world robot products from real companies
-- [x] Home page — hero, featured robots, AI feature cards, stats
-- [x] Catalog page — search, category filter, sorting
-- [x] Robot Detail page — specs, related robots, add to cart
-- [x] AI Assistant page — combined chat + voice with mode toggle
-- [x] Support page — support form
-- [x] Floating ChatWidget — bottom-right, text + voice input, context-aware
-- [x] UserActivityContext — tracks views, cart, search, current page, category
-- [x] Responsive layout, Navbar with mobile menu, Footer
-- [x] Context-aware proactive bot messages (placeholder responses)
+**Performance bugs (affect demo latency):**
+- [pipeline.py](server/ai/pipeline.py) `run_pipeline()` instantiates `PipelineRuntime()` **per request** → reloads all products from SQLite and **rebuilds the FAISS index + re-encodes corpus** on every call. With `ENABLE_SEMANTIC_RAG=1` this is seconds of latency per message. **Fix:** module-level singleton, or pre-build index once at process start.
+- `/api/ai/chat` spawns a fresh Python subprocess twice per message (pipeline + sarvam). Cold-start penalty. **Fix:** long-lived Python worker over stdin/stdout, or combine both scripts into one process.
 
-**Backend (Done):**
-- [x] Express server with CORS
-- [x] SQLite database (better-sqlite3)
-- [x] Schema: products (with brand), chats, chat_messages
-- [x] Seed: 22 real robots via init.js
-- [x] Product API: GET /api/products (filter + search), GET /api/products/:id
-- [x] Chat API: POST /api/chats, GET /api/chats/:id, POST /api/chats/:id/messages
-- [x] Health: GET /api/health
+**Correctness bugs:**
+- `_extract_ids()` regex `\b([1-9]|1[0-2])\b` captures **any** 1-12 integer in the message, so "show me 12 options" parses 12 as a product ID. **Fix:** require a preceding token like `#`, `id`, `product`, or a `compare/vs` context.
+- `_extract_budget()` accepts any number ≥ 50 — a year ("2025"), a pincode, or a quantity can be mis-read as budget. **Fix:** require currency symbol/keyword nearby, or cap range sensibly.
+- `detect_proficiency()` checks only English technical tokens — a Hindi/Telugu expert message gets labeled beginner by default. **Fix:** add HI/TE technical vocabulary or gate the token check by detected language.
+- Default category fallback `"Kitchen"` in `_heuristic_tool_call` / `_sanitize_tool_call` silently biases `search_products` and `recommend` when detection fails. **Fix:** allow empty category (search across all) rather than forcing Kitchen.
 
-**Status:** Frontend at localhost:5173, Backend at localhost:5000, all APIs verified.
+**Operational gaps:**
+- No rate limiting on `/api/ai/chat` — spawns Python per request, trivial to DOS. Add express-rate-limit for the demo endpoint.
+- `sarvam_client.py` sets three auth headers (`Authorization`, `x-api-key`, `api-key`) — strict servers can 400 on redundant auth. Confirm correct header for the Sarvam endpoint and drop the others.
+- `Chat.addMessage` is called synchronously before and after the pipeline call; if SQLite locks, the request hangs. Wrap in try and don't block on persistence.
+- `.env.example` not present in `server/` — `SARVAM_API_KEY`, `ENABLE_FC_MODEL`, `ENABLE_SEMANTIC_RAG`, `FC_MODEL_PATH` are undocumented for a teammate setting it up fresh.
+
+**Graph freshness:**
+- `graphify-out/` still reflects state from when it was first generated. Run `graphify update .` after Block E so the final graph matches shipped code.
 
 ---
 
-### Phase 2 — Research Core (Dataset + Training)
+## Submission Checklist (end of hour 24)
 
-This is where all the deep learning happens. Done entirely on Google Colab.
-
-**2A. Function-Calling Dataset (1-2 days)**
-- [x] Define 7 tool schemas (search, get_product, compare, recommend, add_to_cart, navigate, get_support)
-- [x] Generate 800-1000 synthetic examples using GPT-4/template pipeline:
-  - Input: user query + page context
-  - Output: function_name(arg1, arg2, ...)
-- [x] Include English (~500), Hindi (~250), Telugu (~250) examples
-- [x] Include beginner and expert style queries
-- [x] Format in function-calling training format (messages + tool_calls)
-- [ ] Manual review and cleanup (sample set generated; full pass pending)
-
-**2A Progress Update (Implemented):**
-- [x] Dataset workspace created: `research/dataset/raw`, `research/dataset/processed`, `research/dataset/review`, `research/dataset/final`
-- [x] Source files created: `research/dataset/tool_schemas.json`, `research/dataset/product_catalog.json`
-- [x] Pipeline scripts created: generator, formatter, validator, review sampler in `research/dataset/scripts/`
-- [x] Generated raw dataset: `research/dataset/raw/function_calls_raw_v1.jsonl` (1000 rows)
-- [x] Generated training dataset: `research/dataset/processed/function_calling_train_v1.jsonl` (1000 rows)
-- [x] Generated final dataset: `research/dataset/final/function_calling_v1.jsonl` (1000 rows)
-- [x] Validation report: `research/dataset/processed/validation_report_v1.json` (invalid_count: 0)
-- [x] Manual review sample: `research/dataset/review/manual_review_sample_v1.jsonl` (120 rows)
-- [x] Language split met: EN 500, HI 250, TE 250
-- [x] Proficiency split met: beginner 500, expert 500
-
-**2B. Fine-Tune Small LLM for Function Calling (2-3 days)**
-- [ ] Choose base model: SmolLM2-360M or Qwen2-0.5B
-- [ ] Set up Colab notebook with Unsloth + QLoRA
-- [ ] Fine-tune on function-calling dataset
-- [ ] Evaluate: tool-call accuracy, argument correctness
-- [ ] Benchmark against zero-shot GPT-4, Claude, Gemini on same test set
-- [ ] Generate results: accuracy table, confusion matrix, latency comparison
-
-**2C. User Proficiency Classifier (1 day)**
-- [ ] Generate labeled dataset: 300-400 queries labeled beginner/expert
-- [ ] Train small classifier (can be a head on sentence-transformers or separate small model)
-- [ ] Benchmark: trained vs zero-shot LLM vs keyword heuristic
-- [ ] Generate results: accuracy, F1, example predictions
-
-**2D. Context-Aware RAG (1-2 days)**
-- [ ] Embed all 22 robot descriptions using sentence-transformers
-- [ ] Build FAISS index
-- [ ] Implement context-aware re-ranking:
-  - Boost products in same category as currently viewed
-  - Boost products user has browsed before
-  - Boost products related to cart items
-- [ ] Benchmark: standard FAISS vs context-aware vs TF-IDF vs BM25
-- [ ] Generate results: Recall@3, MRR table
-
-**Phase 2 deliverables:** Fine-tuned model weights, proficiency classifier, FAISS index, all benchmark tables.
-
----
-
-### Phase 3 — Integration (LangChain + Sarvam + Full Pipeline)
-
-Connect all trained components into a working system.
-
-**3A. LangChain Pipeline (2-3 days)**
-- [ ] Set up LangChain with tool definitions matching our 7 functions
-- [ ] Load fine-tuned small LLM as the function-calling model
-- [ ] Implement tool execution layer:
-  - search_products → SQLite query
-  - get_product → SQLite lookup
-  - compare_products → fetch both + format
-  - recommend → RAG retrieval + filter
-  - add_to_cart → update context
-  - navigate_to → return navigation instruction
-  - get_support → format support request
-- [ ] Wire up context-aware RAG in the retrieval tools
-- [ ] Wire up proficiency detector in the response formatting
-
-**3B. Sarvam Integration (1-2 days)**
-- [ ] Connect Sarvam API for response generation
-- [ ] Pass to Sarvam: tool results + product data + user proficiency + page context + language
-- [ ] Test EN/HI/TE response generation
-- [ ] Test beginner vs expert response adaptation
-
-**3C. Connect Frontend (1-2 days)**
-- [ ] New API endpoint: POST /api/ai/chat
-  - Accepts: { message, language, context: { page, viewed, cart, search, filters, visibleProducts } }
-  - Returns: { response, toolCalled, productsReferenced }
-- [ ] Connect ChatWidget → /api/ai/chat
-- [ ] Connect AI Assistant page → /api/ai/chat
-- [ ] Pass UserActivityContext data with every request
-- [ ] Store chat history in SQLite
-
-**Phase 3 deliverables:** Working end-to-end pipeline. User talks → small LLM picks tool → LangChain executes → Sarvam responds.
-
----
-
-### Phase 4 — Voice + Evaluation + Demo
-
-**4A. Voice Integration (1 day)**
-- [ ] Web Speech API for speech-to-text in ChatWidget + AI Assistant
-- [ ] Route transcribed text through same /api/ai/chat pipeline
-- [ ] TTS for Sarvam responses
-- [ ] Test with EN/HI/TE voice input
-
-**4B. Page-Aware Enhancement (1 day)**
-- [ ] Extend UserActivityContext to capture visible products on screen
-- [ ] Pass visible product list + active filters to the pipeline
-- [ ] Test page-aware responses:
-  - Catalog with filter → bot references visible products
-  - Product detail → bot offers comparisons
-  - Home → bot offers category guidance
-
-**4C. Final Benchmarks & Evaluation (1-2 days)**
-- [ ] Run all 5 benchmark tables with final numbers
-- [ ] Generate confusion matrices for function-calling model
-- [ ] Generate latency comparison charts
-- [ ] Run persona-adapted response quality evaluation (LLM-as-judge)
-- [ ] Compile multilingual results
-
-**4D. Demo Preparation (1 day)**
-- [ ] Build demo flow: show query → function call → RAG → Sarvam → response
-- [ ] Prepare slides with benchmark tables and architecture diagrams
-- [ ] Record backup demo video
-- [ ] Clean up code and README
-
-**Phase 4 deliverables:** Working voice, all benchmark results, demo-ready project.
-
----
-
-## Time Estimate (Realistic)
-
-| Phase | Duration | Status |
-|---|---|---|
-| Phase 1 — UI + Backend | Done | ✅ |
-| Phase 2 — Research (dataset + training + RAG) | 5-8 days | In Progress (2A mostly done) |
-| Phase 3 — Integration (LangChain + Sarvam + frontend) | 4-7 days | After Phase 2 |
-| Phase 4 — Voice + Evaluation + Demo | 3-4 days | Final |
-| **Total remaining** | **12-19 days** | |
-
-## Priority Order (If Running Low on Time)
-
-| Priority | What | Why |
-|---|---|---|
-| **Must have** | Phase 2B: Fine-tuned function-calling model + benchmarks | This IS the research. No model = no project. |
-| **Must have** | Phase 2D: Context-aware RAG + benchmarks | Second research contribution. |
-| **Must have** | Phase 3A-C: LangChain + Sarvam + frontend connection | Working demo needed. |
-| **Should have** | Phase 2C: Proficiency classifier | Adds a benchmark table, small effort. |
-| **Should have** | Phase 4A: Voice | Multimodal bonus. Quick to add. |
-| **Nice to have** | Phase 4B: Page-aware enhancement | Cool UX, but not core DL. |
-| **Nice to have** | Phase 4C-D: Full evaluation + demo polish | As much as time allows. |
-
-## What NOT to Waste Time On
-
-- Payment/order management — not relevant
-- Email agent — zero DL value, dropped
-- Training from scratch — QLoRA fine-tuning is the approach
-- Complex UI animations — existing UI is sufficient
-- Cloud deployment — local demo is fine
-- More than 3 languages — EN + HI + TE is enough
-- Over-engineering LangChain agents — keep tool execution simple
-
-## Team
-
-**Digvijaysing Rajput** (CS24MTECH14020), **Vinay Kadari** (CS24MTECH14008)
+- [ ] Fine-tuned model weights on HF Hub + local copy
+- [ ] 5 benchmark tables filled with real numbers in [README.md](README.md)
+- [ ] Demo video recorded (3 min)
+- [ ] Slides (PDF)
+- [ ] Code pushed, tagged `v1.0-submission`
+- [ ] graphify-out/ refreshed
+- [ ] Team: **Digvijaysing Rajput** (CS24MTECH14020), **Vinay Kadari** (CS24MTECH14008)
 
 ---
 
