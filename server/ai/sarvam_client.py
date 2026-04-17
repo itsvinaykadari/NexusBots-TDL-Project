@@ -148,16 +148,20 @@ def _call_sarvam(messages: List[Dict[str, str]]) -> Tuple[Optional[str], Optiona
     }
 
     data = json.dumps(payload).encode("utf-8")
+    auth_header = os.getenv("SARVAM_AUTH_HEADER", "api-subscription-key").strip()
+    headers = {
+        "Content-Type": "application/json",
+    }
+    if auth_header.lower() == "authorization":
+        headers["Authorization"] = f"Bearer {api_key}"
+    else:
+        headers[auth_header] = api_key
+
     request = urllib.request.Request(
         endpoint,
         data=data,
         method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
-            "x-api-key": api_key,
-            "api-key": api_key,
-        },
+        headers=headers,
     )
 
     try:

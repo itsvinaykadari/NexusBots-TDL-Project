@@ -69,6 +69,34 @@ TECHNICAL_TOKENS = {
     "battery",
 }
 
+TECHNICAL_TOKENS_HI = {
+    "विनिर्देश",
+    "बैटरी",
+    "सेंसर",
+    "वारंटी",
+    "रखरखाव",
+    "पेलोड",
+    "कैमरा",
+    "थर्मल",
+    "सटीकता",
+    "एपीआई",
+    "तुलना",
+}
+
+TECHNICAL_TOKENS_TE = {
+    "వివరాలు",
+    "బ్యాటరీ",
+    "సెన్సార్",
+    "వారెంటీ",
+    "నిర్వహణ",
+    "పేలోడ్",
+    "కెమెరా",
+    "థర్మల్",
+    "ఖచ్చితత్వం",
+    "ఏపీఐ",
+    "పోలిక",
+}
+
 _ROUTE_MAP = {
     "home": "/",
     "catalog": "/catalog",
@@ -78,6 +106,14 @@ _ROUTE_MAP = {
 
 _FC_GENERATOR = None
 _FC_MODEL_ERROR = None
+_RUNTIME_SINGLETON: Optional["PipelineRuntime"] = None
+
+
+def _get_runtime() -> "PipelineRuntime":
+    global _RUNTIME_SINGLETON
+    if _RUNTIME_SINGLETON is None:
+        _RUNTIME_SINGLETON = PipelineRuntime()
+    return _RUNTIME_SINGLETON
 
 
 def _safe_json_loads(value: Any, default: Any) -> Any:
@@ -400,21 +436,56 @@ class PipelineRuntime:
     @staticmethod
     def _extract_ids(text: str) -> List[int]:
         ids: List[int] = []
-        for match in re.findall(r"\b([1-9]|1[0-2])\b", text):
+        lowered = text.lower()
+        has_compare_ctx = any(
+            tok in lowered for tok in ("compare", "vs", "versus", "difference", "between")
+        )
+
+        pattern = re.compile(
+            r"(?:#|\bid\b|\bproduct\b|\brobot\b|\bitem\b)\s*:?#?\s*([1-9]|1[0-2])\b",
+            re.IGNORECASE,
+        )
+        for match in pattern.findall(text):
             value = _to_int(match)
             if value is not None:
                 ids.append(value)
+
+        if has_compare_ctx and len(ids) < 2:
+            pair = re.findall(
+                r"\b([1-9]|1[0-2])\b\s*(?:and|&|,|vs|versus|to)\s*\b([1-9]|1[0-2])\b",
+                lowered,
+            )
+            for a, b in pair:
+                for raw in (a, b):
+                    value = _to_int(raw)
+                    if value is not None and value not in ids:
+                        ids.append(value)
+
         return ids
 
     @staticmethod
     def _extract_budget(text: str) -> Optional[int]:
-        matches = re.findall(
-            r"(?:₹|rs\.?|inr|\$)?\s*([0-9]{2,5}(?:\.[0-9]{1,2})?)", text.lower())
-        budgets = []
-        for value in matches:
+        lowered = text.lower()
+        pattern = re.compile(
+            r"(?:₹|rs\.?|inr|\$|usd|budget(?:\s+of)?|under|below|less than|upto|up to|around|about)\s*"
+            r"([0-9]{2,5}(?:\.[0-9]{1,2})?)",
+            re.IGNORECASE,
+        )
+        budgets: List[int] = []
+        for value in pattern.findall(lowered):
             amount = _to_float(value)
-            if amount >= 50:
+            if 50 <= amount <= 50000:
                 budgets.append(int(amount))
+
+        trailing = re.findall(
+            r"([0-9]{2,5}(?:\.[0-9]{1,2})?)\s*(?:dollars|usd|rupees|rs|inr)\b",
+            lowered,
+        )
+        for value in trailing:
+            amount = _to_float(value)
+            if 50 <= amount <= 50000:
+                budgets.append(int(amount))
+
         if not budgets:
             return None
         return max(budgets)
@@ -514,7 +585,7 @@ class PipelineRuntime:
                 "arguments": {
                     "need": message.strip() or "general purpose",
                     "budget": int(max(50, min(20000, budget))),
-                    "category": category or "Kitchen",
+                    "category": category,
                 },
             }
 
@@ -554,7 +625,7 @@ class PipelineRuntime:
             "tool": "search_products",
             "arguments": {
                 "query": message.strip() or context.get("searchQuery") or "robot",
-                "category": category or context.get("selectedCategory") or "Kitchen",
+                "category": category or context.get("selectedCategory") or "",
             },
         }
 
@@ -602,7 +673,7 @@ class PipelineRuntime:
         if tool == "search_products":
             category = _normalize_category(args.get("category"))
             if not category:
-                category = self._detect_category(message, context) or "Kitchen"
+                category = self._detect_category(message, context)
             query = str(args.get("query", message)).strip() or "robot"
             return {"tool": tool, "arguments": {"query": query, "category": category}}
 
@@ -645,7 +716,7 @@ class PipelineRuntime:
             budget = int(max(50, min(20000, budget)))
             category = _normalize_category(args.get("category"))
             if not category:
-                category = self._detect_category(message, context) or "Kitchen"
+                category = self._detect_category(message, context)
             return {
                 "tool": tool,
                 "arguments": {
@@ -692,8 +763,9 @@ class PipelineRuntime:
     def search_products(self, query: str, category: str) -> Dict[str, Any]:
         query_lower = query.lower()
         filtered = []
+        category_active = category in ALLOWED_CATEGORY_SET
         for product in self.products:
-            if category in ALLOWED_CATEGORY_SET and product.get("category") != category:
+            if category_active and product.get("category") != category:
                 continue
 
             haystack = " ".join(
@@ -895,15 +967,20 @@ class PipelineRuntime:
         return self._sanitize_tool_call(self._heuristic_tool_call(message, context), message=message, context=context), "heuristic"
 
 
-def detect_proficiency(message: str, context: Dict[str, Any]) -> str:
+def detect_proficiency(message: str, context: Dict[str, Any], language: str = "en") -> str:
     text = message.lower()
-    tokens = re.findall(r"[a-z0-9]+", text)
+    tokens = re.findall(r"[\w]+", text, flags=re.UNICODE)
     score = 0
 
     if len(tokens) >= 18:
         score += 1
 
     technical_hits = sum(1 for token in TECHNICAL_TOKENS if token in text)
+    if language == "hi":
+        technical_hits += sum(1 for token in TECHNICAL_TOKENS_HI if token in message)
+    elif language == "te":
+        technical_hits += sum(1 for token in TECHNICAL_TOKENS_TE if token in message)
+
     if technical_hits >= 2:
         score += 2
     elif technical_hits == 1:
@@ -916,7 +993,14 @@ def detect_proficiency(message: str, context: Dict[str, Any]) -> str:
     if isinstance(cart, list) and len(cart) >= 2:
         score += 1
 
-    if any(keyword in text for keyword in ["compare", "benchmark", "tradeoff", "spec", "payload", "latency"]):
+    en_keywords = ["compare", "benchmark", "tradeoff", "spec", "payload", "latency"]
+    hi_keywords = ["तुलना", "विनिर्देश", "पेलोड"]
+    te_keywords = ["పోలిక", "వివరాలు", "పేలోడ్"]
+    if any(keyword in text for keyword in en_keywords):
+        score += 1
+    if language == "hi" and any(keyword in message for keyword in hi_keywords):
+        score += 1
+    if language == "te" and any(keyword in message for keyword in te_keywords):
         score += 1
 
     return "expert" if score >= 3 else "beginner"
@@ -1009,35 +1093,32 @@ def run_pipeline(message: str, language: str = "en", context: Optional[Dict[str,
     if not user_message:
         user_message = "Show me recommended robots."
 
-    runtime = PipelineRuntime()
-    try:
-        proficiency = detect_proficiency(user_message, normalized_context)
-        selected_tool, tool_source = runtime.decide_tool(
-            message=user_message,
-            language=normalized_language,
-            context=normalized_context,
-        )
+    runtime = _get_runtime()
+    proficiency = detect_proficiency(user_message, normalized_context, normalized_language)
+    selected_tool, tool_source = runtime.decide_tool(
+        message=user_message,
+        language=normalized_language,
+        context=normalized_context,
+    )
 
-        tool_name = selected_tool["tool"]
-        tool_args = selected_tool["arguments"]
-        tool_result = runtime.execute_tool(
-            tool_name, tool_args, normalized_context)
-        referenced_ids = runtime._collect_product_ids(tool_result)
+    tool_name = selected_tool["tool"]
+    tool_args = selected_tool["arguments"]
+    tool_result = runtime.execute_tool(
+        tool_name, tool_args, normalized_context)
+    referenced_ids = runtime._collect_product_ids(tool_result)
 
-        return {
-            "ok": True,
-            "message": user_message,
-            "language": normalized_language,
-            "proficiency": proficiency,
-            "toolCalled": tool_name,
-            "toolArgs": tool_args,
-            "toolResult": tool_result,
-            "productsReferenced": referenced_ids,
-            "toolSource": tool_source,
-            "ragEnabled": runtime.ranker.semantic_enabled,
-        }
-    finally:
-        runtime.close()
+    return {
+        "ok": True,
+        "message": user_message,
+        "language": normalized_language,
+        "proficiency": proficiency,
+        "toolCalled": tool_name,
+        "toolArgs": tool_args,
+        "toolResult": tool_result,
+        "productsReferenced": referenced_ids,
+        "toolSource": tool_source,
+        "ragEnabled": runtime.ranker.semantic_enabled,
+    }
 
 
 def _cli() -> int:

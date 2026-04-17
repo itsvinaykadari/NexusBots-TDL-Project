@@ -43,11 +43,11 @@ flowchart TB
             LC --> T2["get_product()"]
             LC --> T3["compare_products()"]
             LC --> T4["recommend()"]
-            LC --> T5["navigate_to()"]
-            LC --> T6["get_support()"]
+            LC --> T5["add_to_cart()"]
+            LC --> T6["navigate_to()"]
         end
 
-        LANG -->|"fetch product data"| DB[(SQLite\n22 Real Robots)]
+        LANG -->|"fetch product data"| DB[(SQLite\n12 Real Robots)]
 
         LANG -->|"retrieve similar"| RAG["📚 Context-Aware RAG\nSentence-Transformers + FAISS\nRe-ranked by user activity"]
 
@@ -93,16 +93,14 @@ flowchart TB
 
 ## Product Catalog
 
-22 real-world robots from actual companies across 6 categories:
+12 real-world robots from actual companies across 4 categories:
 
 | Category | Count | Products (Real Brands) |
 |---|---|---|
-| **Household** | 4 | Amazon Astro, Samsung Ballie, Enabot EBO X, Unitree Go2 Air |
-| **Home Cleaner** | 4 | iRobot Roomba j9+, Roborock S8 MaxV Ultra, Ecovacs WINBOT W2, Aiper Surfer S1 |
-| **Child** | 3 | Miko 3, Wonder Workshop Dash, LEGO Spike Prime |
-| **Educational** | 4 | DJI RoboMaster S1, TurtleBot 4, Makeblock mBot2, Unitree Go2 EDU |
-| **Security** | 3 | Ring Always Home Cam, Xiaomi CyberDog 2, DJI Matrice 30T |
-| **Industrial** | 4 | Universal Robots UR10e, Boston Dynamics Stretch, FANUC CRX-25iA, ABB YuMi |
+| **Kitchen** | 3 | Amazon Astro, Samsung Ballie, Enabot EBO X |
+| **Home Cleaner** | 3 | iRobot Roomba j9+, Roborock S8 MaxV Ultra, Ecovacs WINBOT W2 Omni |
+| **Drone** | 3 | Ring Always Home Cam, DJI Matrice 30T, Aiper Surfer S1 |
+| **Humanoid** | 3 | Miko 3, Wonder Workshop Dash, LEGO Education Spike Prime |
 
 ## Tech Stack
 
@@ -127,7 +125,7 @@ nexus-bots/
 │   │   ├── components/    # Navbar, Footer, RobotCard, HeroSection, ChatWidget
 │   │   ├── context/       # UserActivityContext (views, cart, search, page)
 │   │   ├── pages/         # Home, Catalog, RobotDetail, AIAssistant, Support
-│   │   ├── data/          # robots.js — 22 real-world robots
+│   │   ├── data/          # robots.js — 12 real-world robots
 │   │   └── styles/
 ├── server/                # Node.js backend
 │   ├── config/            # db.js (SQLite)
@@ -168,7 +166,7 @@ cd server && npm install && npm run init-db && npm run dev
 
 ## Build Status
 
-- [x] Phase 1 — UI + Backend (React + Tailwind, Express + SQLite, 22 real robots, ChatWidget, AI Assistant, context tracking)
+- [x] Phase 1 — UI + Backend (React + Tailwind, Express + SQLite, 12 real robots, ChatWidget, AI Assistant, context tracking)
 - [ ] Phase 2 — Research Core (dataset, fine-tune small LLM, proficiency classifier, context-aware RAG)
 - [ ] Phase 3 — Integration (LangChain + Sarvam + frontend pipeline)
 - [ ] Phase 4 — Voice + Evaluation + Demo

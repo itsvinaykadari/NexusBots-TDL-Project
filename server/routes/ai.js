@@ -5,6 +5,38 @@ const Chat = require('../models/Chat');
 
 const router = express.Router();
 
+const RATE_LIMIT_WINDOW_MS = Number(process.env.AI_RATE_LIMIT_WINDOW_MS || 60000);
+const RATE_LIMIT_MAX = Number(process.env.AI_RATE_LIMIT_MAX || 20);
+const rateBuckets = new Map();
+
+function rateLimit(req, res, next) {
+    const key = req.ip || req.headers['x-forwarded-for'] || 'anon';
+    const now = Date.now();
+    const bucket = rateBuckets.get(key) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+    if (now > bucket.resetAt) {
+        bucket.count = 0;
+        bucket.resetAt = now + RATE_LIMIT_WINDOW_MS;
+    }
+    bucket.count += 1;
+    rateBuckets.set(key, bucket);
+
+    if (rateBuckets.size > 10000) {
+        for (const [k, v] of rateBuckets) {
+            if (now > v.resetAt) rateBuckets.delete(k);
+        }
+    }
+
+    if (bucket.count > RATE_LIMIT_MAX) {
+        const retryAfter = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+        res.setHeader('Retry-After', String(retryAfter));
+        return res.status(429).json({
+            error: 'Too many requests. Please wait a moment and try again.',
+            retryAfter,
+        });
+    }
+    return next();
+}
+
 const ALLOWED_LANGUAGES = new Set(['en', 'hi', 'te']);
 const ALLOWED_CATEGORIES = new Set(['Kitchen', 'Home Cleaner', 'Drone', 'Humanoid']);
 const PAGE_MAP = new Map([
@@ -231,7 +263,7 @@ function buildTextFallback(pipelineResult, reason) {
 }
 
 // POST /api/ai/chat
-router.post('/chat', async (req, res) => {
+router.post('/chat', rateLimit, async (req, res) => {
     const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     if (!message) {
         return res.status(400).json({
