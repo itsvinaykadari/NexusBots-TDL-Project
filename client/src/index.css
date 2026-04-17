@@ -38,3 +38,20 @@ body {
 .glow-neon {
   box-shadow: 0 0 30px oklch(78% 0.16 195 / 0.15);
 }
+
+/* Subtle dot / line grid overlay — place as a fixed ::before on a wrapper */
+.bg-grid {
+  position: relative;
+}
+.bg-grid::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(oklch(80% 0 0 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(80% 0 0 / 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 88%, transparent 100%);
+}

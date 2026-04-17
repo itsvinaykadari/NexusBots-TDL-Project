@@ -205,7 +205,7 @@ export default function Home() {
   const flagships = FLAGSHIP_CATEGORIES.map(getFlagship).filter(Boolean);
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden bg-grid">
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section className="relative min-h-[92vh] flex items-center overflow-hidden">
         {/* Ambient glows */}
