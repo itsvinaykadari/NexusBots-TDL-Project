@@ -51,7 +51,7 @@ export default function Catalog() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Robot Catalog</h1>
-        <p className="text-slate-400">
+        <p className="text-text-muted">
           Browse our collection of {robots.length} robots across {categories.length - 1} categories
         </p>
       </div>
@@ -60,7 +60,7 @@ export default function Catalog() {
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         {/* Search */}
         <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search robots by name, description, or tags..."
@@ -72,7 +72,7 @@ export default function Catalog() {
 
         {/* Sort */}
         <div className="flex items-center gap-2">
-          <SlidersHorizontal size={16} className="text-slate-400" />
+          <SlidersHorizontal size={16} className="text-text-muted" />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -94,8 +94,8 @@ export default function Catalog() {
             onClick={() => { setCategory(cat); trackCategory(cat); }}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
               category === cat
-                ? "bg-accent text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                : "bg-surface text-slate-400 hover:text-white border border-white/10 hover:border-white/20"
+                ? "bg-accent text-white glow-accent"
+                : "bg-surface text-text-muted hover:text-white border border-white/10 hover:border-white/20"
             }`}
           >
             {cat}
@@ -104,7 +104,7 @@ export default function Catalog() {
       </div>
 
       {/* Results count */}
-      <div className="text-sm text-slate-400 mb-6">
+      <div className="text-sm text-text-muted mb-6">
         Showing {filtered.length} robot{filtered.length !== 1 ? "s" : ""}
         {category !== "All" && ` in ${category}`}
         {search && ` matching "${search}"`}
@@ -121,7 +121,7 @@ export default function Catalog() {
         <div className="text-center py-20">
           <div className="text-6xl mb-4">🤖</div>
           <h3 className="text-white text-xl font-semibold mb-2">No robots found</h3>
-          <p className="text-slate-400">Try adjusting your search or filter criteria</p>
+          <p className="text-text-muted">Try adjusting your search or filter criteria</p>
         </div>
       )}
     </div>

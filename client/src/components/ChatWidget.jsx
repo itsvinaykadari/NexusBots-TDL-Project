@@ -321,14 +321,14 @@ export default function ChatWidget() {
                             <div className="flex bg-white/10 rounded-lg p-1">
                                 <button
                                     onClick={() => setMode("support")}
-                                    className={`text-xs px-2 py-1 rounded-md ${mode === "support" ? "bg-white/20 text-white" : "text-slate-300"
+                                    className={`text-xs px-2 py-1 rounded-md ${mode === "support" ? "bg-white/20 text-white" : "text-text-muted"
                                         }`}
                                 >
                                     Support
                                 </button>
                                 <button
                                     onClick={() => setMode("ai")}
-                                    className={`text-xs px-2 py-1 rounded-md ${mode === "ai" ? "bg-white/20 text-white" : "text-slate-300"
+                                    className={`text-xs px-2 py-1 rounded-md ${mode === "ai" ? "bg-white/20 text-white" : "text-text-muted"
                                         }`}
                                 >
                                     AI
@@ -337,7 +337,7 @@ export default function ChatWidget() {
 
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="text-slate-400 hover:text-white transition-colors"
+                                className="text-text-muted hover:text-white transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -354,7 +354,7 @@ export default function ChatWidget() {
                                     <div
                                         className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed whitespace-pre-line ${msg.role === "user"
                                                 ? "bg-accent text-white rounded-br-sm"
-                                                : "bg-white/5 text-slate-200 rounded-bl-sm"
+                                                : "bg-white/5 text-text rounded-bl-sm"
                                             }`}
                                     >
                                         {msg.content}
@@ -363,12 +363,12 @@ export default function ChatWidget() {
                             ))}
 
                             <div className="space-y-2">
-                                <p className="text-slate-400 text-xs">Common questions</p>
+                                <p className="text-text-muted text-xs">Common questions</p>
                                 {FAQS.map((faq) => (
                                     <button
                                         key={faq.key}
                                         onClick={() => handleFaqClick(faq)}
-                                        className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 px-3 py-2 rounded-lg text-sm"
+                                        className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 text-text px-3 py-2 rounded-lg text-sm"
                                     >
                                         {faq.question}
                                     </button>
@@ -377,7 +377,7 @@ export default function ChatWidget() {
 
                             {showResolution && (
                                 <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                                    <p className="text-slate-200 text-sm mb-2">Did this resolve your issue?</p>
+                                    <p className="text-text text-sm mb-2">Did this resolve your issue?</p>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={handleResolvedYes}
@@ -441,7 +441,7 @@ export default function ChatWidget() {
                                     </button>
 
                                     {callbackStatus && (
-                                        <p className="text-xs text-slate-300 flex items-center gap-1">
+                                        <p className="text-xs text-text-muted flex items-center gap-1">
                                             <CheckCircle2 size={12} /> {callbackStatus}
                                         </p>
                                     )}
@@ -461,7 +461,7 @@ export default function ChatWidget() {
                                         <div
                                             className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed whitespace-pre-line ${msg.role === "user"
                                                     ? "bg-accent text-white rounded-br-sm"
-                                                    : "bg-white/5 text-slate-200 rounded-bl-sm"
+                                                    : "bg-white/5 text-text rounded-bl-sm"
                                                 }`}
                                         >
                                             <p>{msg.content}</p>
@@ -493,7 +493,7 @@ export default function ChatWidget() {
                                                             />
                                                             <div className="min-w-0">
                                                                 <p className="text-xs text-white font-semibold truncate">{product.name}</p>
-                                                                <p className="text-[11px] text-slate-400">{product.category}</p>
+                                                                <p className="text-[11px] text-text-muted">{product.category}</p>
                                                                 <p className="text-[11px] text-neon font-medium">
                                                                     ${Number(product.price).toLocaleString()}
                                                                 </p>
@@ -508,7 +508,7 @@ export default function ChatWidget() {
 
                                 {aiLoading && (
                                     <div className="flex justify-start">
-                                        <div className="max-w-[85%] px-3 py-2 rounded-xl bg-white/5 text-slate-300 text-sm">
+                                        <div className="max-w-[85%] px-3 py-2 rounded-xl bg-white/5 text-text-muted text-sm">
                                             Thinking...
                                         </div>
                                     </div>

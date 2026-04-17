@@ -1,0 +1,30 @@
+/* Design tokens — P1.1 */
+:root {
+  /* Colors — oklch(lightness chroma hue) */
+  --color-surface:          oklch(18% 0.032 255);
+  --color-surface-elevated: oklch(25% 0.040 255);
+  --color-surface-high:     oklch(33% 0.040 255);
+  --color-text:             oklch(93% 0.010 255);
+  --color-text-muted:       oklch(65% 0.025 255);
+  --color-accent:           oklch(65% 0.280 290);   /* electric violet */
+  --color-accent-dark:      oklch(55% 0.280 290);
+  --color-accent-glow:      oklch(65% 0.280 290 / 0.4);
+  --color-neon:             oklch(78% 0.160 195);   /* cyan carry-over */
+  --color-neon-green:       oklch(78% 0.180 145);
+
+  /* Fluid type */
+  --text-hero:    clamp(3rem,   1rem + 7vw,  8rem);
+  --text-heading: clamp(1.75rem, 1rem + 2.5vw, 3.5rem);
+  --text-body:    clamp(1rem,   0.9rem + 0.3vw, 1.125rem);
+
+  /* Spacing */
+  --space-section: clamp(4rem, 3rem + 5vw, 10rem);
+  --space-gap:     clamp(1.5rem, 1rem + 2vw, 3rem);
+
+  /* Motion */
+  --duration-fast:   150ms;
+  --duration-base:   300ms;
+  --duration-slow:   600ms;
+  --ease-out-expo:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:     cubic-bezier(0.4, 0, 0.2, 1);
+}

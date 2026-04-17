@@ -5,7 +5,7 @@ export default function RobotCard({ robot }) {
   return (
     <Link
       to={`/robot/${robot.id}`}
-      className="group bg-surface rounded-2xl overflow-hidden border border-white/5 hover:border-neon/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)] flex flex-col"
+      className="group bg-surface rounded-2xl overflow-hidden border border-white/5 hover:border-neon/30 transition-all duration-300 hover:glow-neon flex flex-col"
     >
       <div className="relative overflow-hidden">
         <img
@@ -31,7 +31,7 @@ export default function RobotCard({ robot }) {
         <h3 className="text-white font-semibold text-lg mb-1 group-hover:text-neon transition-colors">
           {robot.name}
         </h3>
-        <p className="text-slate-400 text-sm mb-3 flex-1">{robot.shortDesc}</p>
+        <p className="text-text-muted text-sm mb-3 flex-1">{robot.shortDesc}</p>
 
         <div className="flex items-center justify-between mt-auto">
           <div>
@@ -47,7 +47,7 @@ export default function RobotCard({ robot }) {
           {robot.tags.slice(0, 2).map((tag) => (
             <span
               key={tag}
-              className="px-2 py-0.5 bg-white/5 text-slate-400 text-xs rounded-full"
+              className="px-2 py-0.5 bg-white/5 text-text-muted text-xs rounded-full"
             >
               {tag}
             </span>

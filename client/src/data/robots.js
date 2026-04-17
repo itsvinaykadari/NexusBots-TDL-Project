@@ -154,7 +154,7 @@ const robots = [
     brand: "Ring (Amazon)",
     category: "Drone",
     price: 249.99,
-    image: "https://www.cnet.com/a/img/resize/9c92a359449b76159f1c4393ab0a54cf9deff654/hub/2021/09/27/67c8b807-66c4-4c6c-a046-3bdee2e10cdf/screen-shot-2021-09-27-at-12-53-16-pm.png?auto=webp&fit=crop&height=1200&width=1200",
+    image: "https://ichef.bbci.co.uk/news/480/cpsprodpb/CBB5/production/_114594125_drone-ring.jpg.webp",
     shortDesc: "Autonomous indoor flying drone for home patrol.",
     description: "Ring Always Home Cam flies preset indoor routes and streams live footage.",
     purpose: "Intended for indoor security patrols where homeowners need quick, automated visual checks.",

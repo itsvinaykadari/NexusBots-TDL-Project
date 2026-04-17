@@ -29,7 +29,7 @@ export default function RobotDetail() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Link
         to="/catalog"
-        className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-text-muted hover:text-white transition-colors mb-8"
       >
         <ArrowLeft size={16} />
         Back to Catalog
@@ -53,13 +53,13 @@ export default function RobotDetail() {
 
           <div className="mt-5 bg-surface rounded-xl p-5 border border-white/5">
             <h3 className="text-white font-semibold mb-2">Detailed Description</h3>
-            <p className="text-slate-300 leading-relaxed text-sm mb-3">
+            <p className="text-text-muted leading-relaxed text-sm mb-3">
               {robot.description}
             </p>
-            <p className="text-slate-400 leading-relaxed text-sm mb-3">
+            <p className="text-text-muted leading-relaxed text-sm mb-3">
               {robot.purpose}
             </p>
-            <p className="text-slate-400 leading-relaxed text-sm">
+            <p className="text-text-muted leading-relaxed text-sm">
               {robot.shortDesc}
             </p>
           </div>
@@ -84,7 +84,7 @@ export default function RobotDetail() {
             </span>
           </div>
 
-          <p className="text-slate-300 text-lg mb-6 leading-relaxed">{robot.description}</p>
+          <p className="text-text-muted text-lg mb-6 leading-relaxed">{robot.description}</p>
 
           <div className="text-4xl font-bold text-white mb-8">
             ${robot.price.toLocaleString()}
@@ -96,7 +96,7 @@ export default function RobotDetail() {
             <div className="grid grid-cols-2 gap-4">
               {Object.entries(robot.specs).map(([key, value]) => (
                 <div key={key} className="flex justify-between">
-                  <span className="text-slate-400 capitalize">{key}</span>
+                  <span className="text-text-muted capitalize">{key}</span>
                   <span className="text-white font-medium">{value}</span>
                 </div>
               ))}
@@ -105,11 +105,11 @@ export default function RobotDetail() {
 
           {/* Tags */}
           <div className="flex items-center gap-2 mb-8">
-            <Tag size={14} className="text-slate-500" />
+            <Tag size={14} className="text-text-muted" />
             {robot.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-3 py-1 bg-white/5 text-slate-400 text-sm rounded-full"
+                className="px-3 py-1 bg-white/5 text-text-muted text-sm rounded-full"
               >
                 {tag}
               </span>
@@ -120,7 +120,7 @@ export default function RobotDetail() {
           <div className="flex gap-4">
             <button
               onClick={() => addToCart(robot)}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-xl transition-all hover:glow-accent"
             >
               <ShoppingCart size={18} />
               Add to Cart

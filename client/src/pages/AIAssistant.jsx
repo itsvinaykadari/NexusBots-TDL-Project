@@ -206,7 +206,7 @@ export default function AIAssistant() {
                         <Bot size={32} className="text-neon" />
                     </div>
                     <h1 className="text-3xl font-bold text-white mb-2">AI Assistant</h1>
-                    <p className="text-slate-400">
+                    <p className="text-text-muted">
                         Live tool-calling assistant with context-aware recommendations and multilingual responses
                     </p>
                 </div>
@@ -215,7 +215,7 @@ export default function AIAssistant() {
                     <div className="bg-secondary rounded-xl p-1 flex gap-1">
                         <button
                             onClick={() => setMode("chat")}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === "chat" ? "bg-accent text-white" : "text-slate-400 hover:text-white"
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === "chat" ? "bg-accent text-white" : "text-text-muted hover:text-white"
                                 }`}
                         >
                             <MessageCircle size={16} />
@@ -223,7 +223,7 @@ export default function AIAssistant() {
                         </button>
                         <button
                             onClick={() => setMode("voice")}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === "voice" ? "bg-accent text-white" : "text-slate-400 hover:text-white"
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === "voice" ? "bg-accent text-white" : "text-text-muted hover:text-white"
                                 }`}
                         >
                             <Mic size={16} />
@@ -257,7 +257,7 @@ export default function AIAssistant() {
                                 <div
                                     className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "user"
                                             ? "bg-accent text-white rounded-br-sm"
-                                            : "bg-white/5 text-slate-200 rounded-bl-sm"
+                                            : "bg-white/5 text-text rounded-bl-sm"
                                         }`}
                                 >
                                     <p>{msg.content}</p>
@@ -286,7 +286,7 @@ export default function AIAssistant() {
                                                     />
                                                     <div className="min-w-0">
                                                         <p className="text-white text-xs font-semibold truncate">{product.name}</p>
-                                                        <p className="text-slate-400 text-[11px]">{product.category}</p>
+                                                        <p className="text-text-muted text-[11px]">{product.category}</p>
                                                         <p className="text-neon text-[11px] font-medium">${Number(product.price).toLocaleString()}</p>
                                                     </div>
                                                 </div>
@@ -335,7 +335,7 @@ export default function AIAssistant() {
                                 </button>
                                 <button
                                     onClick={toggleTTS}
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isSpeaking ? "bg-neon/20 text-neon" : "bg-white/5 text-slate-400 hover:text-white"
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isSpeaking ? "bg-neon/20 text-neon" : "bg-white/5 text-text-muted hover:text-white"
                                         }`}
                                 >
                                     {isSpeaking ? <Volume2 size={20} /> : <VolumeX size={20} />}
@@ -343,11 +343,11 @@ export default function AIAssistant() {
                             </div>
 
                             {voiceTranscript && (
-                                <p className="text-center text-sm text-slate-400 mt-2 italic">{voiceTranscript}</p>
+                                <p className="text-center text-sm text-text-muted mt-2 italic">{voiceTranscript}</p>
                             )}
 
                             {!isListening && !voiceTranscript && (
-                                <p className="text-center text-xs text-slate-500 mt-2">Tap the mic to start speaking</p>
+                                <p className="text-center text-xs text-text-muted mt-2">Tap the mic to start speaking</p>
                             )}
                         </div>
                     )}
@@ -380,7 +380,7 @@ export default function AIAssistant() {
                             <button
                                 type="button"
                                 onClick={toggleVoice}
-                                className={`p-2.5 rounded-xl transition-colors ${isListening ? "bg-red-500/20 text-red-400" : "text-slate-400 hover:text-white hover:bg-white/5"
+                                className={`p-2.5 rounded-xl transition-colors ${isListening ? "bg-red-500/20 text-red-400" : "text-text-muted hover:text-white hover:bg-white/5"
                                     }`}
                             >
                                 {isListening ? <MicOff size={20} /> : <Mic size={20} />}

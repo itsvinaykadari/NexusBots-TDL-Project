@@ -35,7 +35,7 @@ export default function Navbar({ onCartClick }) {
                 to={path}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname === path
                   ? "bg-accent/20 text-neon"
-                  : "text-slate-300 hover:text-white hover:bg-white/5"
+                  : "text-text-muted hover:text-white hover:bg-white/5"
                   }`}
               >
                 {icon}
@@ -47,7 +47,7 @@ export default function Navbar({ onCartClick }) {
           <div className="flex items-center gap-3">
             <button
               onClick={onCartClick}
-              className="relative p-2 text-slate-300 hover:text-white transition-colors"
+              className="relative p-2 text-text-muted hover:text-white transition-colors"
             >
               <ShoppingCart size={20} />
               {cart.length > 0 && (
@@ -58,7 +58,7 @@ export default function Navbar({ onCartClick }) {
             </button>
 
             <button
-              className="md:hidden p-2 text-slate-300 hover:text-white"
+              className="md:hidden p-2 text-text-muted hover:text-white"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -76,7 +76,7 @@ export default function Navbar({ onCartClick }) {
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${location.pathname === path
                     ? "bg-accent/20 text-neon"
-                    : "text-slate-300 hover:text-white hover:bg-white/5"
+                    : "text-text-muted hover:text-white hover:bg-white/5"
                     }`}
                 >
                   {icon}

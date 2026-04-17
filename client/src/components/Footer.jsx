@@ -14,14 +14,14 @@ export default function Footer() {
                 Nexus<span className="text-neon">Bots</span>
               </span>
             </div>
-            <p className="text-slate-400 text-sm">
+            <p className="text-text-muted text-sm">
               AI-powered robotics commerce platform. Browse, discover, and get intelligent assistance for your robotics needs.
             </p>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Products</h3>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <ul className="space-y-2 text-sm text-text-muted">
               <li className="hover:text-neon cursor-pointer transition-colors">Kitchen Robots</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Home Cleaners</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Drone Robots</li>
@@ -31,7 +31,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">AI Services</h3>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <ul className="space-y-2 text-sm text-text-muted">
               <li className="hover:text-neon cursor-pointer transition-colors">Unified AI Assistant</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Voice Interaction</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Support Chat</li>
@@ -41,7 +41,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Company</h3>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <ul className="space-y-2 text-sm text-text-muted">
               <li className="hover:text-neon cursor-pointer transition-colors">About Us</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Contact</li>
               <li className="hover:text-neon cursor-pointer transition-colors">Careers</li>
@@ -50,7 +50,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-8 pt-8 text-center text-sm text-slate-500">
+        <div className="border-t border-white/10 mt-8 pt-8 text-center text-sm text-text-muted">
           <p>&copy; 2026 NexusBots. AI-Powered Robotics Commerce. College Project Demo.</p>
         </div>
       </div>

@@ -27,7 +27,7 @@ export default function HeroSection() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-text-muted mb-10 max-w-2xl mx-auto">
             Browse cutting-edge robots and get AI-powered assistance through one unified assistant across chat and voice.
             Your intelligent robotics shopping experience starts here.
           </p>
@@ -36,7 +36,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Link
               to="/catalog"
-              className="flex items-center gap-2 px-8 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]"
+              className="flex items-center gap-2 px-8 py-3.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-xl transition-all hover:glow-accent"
             >
               Explore Catalog
               <ArrowRight size={18} />
@@ -57,21 +57,21 @@ export default function HeroSection() {
                 <Bot size={24} className="text-accent" />
               </div>
               <h3 className="text-white font-semibold">12 Robots</h3>
-              <p className="text-slate-400 text-sm">Kitchen, home cleaner, drone, and humanoid categories</p>
+              <p className="text-text-muted text-sm">Kitchen, home cleaner, drone, and humanoid categories</p>
             </div>
             <div className="flex flex-col items-center gap-3 p-6 bg-surface/50 rounded-2xl border border-white/5">
               <div className="w-12 h-12 bg-neon/10 rounded-xl flex items-center justify-center">
                 <MessageCircle size={24} className="text-neon" />
               </div>
               <h3 className="text-white font-semibold">AI Chat & Voice</h3>
-              <p className="text-slate-400 text-sm">Get instant help through chat or voice interaction</p>
+              <p className="text-text-muted text-sm">Get instant help through chat or voice interaction</p>
             </div>
             <div className="flex flex-col items-center gap-3 p-6 bg-surface/50 rounded-2xl border border-white/5">
               <div className="w-12 h-12 bg-neon-green/10 rounded-xl flex items-center justify-center">
                 <Mic size={24} className="text-neon-green" />
               </div>
               <h3 className="text-white font-semibold">Multi-Agent AI</h3>
-              <p className="text-slate-400 text-sm">LangChain-powered agents for sales, support & more</p>
+              <p className="text-text-muted text-sm">LangChain-powered agents for sales, support & more</p>
             </div>
           </div>
         </div>

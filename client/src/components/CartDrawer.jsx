@@ -107,7 +107,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                         {step === "payment" && "Payment"}
                         {step === "success" && "Order Success"}
                     </h2>
-                    <button onClick={onClose} className="text-slate-300 hover:text-white">
+                    <button onClick={onClose} className="text-text-muted hover:text-white">
                         <X size={20} />
                     </button>
                 </div>
@@ -116,7 +116,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                     <div className="flex-1 flex flex-col">
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                             {cart.length === 0 ? (
-                                <p className="text-slate-400">Your cart is empty.</p>
+                                <p className="text-text-muted">Your cart is empty.</p>
                             ) : (
                                 cart.map((item) => (
                                     <div key={item.id} className="bg-surface border border-white/10 rounded-xl p-3">
@@ -124,18 +124,18 @@ export default function CartDrawer({ isOpen, onClose }) {
                                             <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-white font-medium truncate">{item.name}</p>
-                                                <p className="text-slate-400 text-sm">${item.price.toLocaleString()}</p>
+                                                <p className="text-text-muted text-sm">${item.price.toLocaleString()}</p>
                                                 <div className="mt-2 flex items-center gap-2">
                                                     <button
                                                         onClick={() => decreaseQuantity(item.id)}
-                                                        className="p-1 rounded bg-white/5 text-slate-300 hover:text-white"
+                                                        className="p-1 rounded bg-white/5 text-text-muted hover:text-white"
                                                     >
                                                         <Minus size={14} />
                                                     </button>
                                                     <span className="text-white text-sm w-6 text-center">{item.quantity}</span>
                                                     <button
                                                         onClick={() => increaseQuantity(item.id)}
-                                                        className="p-1 rounded bg-white/5 text-slate-300 hover:text-white"
+                                                        className="p-1 rounded bg-white/5 text-text-muted hover:text-white"
                                                     >
                                                         <Plus size={14} />
                                                     </button>
@@ -155,7 +155,7 @@ export default function CartDrawer({ isOpen, onClose }) {
 
                         <div className="p-4 border-t border-white/10">
                             <div className="flex items-center justify-between mb-3">
-                                <span className="text-slate-300">Total</span>
+                                <span className="text-text-muted">Total</span>
                                 <span className="text-white font-semibold">${total.toLocaleString()}</span>
                             </div>
                             <button
@@ -173,7 +173,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                 {step === "payment" && (
                     <form onSubmit={handlePaymentSubmit} className="flex-1 p-4 space-y-3 overflow-y-auto">
                         <div>
-                            <label className="text-slate-300 text-sm">User ID</label>
+                            <label className="text-text-muted text-sm">User ID</label>
                             <input
                                 value={paymentForm.userId}
                                 onChange={(e) => setPaymentForm((prev) => ({ ...prev, userId: e.target.value }))}
@@ -182,7 +182,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                             />
                         </div>
                         <div>
-                            <label className="text-slate-300 text-sm">Email</label>
+                            <label className="text-text-muted text-sm">Email</label>
                             <input
                                 type="email"
                                 value={paymentForm.email}
@@ -192,7 +192,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                             />
                         </div>
                         <div>
-                            <label className="text-slate-300 text-sm">Payment Method</label>
+                            <label className="text-text-muted text-sm">Payment Method</label>
                             <select
                                 value={paymentForm.paymentMethod}
                                 onChange={(e) => setPaymentForm((prev) => ({ ...prev, paymentMethod: e.target.value }))}
@@ -204,7 +204,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                         </div>
                         {paymentForm.paymentMethod === "upi" && (
                             <div>
-                                <label className="text-slate-300 text-sm">UPI ID</label>
+                                <label className="text-text-muted text-sm">UPI ID</label>
                                 <input
                                     value={paymentForm.upiId}
                                     onChange={(e) => setPaymentForm((prev) => ({ ...prev, upiId: e.target.value }))}
@@ -216,7 +216,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                         {paymentForm.paymentMethod === "card" && (
                             <>
                                 <div>
-                                    <label className="text-slate-300 text-sm">Card Holder Name</label>
+                                    <label className="text-text-muted text-sm">Card Holder Name</label>
                                     <input
                                         value={paymentForm.cardName}
                                         onChange={(e) => setPaymentForm((prev) => ({ ...prev, cardName: e.target.value }))}
@@ -224,7 +224,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-slate-300 text-sm">Card Number</label>
+                                    <label className="text-text-muted text-sm">Card Number</label>
                                     <input
                                         value={paymentForm.cardNumber}
                                         onChange={(e) => setPaymentForm((prev) => ({ ...prev, cardNumber: e.target.value }))}
@@ -234,7 +234,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="text-slate-300 text-sm">Expiry</label>
+                                        <label className="text-text-muted text-sm">Expiry</label>
                                         <input
                                             value={paymentForm.expiry}
                                             onChange={(e) => setPaymentForm((prev) => ({ ...prev, expiry: e.target.value }))}
@@ -243,7 +243,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-slate-300 text-sm">CVV</label>
+                                        <label className="text-text-muted text-sm">CVV</label>
                                         <input
                                             value={paymentForm.cvv}
                                             onChange={(e) => setPaymentForm((prev) => ({ ...prev, cvv: e.target.value }))}
@@ -256,7 +256,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                         )}
 
                         <div className="pt-2">
-                            <p className="text-slate-300 text-sm">Payable Amount: <span className="text-white font-semibold">${total.toLocaleString()}</span></p>
+                            <p className="text-text-muted text-sm">Payable Amount: <span className="text-white font-semibold">${total.toLocaleString()}</span></p>
                         </div>
 
                         {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -291,11 +291,11 @@ export default function CartDrawer({ isOpen, onClose }) {
                         </div>
 
                         <div className="mt-4 space-y-2 text-sm">
-                            <p className="text-slate-300">Order ID: <span className="text-white font-medium">{orderResult.order_id}</span></p>
-                            <p className="text-slate-300">User ID: <span className="text-white font-medium">{orderResult.user_id}</span></p>
-                            <p className="text-slate-300">Status: <span className="text-white font-medium">{orderResult.status}</span></p>
-                            <p className="text-slate-300">Estimated Delivery: <span className="text-white font-medium">{new Date(orderResult.estimated_delivery).toLocaleDateString()}</span></p>
-                            <p className="text-slate-300">Total Amount: <span className="text-white font-medium">${Number(orderResult.total_amount).toLocaleString()}</span></p>
+                            <p className="text-text-muted">Order ID: <span className="text-white font-medium">{orderResult.order_id}</span></p>
+                            <p className="text-text-muted">User ID: <span className="text-white font-medium">{orderResult.user_id}</span></p>
+                            <p className="text-text-muted">Status: <span className="text-white font-medium">{orderResult.status}</span></p>
+                            <p className="text-text-muted">Estimated Delivery: <span className="text-white font-medium">{new Date(orderResult.estimated_delivery).toLocaleDateString()}</span></p>
+                            <p className="text-text-muted">Total Amount: <span className="text-white font-medium">${Number(orderResult.total_amount).toLocaleString()}</span></p>
                         </div>
 
                         <div className="mt-4">
@@ -304,7 +304,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                                 {(orderResult.items || []).map((item, idx) => (
                                     <div key={`${item.product_id}-${idx}`} className="bg-surface border border-white/10 rounded-lg p-2 text-sm">
                                         <p className="text-white">{item.name}</p>
-                                        <p className="text-slate-400">Qty: {item.quantity} • ${item.price.toLocaleString()}</p>
+                                        <p className="text-text-muted">Qty: {item.quantity} • ${item.price.toLocaleString()}</p>
                                     </div>
                                 ))}
                             </div>

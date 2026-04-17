@@ -9,7 +9,7 @@ function AIFeatureCard({ icon, title, description, link, color }) {
   return (
     <Link
       to={link}
-      className="group p-6 bg-surface rounded-2xl border border-white/5 hover:border-neon/20 transition-all hover:shadow-[0_0_30px_rgba(34,211,238,0.05)]"
+      className="group p-6 bg-surface rounded-2xl border border-white/5 hover:border-neon/20 transition-all hover:glow-accent"
     >
       <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mb-4`}>
         {icon}
@@ -17,7 +17,7 @@ function AIFeatureCard({ icon, title, description, link, color }) {
       <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-neon transition-colors">
         {title}
       </h3>
-      <p className="text-slate-400 text-sm">{description}</p>
+      <p className="text-text-muted text-sm">{description}</p>
     </Link>
   );
 }
@@ -36,7 +36,7 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-white mb-3">AI-Powered Assistance</h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
+          <p className="text-text-muted max-w-2xl mx-auto">
             Get product recommendations and support with one unified AI assistant for both
             chat and voice interactions.
           </p>
@@ -79,7 +79,7 @@ export default function Home() {
             ].map(({ value, label }) => (
               <div key={label}>
                 <div className="text-3xl font-bold text-neon mb-1">{value}</div>
-                <div className="text-slate-400 text-sm">{label}</div>
+                <div className="text-text-muted text-sm">{label}</div>
               </div>
             ))}
           </div>

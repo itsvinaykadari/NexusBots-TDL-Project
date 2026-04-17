@@ -52,13 +52,13 @@ export default function OrderHistory() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-white mb-2">Order History</h1>
-                <p className="text-slate-400">View your past orders, statuses, and tracking progress.</p>
+                <p className="text-text-muted">View your past orders, statuses, and tracking progress.</p>
             </div>
 
             <div className="bg-surface border border-white/10 rounded-2xl p-4 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <div>
-                        <label className="text-slate-300 text-sm">User ID</label>
+                        <label className="text-text-muted text-sm">User ID</label>
                         <input
                             value={userId}
                             onChange={(e) => setUserId(e.target.value)}
@@ -72,7 +72,7 @@ export default function OrderHistory() {
                     >
                         Load Orders
                     </button>
-                    <div className="text-sm text-slate-300">
+                    <div className="text-sm text-text-muted">
                         <p>Orders: <span className="text-white font-semibold">{summary.count}</span></p>
                         <p>Total Spent: <span className="text-white font-semibold">${summary.total.toLocaleString()}</span></p>
                     </div>
@@ -80,12 +80,12 @@ export default function OrderHistory() {
             </div>
 
             {error && <p className="text-red-400 mb-4">{error}</p>}
-            {loading && <p className="text-slate-300 mb-4">Loading order history...</p>}
+            {loading && <p className="text-text-muted mb-4">Loading order history...</p>}
 
             {!loading && orders.length === 0 && (
                 <div className="bg-surface border border-white/10 rounded-2xl p-8 text-center">
-                    <PackageCheck className="mx-auto text-slate-500 mb-2" />
-                    <p className="text-slate-300">No orders found for this user.</p>
+                    <PackageCheck className="mx-auto text-text-muted mb-2" />
+                    <p className="text-text-muted">No orders found for this user.</p>
                 </div>
             )}
 
@@ -98,13 +98,13 @@ export default function OrderHistory() {
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-white font-semibold">Order ID: {order.order_id}</p>
-                                    <p className="text-slate-400 text-sm">User ID: {order.user_id}</p>
-                                    <p className="text-slate-400 text-sm">Date: {new Date(order.created_at).toLocaleString()}</p>
+                                    <p className="text-text-muted text-sm">User ID: {order.user_id}</p>
+                                    <p className="text-text-muted text-sm">Date: {new Date(order.created_at).toLocaleString()}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-white font-semibold">${Number(order.total_amount).toLocaleString()}</p>
                                     <p className="text-neon text-sm">{order.status}</p>
-                                    <p className="text-slate-400 text-xs">ETA: {order.estimated_delivery ? new Date(order.estimated_delivery).toLocaleDateString() : "-"}</p>
+                                    <p className="text-text-muted text-xs">ETA: {order.estimated_delivery ? new Date(order.estimated_delivery).toLocaleDateString() : "-"}</p>
                                 </div>
                             </div>
 
@@ -112,7 +112,7 @@ export default function OrderHistory() {
                                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                                     <div className="h-full bg-accent" style={{ width: `${progress}%` }} />
                                 </div>
-                                <div className="mt-1 flex justify-between text-xs text-slate-400">
+                                <div className="mt-1 flex justify-between text-xs text-text-muted">
                                     <span>Processing</span>
                                     <span>Shipped</span>
                                     <span>Delivered</span>
@@ -121,7 +121,7 @@ export default function OrderHistory() {
 
                             <button
                                 onClick={() => setExpandedId(expanded ? null : order.id)}
-                                className="mt-4 flex items-center gap-2 text-sm text-slate-300 hover:text-white"
+                                className="mt-4 flex items-center gap-2 text-sm text-text-muted hover:text-white"
                             >
                                 {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                 {expanded ? "Hide Details" : "View Details"}
@@ -132,7 +132,7 @@ export default function OrderHistory() {
                                     {(order.items || []).map((item, idx) => (
                                         <div key={`${order.id}-${idx}`} className="bg-primary border border-white/10 rounded-lg p-3">
                                             <p className="text-white font-medium">{item.name}</p>
-                                            <p className="text-slate-400 text-sm">Quantity: {item.quantity} • Price: ${Number(item.price).toLocaleString()}</p>
+                                            <p className="text-text-muted text-sm">Quantity: {item.quantity} • Price: ${Number(item.price).toLocaleString()}</p>
                                         </div>
                                     ))}
                                 </div>

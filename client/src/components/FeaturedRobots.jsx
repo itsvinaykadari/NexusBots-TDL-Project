@@ -18,7 +18,7 @@ export default function FeaturedRobots() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold text-white">Most Rated Products</h2>
-          <p className="text-slate-400 mt-1">Top pick from kitchen, home cleaner, and drone categories</p>
+          <p className="text-text-muted mt-1">Top pick from kitchen, home cleaner, and drone categories</p>
         </div>
         <Link
           to="/catalog"
