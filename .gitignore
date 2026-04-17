@@ -1,2 +1,5 @@
 /graphify-out
 CLAUDE*
+/server/node_modules
+models/
+*pyc
