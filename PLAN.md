@@ -174,6 +174,7 @@ LLM-as-judge score across 20 beginner + 20 expert prompts comparing Sarvam perso
 5. **Heuristic baseline as a first-class system** — we benchmark against our own rule-based router, not just LLMs. Shows when ML is actually worth the weight.
 6. **Deliberate choice to skip LangChain** — 6 fixed tools, direct Python dispatch. Lower latency, fewer moving parts, easier to reason about.
 7. **Persona-adaptive generation driven by auto-detected proficiency** — `detect_proficiency()` uses message complexity + session activity (viewed count, cart size, technical tokens) to switch Sarvam system prompt between beginner and expert registers.
+8. **Prompt-driven UI guidance that converts intent into on-screen help** — the bot does not stop at text replies; it guides users through the interface based on their issue. For order-related problems, it can direct attention to the Orders flow; for product-discovery problems, it explains filters and surfaces relevant product recommendations directly in the UI context.
 
 ---
 
