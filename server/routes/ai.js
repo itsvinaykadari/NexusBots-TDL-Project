@@ -3,6 +3,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { createInterface } = require('readline');
 const Chat = require('../models/Chat');
+const { logSession } = require('../ai-session-log');
 
 const router = express.Router();
 
@@ -336,8 +337,51 @@ function buildTextFallback(pipelineResult, reason) {
     return 'I can help with robot discovery, comparison, recommendations, and navigation. Please try again.';
 }
 
+function buildGuidedLocationResponse(pipelineResult) {
+    const guide = typeof pipelineResult?.ui_guide === 'string' ? pipelineResult.ui_guide : '';
+    if (!guide.startsWith('locate_')) return null;
+
+    const toolResult = pipelineResult?.toolResult && typeof pipelineResult.toolResult === 'object'
+        ? pipelineResult.toolResult
+        : {};
+    const navigation = toolResult?.navigation && typeof toolResult.navigation === 'object'
+        ? toolResult.navigation
+        : {};
+    const params = navigation?.params && typeof navigation.params === 'object'
+        ? navigation.params
+        : (pipelineResult?.toolArgs?.params && typeof pipelineResult.toolArgs.params === 'object'
+            ? pipelineResult.toolArgs.params
+            : {});
+
+    const target = toolResult?.target_product && typeof toolResult.target_product === 'object'
+        ? toolResult.target_product
+        : null;
+
+    const name = typeof target?.name === 'string' && target.name.trim()
+        ? target.name.trim()
+        : null;
+    const category = typeof target?.category === 'string' && target.category.trim()
+        ? target.category.trim()
+        : (typeof params?.category === 'string' ? params.category.trim() : '');
+    const price = Number(target?.price);
+
+    if (name) {
+        const pricePart = Number.isFinite(price) ? ` at $${price.toLocaleString()}` : '';
+        const categoryPart = category ? ` in ${category} category` : '';
+        return `The target robot is ${name}${pricePart}${categoryPart}. I have started guided navigation now.`;
+    }
+
+    if (category) {
+        return `I have started guided navigation for ${category} category.`;
+    }
+
+    return 'I have started guided navigation for your request.';
+}
+
 /* ── POST /api/ai/chat ───────────────────────────────────── */
 router.post('/chat', rateLimit, async (req, res) => {
+    const requestStart = Date.now();
+
     const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     if (!message) {
         return res.status(400).json({
@@ -401,7 +445,10 @@ router.post('/chat', rateLimit, async (req, res) => {
         };
     }
 
-    const responseText =
+    const guidedResponse = buildGuidedLocationResponse(pipelineResult);
+    const responseSource = guidedResponse ? 'guided'
+        : (sarvamResult?.source === 'fallback' ? 'fallback' : 'sarvam');
+    const responseText = guidedResponse ||
         (typeof sarvamResult?.response === 'string' && sarvamResult.response.trim()) ||
         buildTextFallback(pipelineResult, sarvamResult?.error);
 
@@ -416,6 +463,17 @@ router.post('/chat', rateLimit, async (req, res) => {
     } catch (_) {
         // Non-fatal
     }
+
+    logSession({
+        message, language, context, chatId,
+        pipelineResult: pipelineError ? null : pipelineResult,
+        pipelineError,
+        sarvamResult: sarvamError ? null : sarvamResult,
+        sarvamError: sarvamError || sarvamResult?.error || null,
+        finalResponse: responseText,
+        responseSource,
+        durationMs: Date.now() - requestStart,
+    });
 
     return res.json({
         response: responseText,

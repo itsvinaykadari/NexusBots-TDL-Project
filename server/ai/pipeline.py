@@ -178,6 +178,59 @@ def _normalize_category(value: Any) -> str:
     return ""
 
 
+def _is_location_intent(text: str) -> bool:
+    lowered = text.lower()
+    phrases = (
+        "where is",
+        "where can i find",
+        "locate",
+        "find this",
+        "find robot",
+        "show me where",
+        "kahan",
+        "ekkada",
+    )
+    return any(phrase in lowered for phrase in phrases)
+
+
+def _extract_rank_preference(text: str) -> Optional[str]:
+    lowered = text.lower()
+    cheapest_tokens = (
+        "cheapest",
+        "lowest price",
+        "least expensive",
+        "budget",
+        "affordable",
+        "low cost",
+        "minimum price",
+        "sasta",
+        "cheap",
+    )
+    premium_tokens = (
+        "most expensive",
+        "costliest",
+        "highest price",
+        "premium",
+        "luxury",
+        "max price",
+    )
+    best_tokens = (
+        "best",
+        "top",
+        "highest rated",
+        "top rated",
+        "highest rating",
+    )
+
+    if any(token in lowered for token in cheapest_tokens):
+        return "cheapest"
+    if any(token in lowered for token in premium_tokens):
+        return "expensive"
+    if any(token in lowered for token in best_tokens):
+        return "best"
+    return None
+
+
 def normalize_context(context: Any) -> Dict[str, Any]:
     if not isinstance(context, dict):
         context = {}
@@ -413,7 +466,8 @@ class PipelineRuntime:
         self.conn.row_factory = sqlite3.Row
 
         self.products = self._load_products()
-        self.product_by_id = {product["id"]: product for product in self.products}
+        self.product_by_id = {product["id"]
+            : product for product in self.products}
         self.ranker = RecommendationRanker(self.products)
 
     def _load_products(self) -> List[Dict[str, Any]]:
@@ -530,6 +584,18 @@ class PipelineRuntime:
 
         return ""
 
+    def _detect_category_from_text(self, text: str) -> str:
+        text_lower = text.lower()
+        for category in ALLOWED_CATEGORIES:
+            if category.lower() in text_lower:
+                return category
+
+        for category, hints in CATEGORY_HINTS.items():
+            if any(hint in text_lower for hint in hints):
+                return category
+
+        return ""
+
     def _detect_page(self, text: str, context: Dict[str, Any]) -> str:
         text_lower = text.lower()
         for page, hints in PAGE_HINTS.items():
@@ -556,10 +622,134 @@ class PipelineRuntime:
 
         return 1
 
+    def _extract_named_product_id(self, text: str) -> Optional[int]:
+        text_lower = text.lower()
+
+        for product in self.products:
+            name = str(product.get("name", "")).strip().lower()
+            if name and name in text_lower:
+                return product["id"]
+
+        query_tokens = set(re.findall(r"[a-z0-9]+", text_lower))
+        if not query_tokens:
+            return None
+
+        stop = {
+            "where", "is", "the", "a", "an", "this", "that", "robot", "bots", "bot",
+            "show", "me", "find", "locate", "please", "can", "you", "in", "on", "at",
+        }
+
+        filtered_query_tokens = {
+            tok for tok in query_tokens if tok not in stop and len(tok) > 2
+        }
+        if not filtered_query_tokens:
+            return None
+
+        scores: Dict[int, int] = {}
+        for product in self.products:
+            name = str(product.get("name", "")).lower()
+            name_tokens = {
+                tok for tok in re.findall(r"[a-z0-9]+", name)
+                if tok not in stop and len(tok) > 2
+            }
+            if not name_tokens:
+                continue
+            overlap = len(name_tokens & filtered_query_tokens)
+            if overlap > 0:
+                scores[product["id"]] = overlap
+
+        if not scores:
+            return None
+
+        ranked = sorted(scores.items(), key=lambda row: row[1], reverse=True)
+        best_id, best_score = ranked[0]
+        second_score = ranked[1][1] if len(ranked) > 1 else 0
+
+        if best_score >= 2 or best_score > second_score:
+            return best_id
+
+        return None
+
+    def _select_product_for_location(self, category: str, preference: Optional[str]) -> Optional[int]:
+        candidates = [
+            product for product in self.products
+            if not category or product.get("category") == category
+        ]
+        if not candidates:
+            return None
+
+        if preference == "cheapest":
+            chosen = min(candidates, key=lambda product: float(
+                product.get("price") or 0.0))
+            return chosen["id"]
+
+        if preference == "expensive":
+            chosen = max(candidates, key=lambda product: float(
+                product.get("price") or 0.0))
+            return chosen["id"]
+
+        # default / best
+        chosen = max(candidates, key=lambda product: float(
+            product.get("rating") or 0.0))
+        return chosen["id"]
+
     def _heuristic_tool_call(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
         text = message.lower()
         ids = self._extract_ids(text)
-        category = self._detect_category(text, context)
+        category_from_text = self._detect_category_from_text(text)
+        category = category_from_text or self._detect_category(text, context)
+        rank_preference = _extract_rank_preference(text)
+        named_product_id = self._extract_named_product_id(message)
+
+        if _is_location_intent(text) and (named_product_id or ids):
+            product_id = named_product_id or ids[0]
+            derived_category = category_from_text
+            if not derived_category and product_id in self.product_by_id:
+                derived_category = _normalize_category(
+                    self.product_by_id[product_id].get("category")
+                )
+            params: Dict[str, Any] = {"product_id": product_id}
+            if derived_category:
+                params["category"] = derived_category
+            return {
+                "tool": "navigate_to",
+                "arguments": {
+                    "page": "catalog",
+                    "params": params,
+                },
+            }
+
+        if _is_location_intent(text) and rank_preference:
+            product_id = self._select_product_for_location(
+                category_from_text, rank_preference)
+            params: Dict[str, Any] = {}
+            if category_from_text:
+                params["category"] = category_from_text
+            if product_id in self.product_by_id:
+                params["product_id"] = product_id
+                if "category" not in params:
+                    inferred_category = _normalize_category(
+                        self.product_by_id[product_id].get("category")
+                    )
+                    if inferred_category:
+                        params["category"] = inferred_category
+
+            return {
+                "tool": "navigate_to",
+                "arguments": {
+                    "page": "catalog",
+                    "params": params,
+                },
+            }
+
+        if _is_location_intent(text) and category_from_text:
+            return {
+                "tool": "navigate_to",
+                "arguments": {
+                    "page": "catalog",
+                    "params": {"category": category_from_text},
+                },
+            }
 
         if any(token in text for token in ["compare", "difference", "vs", "versus"]):
             selected = ids[:2]
@@ -714,8 +904,9 @@ class PipelineRuntime:
             return {"tool": tool, "arguments": {"query": query, "category": category}}
 
         if tool == "get_product":
-            product_id = _to_int(args.get("product_id"),
-                                 self._default_product_id(context))
+            product_id = _to_int(args.get("product_id"))
+            if product_id not in self.product_by_id:
+                product_id = self._extract_named_product_id(message)
             if product_id not in self.product_by_id:
                 product_id = self._default_product_id(context)
             return {"tool": tool, "arguments": {"product_id": product_id}}
@@ -774,7 +965,8 @@ class PipelineRuntime:
                 args.get("page", self._detect_page(message, context)))
             # Keyword-based page correction (fixes base model misrouting)
             text_lower = message.lower()
-            order_tokens = ["order", "orders", "ऑर्डर", "ఆర్డర్", "track", "delivery"]
+            order_tokens = ["order", "orders",
+                            "ऑर्डर", "ఆర్డర్", "track", "delivery"]
             cart_tokens = ["cart", "checkout", "basket", "कार्ट"]
             if page == "cart" and any(t in text_lower for t in order_tokens) and not any(t in text_lower for t in cart_tokens):
                 page = "orders"
@@ -789,8 +981,16 @@ class PipelineRuntime:
                 normalized_params["category"] = category
 
             product_id = _to_int(params.get("product_id"))
+            if product_id not in self.product_by_id:
+                product_id = self._extract_named_product_id(message)
             if product_id in self.product_by_id:
                 normalized_params["product_id"] = product_id
+                if "category" not in normalized_params:
+                    inferred_category = _normalize_category(
+                        self.product_by_id[product_id].get("category")
+                    )
+                    if inferred_category:
+                        normalized_params["category"] = inferred_category
 
             query = params.get("query")
             if isinstance(query, str) and query.strip():
@@ -799,6 +999,9 @@ class PipelineRuntime:
             sort = params.get("sort")
             if sort in {"price_asc", "price_desc", "rating_desc", "latest"}:
                 normalized_params["sort"] = sort
+
+            if page == "home" and _is_location_intent(message) and "product_id" in normalized_params:
+                page = "catalog"
 
             return {"tool": tool, "arguments": {"page": page, "params": normalized_params}}
 
@@ -927,9 +1130,20 @@ class PipelineRuntime:
     def navigate_to(self, page: str, params: Dict[str, Any]) -> Dict[str, Any]:
         page = _normalize_page(page)
         route = _ROUTE_MAP.get(page, "/")
+        target_product = None
+
+        product_id = _to_int(params.get("product_id"))
+        if product_id in self.product_by_id:
+            product = self.product_by_id[product_id]
+            target_product = {
+                "id": product["id"],
+                "name": product.get("name"),
+                "category": product.get("category"),
+                "price": product.get("price"),
+                "in_stock": product.get("in_stock", False),
+            }
 
         if page == "product":
-            product_id = _to_int(params.get("product_id"))
             if product_id in self.product_by_id:
                 route = f"/robot/{product_id}"
             else:
@@ -947,12 +1161,17 @@ class PipelineRuntime:
             }
 
         return {
-            "summary": f"Navigate user to {page}.",
+            "summary": (
+                f"Navigate user to {page}."
+                if not target_product
+                else f"Navigate user to {page} and highlight {target_product.get('name')}."
+            ),
             "navigation": {
                 "page": page,
                 "route": route,
                 "params": params,
             },
+            "target_product": target_product,
         }
 
     def execute_tool(self, tool: str, arguments: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
@@ -1039,7 +1258,8 @@ def detect_proficiency(message: str, context: Dict[str, Any], language: str = "e
     if isinstance(cart, list) and len(cart) >= 2:
         score += 1
 
-    en_keywords = ["compare", "benchmark", "tradeoff", "spec", "payload", "latency"]
+    en_keywords = ["compare", "benchmark",
+                   "tradeoff", "spec", "payload", "latency"]
     hi_keywords = ["तुलना", "विनिर्देश", "पेलोड"]
     te_keywords = ["పోలిక", "వివరాలు", "పేలోడ్"]
     if any(keyword in text for keyword in en_keywords):
@@ -1140,7 +1360,8 @@ def run_pipeline(message: str, language: str = "en", context: Optional[Dict[str,
         user_message = "Show me recommended robots."
 
     runtime = _get_runtime()
-    proficiency = detect_proficiency(user_message, normalized_context, normalized_language)
+    proficiency = detect_proficiency(
+        user_message, normalized_context, normalized_language)
     selected_tool, tool_source, model_ui_guide = runtime.decide_tool(
         message=user_message,
         language=normalized_language,
@@ -1175,6 +1396,40 @@ def run_pipeline(message: str, language: str = "en", context: Optional[Dict[str,
             category = (tool_args.get("category") or "").strip()
             if category:
                 ui_guide = f"find_{category.lower().replace(' ', '_')}"
+
+        if not ui_guide and _is_location_intent(text_lower):
+            target_id = None
+            category = ""
+            rank_preference = _extract_rank_preference(text_lower)
+
+            if tool_name == "get_product":
+                target_id = _to_int(tool_args.get("product_id"))
+            elif tool_name == "navigate_to":
+                params = tool_args.get("params") if isinstance(
+                    tool_args.get("params"), dict) else {}
+                target_id = _to_int(params.get("product_id"))
+                category = _normalize_category(params.get("category"))
+            elif tool_name in {"search_products", "recommend"}:
+                category = _normalize_category(tool_args.get("category"))
+
+            if not category:
+                category = runtime._detect_category_from_text(text_lower)
+
+            if target_id not in runtime.product_by_id:
+                target_id = runtime._select_product_for_location(
+                    category, rank_preference)
+
+            if target_id in runtime.product_by_id:
+                if not category:
+                    category = _normalize_category(
+                        runtime.product_by_id[target_id].get("category")
+                    )
+
+                if category:
+                    ui_guide = f"locate_path:{category}:{target_id}"
+                else:
+                    ui_guide = f"locate_robot:{target_id}"
+
         # Support-related intents
         if not ui_guide and any(t in text_lower for t in ["support", "help", "ticket", "complaint", "issue"]):
             if any(t in text_lower for t in ["new", "create", "file", "submit", "raise"]):
@@ -1247,7 +1502,8 @@ def _worker() -> int:
             message = payload.get("message", "")
             language = payload.get("language", "en")
             context = payload.get("context", {})
-            output = run_pipeline(message=message, language=language, context=context)
+            output = run_pipeline(
+                message=message, language=language, context=context)
         except Exception as error:
             output = {
                 "ok": False,

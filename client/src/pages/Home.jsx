@@ -66,7 +66,7 @@ const CATEGORIES = [
     name: "Drone",
     tagline: "Aerial intelligence at your command",
     desc: "Indoor patrol, thermal inspection, and surface cleaning — drones that work so you don't have to.",
-    image: "https://www-cdn.djiits.com/dps/d90267d0c1579a191284086d26cd8156.jpg",
+    image: "https://img.freepik.com/free-photo/quadcopter-flying-nature_231208-10459.jpg",
     Icon: Plane,
     accent: "oklch(78% 0.16 240)",
   },
@@ -118,7 +118,7 @@ const AI_CAPABILITIES = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
-  const { setPage } = useUserActivity();
+  const { setPage, userName } = useUserActivity();
   useEffect(() => setPage("home"), []);
 
   return (
@@ -143,19 +143,45 @@ export default function Home() {
         />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center py-32">
-          {/* Badge */}
+          {/* Welcome greeting */}
           <Reveal>
-            <div
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-full border mb-10"
-              style={{
-                borderColor: "oklch(65% 0.28 290 / 0.3)",
-                background: "oklch(65% 0.28 290 / 0.06)",
-              }}
-            >
-              <Sparkles size={14} style={{ color: "var(--color-accent)" }} />
-              <span className="text-xs font-semibold tracking-wider uppercase" style={{ color: "var(--color-accent)" }}>
-                AI-Powered Robotics Platform
-              </span>
+            <div className="flex flex-col items-center gap-3 mb-8">
+              <div
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full border"
+                style={{
+                  borderColor: "oklch(65% 0.28 290 / 0.3)",
+                  background: "oklch(65% 0.28 290 / 0.06)",
+                }}
+              >
+                <Sparkles size={14} style={{ color: "var(--color-accent)" }} />
+                <span className="text-xs font-semibold tracking-wider uppercase" style={{ color: "var(--color-accent)" }}>
+                  AI-Powered Robotics Platform
+                </span>
+              </div>
+              <div
+                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full"
+                style={{
+                  background: "oklch(72% 0.18 145 / 0.08)",
+                  border: "1px solid oklch(72% 0.18 145 / 0.2)",
+                }}
+              >
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                  style={{
+                    background: "linear-gradient(135deg, oklch(65% 0.28 290), oklch(58% 0.26 280))",
+                    color: "#fff",
+                  }}
+                >
+                  {(userName || "A")[0].toUpperCase()}
+                </div>
+                <span className="text-sm font-medium" style={{ color: "oklch(82% 0.01 255)" }}>
+                  Welcome back, <span className="text-white font-semibold">{userName || "Admin"}</span>
+                </span>
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: "oklch(72% 0.18 145)", boxShadow: "0 0 6px oklch(72% 0.18 145 / 0.6)" }}
+                />
+              </div>
             </div>
           </Reveal>
 
@@ -216,9 +242,6 @@ export default function Home() {
                 <Sparkles size={18} />
                 Talk to AI Assistant
               </button>
-              <span className="text-text-muted text-sm hidden sm:block">
-                or explore categories from the menu above
-              </span>
             </div>
           </Reveal>
 
@@ -253,7 +276,7 @@ export default function Home() {
               return (
                 <Reveal key={cat.name} delay={i * 100}>
                   <Link
-                    to={`/catalog?category=${encodeURIComponent(cat.name)}`}
+                    to={`/catalog/${cat.name.toLowerCase().replace(/\s+/g, "-")}`}
                     className="group relative overflow-hidden rounded-3xl border border-white/6 block"
                     style={{
                       minHeight: "340px",
@@ -261,28 +284,39 @@ export default function Home() {
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "scale(1.01)";
-                      e.currentTarget.style.boxShadow = `0 24px 80px oklch(65% 0.28 290 / 0.15)`;
+                      e.currentTarget.style.boxShadow = `0 24px 80px oklch(65% 0.28 290 / 0.2)`;
+                      const img = e.currentTarget.querySelector("img");
+                      const overlay = e.currentTarget.querySelector("[data-overlay]");
+                      if (img) img.style.opacity = "0.78";
+                      if (overlay) overlay.style.opacity = "0.3";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "scale(1)";
                       e.currentTarget.style.boxShadow = "none";
+                      const img = e.currentTarget.querySelector("img");
+                      const overlay = e.currentTarget.querySelector("[data-overlay]");
+                      if (img) img.style.opacity = "0.3";
+                      if (overlay) overlay.style.opacity = "1";
                     }}
                   >
-                    {/* Background image */}
+                    {/* Background image — brightens on hover */}
                     <img
                       src={cat.image}
                       alt={cat.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105"
                       style={{
-                        opacity: 0.35,
+                        opacity: 0.3,
                         transition: "transform 0.7s var(--ease-out-expo), opacity 0.5s var(--ease-out-expo)",
                       }}
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 group-hover:opacity-90"
+                    {/* Dark overlay — fades on hover to reveal image */}
+                    <div
+                      data-overlay
+                      className="absolute inset-0"
                       style={{
-                        background: "linear-gradient(160deg, oklch(12% 0.025 255 / 0.85) 30%, oklch(12% 0.025 255 / 0.5) 100%)",
-                        transition: "opacity 0.5s",
+                        background: "linear-gradient(160deg, oklch(12% 0.025 255 / 0.88) 20%, oklch(12% 0.025 255 / 0.55) 100%)",
+                        transition: "opacity 0.5s var(--ease-out-expo)",
                       }}
                     />
 

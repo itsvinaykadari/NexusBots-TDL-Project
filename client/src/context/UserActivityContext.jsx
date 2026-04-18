@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useCallback } from "react";
+import { getOrCreateUserId, getUserName } from "../utils/user";
 
 const UserActivityContext = createContext();
 
@@ -67,6 +68,8 @@ function activityReducer(state, action) {
 
 export function UserActivityProvider({ children }) {
   const [state, dispatch] = useReducer(activityReducer, initialState);
+  const userId = getOrCreateUserId();
+  const userName = getUserName();
 
   const viewProduct = useCallback((product) => {
     dispatch({ type: "VIEW_PRODUCT", payload: { id: product.id, name: product.name, category: product.category } });
@@ -143,6 +146,8 @@ export function UserActivityProvider({ children }) {
     <UserActivityContext.Provider
       value={{
         ...state,
+        userId,
+        userName,
         viewProduct,
         addToCart,
         increaseQuantity,

@@ -45,7 +45,7 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("Kitchen");
-  const { cart } = useUserActivity();
+  const { cart, userName } = useUserActivity();
   const megaRef = useRef(null);
   const triggerRef = useRef(null);
   const closeTimer = useRef(null);
@@ -109,7 +109,10 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
           transition: "background 0.35s var(--ease-out-expo), box-shadow 0.35s var(--ease-out-expo), border-color 0.35s",
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-[padding-right] duration-300 ${isAIOpen ? "md:pr-[420px]" : ""
+            }`}
+        >
           <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
@@ -152,20 +155,22 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
                 Home
               </Link>
 
-              {/* Robots — mega-menu trigger */}
+              {/* Robots — mega-menu trigger (click-only) */}
               <button
                 ref={triggerRef}
                 data-guide-id="nav-catalog"
-                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
+                aria-expanded={megaOpen}
+                aria-haspopup="menu"
+                onClick={() => setMegaOpen((v) => !v)}
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
                 style={{
-                  color: megaOpen || location.pathname === "/catalog" ? "#fff" : "var(--color-text-muted)",
+                  color: megaOpen || location.pathname.startsWith("/catalog") ? "#fff" : "var(--color-text-muted)",
                   transition: "color 0.2s",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#fff";
-                  openMega();
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={(e) => {
+                  if (!megaOpen && !location.pathname.startsWith("/catalog")) e.currentTarget.style.color = "var(--color-text-muted)";
                 }}
-                onMouseLeave={closeMegaDelayed}
               >
                 Robots
                 <ChevronDown
@@ -197,6 +202,40 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
 
             {/* Right: Ask AI + cart + mobile toggle */}
             <div className="flex items-center gap-2">
+
+              {/* Logged-in user badge */}
+              <div
+                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl"
+                style={{
+                  background: "oklch(65% 0.28 290 / 0.06)",
+                  border: "1px solid oklch(65% 0.28 290 / 0.14)",
+                }}
+              >
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold"
+                  style={{
+                    background: "linear-gradient(135deg, oklch(65% 0.28 290), oklch(58% 0.26 280))",
+                    color: "#fff",
+                    flexShrink: 0,
+                  }}
+                >
+                  {(userName || "A")[0].toUpperCase()}
+                </div>
+                <span className="text-xs font-medium" style={{ color: "oklch(85% 0.01 255)" }}>
+                  {userName || "Admin"}
+                </span>
+                {/* <span
+                  className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                  style={{
+                    background: "oklch(72% 0.18 145 / 0.15)",
+                    color: "oklch(72% 0.18 145)",
+                    border: "1px solid oklch(72% 0.18 145 / 0.25)",
+                  }}
+                >
+                  Online
+                </span> */}
+              </div>
+
               {/* Ask AI — accent pill on right */}
               <button
                 data-guide-id="nav-assistant"
@@ -237,6 +276,7 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
                 <button
                   data-guide-id="nav-cart"
                   onClick={onCartClick}
+                  aria-label={`Open cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
                   className="relative p-2 rounded-lg"
                   style={{
                     color: "var(--color-accent)",
@@ -272,6 +312,8 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
                 className="md:hidden p-2"
                 style={{ color: "var(--color-text-muted)" }}
                 onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileOpen}
               >
                 {mobileOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -297,7 +339,7 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
                   {CATEGORIES.map((cat) => (
                     <Link
                       key={cat}
-                      to={`/catalog?category=${encodeURIComponent(cat)}`}
+                      to={`/catalog/${cat.toLowerCase().replace(/\s+/g, "-")}`}
                       data-guide-id={`catalog-filter-${cat}`}
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-3 px-2 py-2 rounded-lg text-sm"
@@ -340,18 +382,15 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
       {/* ── MEGA-MENU DROPDOWN ─────────────────────────────────────── */}
       <div
         ref={megaRef}
-        className="fixed z-40"
+        className={`fixed left-0 right-0 z-40 transition-[right] duration-300 ${isAIOpen ? "md:right-[420px]" : ""
+          }`}
         style={{
           top: "64px",
-          left: 0,
-          right: 0,
           opacity: megaOpen ? 1 : 0,
           transform: megaOpen ? "translateY(0)" : "translateY(-8px)",
           pointerEvents: megaOpen ? "auto" : "none",
-          transition: "opacity 0.25s var(--ease-out-expo), transform 0.25s var(--ease-out-expo)",
+          transition: "right 0.3s var(--ease-out-expo), opacity 0.25s var(--ease-out-expo), transform 0.25s var(--ease-out-expo)",
         }}
-        onMouseEnter={cancelClose}
-        onMouseLeave={closeMegaDelayed}
       >
         {/* Backdrop */}
         <div
@@ -391,10 +430,13 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
                       borderLeft: isActive ? "2px solid var(--color-accent)" : "2px solid transparent",
                       transition: "background 0.15s, border-color 0.15s",
                     }}
-                    onMouseEnter={() => setActiveCategory(cat)}
                     onClick={() => {
-                      navigate(`/catalog?category=${encodeURIComponent(cat)}`);
-                      setMegaOpen(false);
+                      if (activeCategory !== cat) {
+                        setActiveCategory(cat);
+                      } else {
+                        navigate(`/catalog/${cat.toLowerCase().replace(/\s+/g, "-")}`);
+                        setMegaOpen(false);
+                      }
                     }}
                   >
                     {(() => { const Icon = CATEGORY_ICONS[cat]; return <Icon size={18} style={{ color: isActive ? CATEGORY_META[cat].color : "var(--color-text-muted)", transition: "color 0.15s" }} />; })()}

@@ -1,7 +1,24 @@
+const USER_ID_KEY = "nexus_user_id";
+const USER_NAME_KEY = "nexus_user_name";
+
+// Fixed admin session — always "Admin" on first load
+const ADMIN_ID = "USR-ADMIN";
+const ADMIN_NAME = "Admin";
+
 export function getOrCreateUserId() {
-    const existing = localStorage.getItem("nexus_user_id");
-    if (existing) return existing;
-    const generated = `USR-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-    localStorage.setItem("nexus_user_id", generated);
-    return generated;
+    let id = localStorage.getItem(USER_ID_KEY);
+    if (!id) {
+        id = ADMIN_ID;
+        localStorage.setItem(USER_ID_KEY, id);
+    }
+    return id;
+}
+
+export function getUserName() {
+    let name = localStorage.getItem(USER_NAME_KEY);
+    if (!name) {
+        name = ADMIN_NAME;
+        localStorage.setItem(USER_NAME_KEY, name);
+    }
+    return name;
 }

@@ -38,6 +38,16 @@ export default function CartDrawer({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKey(e) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
   const total = useMemo(
     () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [cart]
@@ -47,12 +57,39 @@ export default function CartDrawer({ isOpen, onClose }) {
     e.preventDefault();
     if (!paymentForm.userId.trim()) { setError("User ID is required."); return; }
     if (!paymentForm.email.trim()) { setError("Email is required."); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(paymentForm.email.trim())) {
+      setError("Please enter a valid email address."); return;
+    }
     if (paymentForm.paymentMethod === "card") {
       if (!paymentForm.cardName || !paymentForm.cardNumber || !paymentForm.expiry || !paymentForm.cvv) {
         setError("Please fill all card details."); return;
       }
+      const digits = paymentForm.cardNumber.replace(/\s+/g, "");
+      if (!/^\d{16}$/.test(digits)) {
+        setError("Card number must be 16 digits."); return;
+      }
+      const expiryMatch = paymentForm.expiry.match(/^(\d{2})\/(\d{2})$/);
+      if (!expiryMatch) {
+        setError("Expiry must be in MM/YY format."); return;
+      }
+      const mm = Number(expiryMatch[1]);
+      const yy = Number(expiryMatch[2]);
+      if (mm < 1 || mm > 12) {
+        setError("Invalid expiry month."); return;
+      }
+      const now = new Date();
+      const expDate = new Date(2000 + yy, mm, 0, 23, 59, 59);
+      if (expDate < now) {
+        setError("Card has expired."); return;
+      }
+      if (!/^\d{3,4}$/.test(paymentForm.cvv)) {
+        setError("CVV must be 3 or 4 digits."); return;
+      }
     } else if (!paymentForm.upiId.trim()) {
       setError("UPI ID is required."); return;
+    } else if (!/^[\w.\-]+@[\w.\-]+$/.test(paymentForm.upiId.trim())) {
+      setError("Please enter a valid UPI ID (e.g., name@bank)."); return;
     }
 
     setError("");
@@ -139,6 +176,7 @@ export default function CartDrawer({ isOpen, onClose }) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close cart"
             className="p-1.5 rounded-lg"
             style={{ color: "var(--color-text-muted)", transition: "color 0.2s" }}
             onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; }}
@@ -380,10 +418,12 @@ export default function CartDrawer({ isOpen, onClose }) {
 }
 
 function InputField({ label, value, onChange, type = "text", placeholder = "" }) {
+  const id = `field-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div>
-      <label className="text-text-muted text-xs font-medium uppercase tracking-wider">{label}</label>
+      <label htmlFor={id} className="text-text-muted text-xs font-medium uppercase tracking-wider">{label}</label>
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}

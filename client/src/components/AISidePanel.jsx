@@ -126,6 +126,16 @@ export default function AISidePanel({ isOpen, onClose }) {
     }
   }, [aiMessages, aiLoading]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKey(e) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
   // Determine if welcome screen should show
   const showWelcome = aiMessages.length === 0;
 
@@ -192,6 +202,7 @@ export default function AISidePanel({ isOpen, onClose }) {
           toolCalled: "fallback",
           proficiency: null,
           products: [],
+          isError: true,
         },
       ]);
     } finally {
@@ -274,6 +285,7 @@ export default function AISidePanel({ isOpen, onClose }) {
           {aiMessages.length > 0 && (
             <button
               onClick={() => { setAiMessages([]); setAiChatId(null); }}
+              aria-label="Clear chat history"
               className="p-2 rounded-lg transition-colors"
               style={{ color: "var(--color-text-muted)" }}
               onMouseEnter={(e) => {
@@ -292,6 +304,7 @@ export default function AISidePanel({ isOpen, onClose }) {
           {/* Collapse arrow */}
           <button
             onClick={onClose}
+            aria-label="Collapse AI panel"
             className="p-2 rounded-lg transition-colors"
             style={{ color: "var(--color-text-muted)" }}
             onMouseEnter={(e) => {
@@ -419,10 +432,16 @@ export default function AISidePanel({ isOpen, onClose }) {
                 }`}
                 style={
                   msg.role === "bot"
-                    ? {
-                        background: "oklch(18% 0.030 255 / 0.8)",
-                        border: "1px solid oklch(80% 0 0 / 0.06)",
-                      }
+                    ? msg.isError
+                      ? {
+                          background: "oklch(28% 0.12 25 / 0.85)",
+                          border: "1px solid oklch(65% 0.22 25 / 0.6)",
+                          color: "#fecaca",
+                        }
+                      : {
+                          background: "oklch(18% 0.030 255 / 0.8)",
+                          border: "1px solid oklch(80% 0 0 / 0.06)",
+                        }
                     : {}
                 }
               >

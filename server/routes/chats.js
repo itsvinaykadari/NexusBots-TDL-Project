@@ -97,10 +97,14 @@ router.post('/support/request-callback', (req, res) => {
   }
 });
 
-// GET /api/chats/support/callbacks
+// GET /api/chats/support/callbacks?user_id=...
 router.get('/support/callbacks', (req, res) => {
   try {
-    const callbacks = CallbackRequest.getAll();
+    const userId = req.query.user_id;
+    if (!userId) {
+      return res.status(400).json({ message: 'user_id query parameter is required.' });
+    }
+    const callbacks = CallbackRequest.getByUserId(userId);
     return res.json({ callbacks });
   } catch (error) {
     res.status(500).json({ message: error.message });

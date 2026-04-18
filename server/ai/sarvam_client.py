@@ -59,6 +59,9 @@ def _compact_product_list(tool_payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     if isinstance(result.get("added"), dict):
         products.append(result["added"])
 
+    if isinstance(result.get("target_product"), dict):
+        products.append(result["target_product"])
+
     dedup: Dict[int, Dict[str, Any]] = {}
     for item in products:
         try:
@@ -154,7 +157,8 @@ def _call_sarvam(messages: List[Dict[str, str]]) -> Tuple[Optional[str], Optiona
     }
 
     data = json.dumps(payload).encode("utf-8")
-    auth_header = os.getenv("SARVAM_AUTH_HEADER", "api-subscription-key").strip()
+    auth_header = os.getenv("SARVAM_AUTH_HEADER",
+                            "api-subscription-key").strip()
     headers = {
         "Content-Type": "application/json",
     }
@@ -257,6 +261,14 @@ def _fallback_text(
         navigation = result.get("navigation") if isinstance(
             result.get("navigation"), dict) else {}
         route = navigation.get("route", "/")
+        target = result.get("target_product") if isinstance(
+            result.get("target_product"), dict) else None
+        if target:
+            name = target.get("name", "the selected robot")
+            category = target.get("category", "")
+            if category:
+                return prefix + f"The target robot is {name} in {category} category. Guided navigation has started at {route}."
+            return prefix + f"The target robot is {name}. Guided navigation has started at {route}."
         return prefix + f"You can continue at {route}."
 
     if products:

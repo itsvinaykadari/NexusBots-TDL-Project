@@ -26,10 +26,10 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Categories</h3>
             <ul className="space-y-2 text-sm text-text-muted">
-              <li><Link to="/catalog?category=Kitchen" className="hover:text-white transition-colors">Kitchen</Link></li>
-              <li><Link to="/catalog?category=Home+Cleaner" className="hover:text-white transition-colors">Home Cleaner</Link></li>
-              <li><Link to="/catalog?category=Drone" className="hover:text-white transition-colors">Drone</Link></li>
-              <li><Link to="/catalog?category=Humanoid" className="hover:text-white transition-colors">Humanoid</Link></li>
+              <li><Link to="/catalog/kitchen" className="hover:text-white transition-colors">Kitchen</Link></li>
+              <li><Link to="/catalog/home-cleaner" className="hover:text-white transition-colors">Home Cleaner</Link></li>
+              <li><Link to="/catalog/drone" className="hover:text-white transition-colors">Drone</Link></li>
+              <li><Link to="/catalog/humanoid" className="hover:text-white transition-colors">Humanoid</Link></li>
             </ul>
           </div>
 
@@ -47,7 +47,7 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Experience</h3>
             <ul className="space-y-2 text-sm text-text-muted">
               <li><button onClick={() => window.dispatchEvent(new CustomEvent("open-chat", { detail: { mode: "ai" } }))} className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 text-sm text-text-muted"><Sparkles size={12} />Talk to AI</button></li>
-              <li><Link to="/catalog" className="hover:text-white transition-colors">Browse Categories</Link></li>
+              <li><Link to="/catalog/kitchen" className="hover:text-white transition-colors">Browse Categories</Link></li>
               <li><Link to="/orders" className="hover:text-white transition-colors">Orders & Support</Link></li>
             </ul>
           </div>

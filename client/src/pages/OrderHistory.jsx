@@ -77,10 +77,10 @@ export default function OrderHistory() {
 
   async function fetchTickets() {
     try {
-      const res = await fetch(`${API_BASE}/api/chats/support/callbacks`);
+      const res = await fetch(`${API_BASE}/api/chats/support/callbacks?user_id=${encodeURIComponent(userId)}`);
       const data = await res.json();
       if (data.callbacks) {
-        setTickets(data.callbacks.filter((t) => t.user_id === userId));
+        setTickets(data.callbacks);
       }
     } catch {
       /* empty state shown */
@@ -293,13 +293,45 @@ export default function OrderHistory() {
                         </div>
                       </div>
 
-                      {/* Progress bar */}
+                      {/* Delivery timeline */}
                       <div className="mt-4">
-                        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "oklch(80% 0 0 / 0.08)" }}>
-                          <div className="h-full rounded-full" style={{ width: `${meta.pct}%`, background: meta.color, boxShadow: `0 0 8px ${meta.color}`, transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)" }} />
-                        </div>
-                        <div className="flex justify-between text-xs text-text-muted mt-1.5">
-                          <span>Processing</span><span>Shipped</span><span>Delivered</span>
+                        <div className="relative flex items-center justify-between">
+                          {/* connector line */}
+                          <div className="absolute left-3 right-3 top-3 h-[2px]" style={{ background: "oklch(80% 0 0 / 0.1)" }} />
+                          <div
+                            className="absolute left-3 top-3 h-[2px]"
+                            style={{
+                              width: `calc(${meta.pct === 33 ? 0 : meta.pct === 66 ? 50 : 100}% - ${meta.pct === 100 ? 24 : 12}px)`,
+                              background: meta.color,
+                              boxShadow: `0 0 6px ${meta.color}`,
+                              transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+                            }}
+                          />
+                          {["Processing", "Shipped", "Delivered"].map((step, idx) => {
+                            const reached = meta.pct >= [33, 66, 100][idx];
+                            const current = order.status === step;
+                            return (
+                              <div key={step} className="relative flex flex-col items-center z-10" style={{ flex: "0 0 auto" }}>
+                                <div
+                                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+                                  style={{
+                                    background: reached ? meta.color : "oklch(22% 0 0)",
+                                    color: reached ? "#0a0a0a" : "var(--color-text-muted)",
+                                    border: `2px solid ${reached ? meta.color : "oklch(80% 0 0 / 0.15)"}`,
+                                    boxShadow: current ? `0 0 10px ${meta.color}` : "none",
+                                  }}
+                                >
+                                  {reached ? "✓" : idx + 1}
+                                </div>
+                                <span
+                                  className="text-[10px] mt-1.5"
+                                  style={{ color: reached ? meta.color : "var(--color-text-muted)", fontWeight: current ? 600 : 400 }}
+                                >
+                                  {step}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
 

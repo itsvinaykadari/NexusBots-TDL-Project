@@ -110,7 +110,7 @@ export default function RobotDetail() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-bold text-white mb-4">Robot not found</h2>
-        <Link to="/catalog" className="text-accent hover:text-neon">Back to catalog</Link>
+        <Link to="/" className="text-accent hover:text-neon">Back to home</Link>
       </div>
     );
   }
@@ -161,7 +161,7 @@ export default function RobotDetail() {
         {/* Back link */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <Link
-            to="/catalog"
+            to={`/catalog/${robot?.category?.toLowerCase().replace(/\s+/g, "-") ?? ""}`}
             className="inline-flex items-center gap-1.5 text-text-muted hover:text-white text-sm transition-colors"
           >
             <ArrowLeft size={15} />
@@ -378,7 +378,7 @@ export default function RobotDetail() {
                 </h2>
               </div>
               <Link
-                to={`/catalog?category=${encodeURIComponent(robot.category)}`}
+                to={`/catalog/${robot.category.toLowerCase().replace(/\s+/g, "-")}`}
                 className="text-sm text-text-muted hover:text-white transition-colors inline-flex items-center gap-1"
               >
                 View all {robot.category} <ArrowRight size={14} />

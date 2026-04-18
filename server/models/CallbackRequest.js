@@ -35,6 +35,12 @@ const CallbackRequest = {
             .prepare('SELECT * FROM callback_requests ORDER BY created_at DESC')
             .all();
     },
+
+    getByUserId(userId) {
+        return db
+            .prepare('SELECT * FROM callback_requests WHERE user_id = ? ORDER BY created_at DESC')
+            .all(userId);
+    },
 };
 
 module.exports = CallbackRequest;

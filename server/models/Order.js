@@ -38,17 +38,11 @@ function normalizeOrderRow(row) {
 }
 
 function computeStatusAndEta() {
-    const statuses = ['Processing', 'Shipped', 'Delivered'];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-
-    const eta = new Date();
-    if (status === 'Processing') eta.setDate(eta.getDate() + 5);
-    if (status === 'Shipped') eta.setDate(eta.getDate() + 2);
-    if (status === 'Delivered') eta.setDate(eta.getDate() - 1);
-
+    const delivered = new Date();
+    delivered.setDate(delivered.getDate() - 1);
     return {
-        status,
-        estimatedDelivery: eta.toISOString(),
+        status: 'Delivered',
+        estimatedDelivery: delivered.toISOString(),
     };
 }
 

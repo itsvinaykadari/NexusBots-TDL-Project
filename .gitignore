@@ -3,3 +3,6 @@ CLAUDE*
 /server/node_modules
 models/
 *pyc
+.env
+.env.local
+.env.*.local

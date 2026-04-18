@@ -1,19 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import { driver } from "driver.js";
-import "driver.js/dist/driver.css";
+import { computePosition, autoUpdate, offset, flip, shift, arrow } from "@floating-ui/react-dom";
 import "./guide-pulse.css";
 import flows from "./flows.json";
 
-// Route each guide-id prefix lives on so we can auto-navigate
+// Route each guide-id prefix lives on so we can auto-navigate.
+// null means "don't force navigation — find a visible element wherever it is."
 const ID_ROUTE = {
-  "nav-":              "/",          // navbar is on every page
-  "catalog-filter-":   "/catalog",
-  "product-":          null,         // dynamic — stays on current
-  "cart-":             null,         // drawer overlay — stays
+  "nav-":              null,
+  "catalog-filter-":   null,      // exists in both mega-menu AND /catalog page
+  "catalog-card-":     null,
+  "product-":          null,
+  "cart-":             null,
   "order-track-":      "/orders",
   "orders-support-":   "/orders",
-  "support-":          "/orders",    // support is merged into OrderHistory
+  "support-":          "/orders",
 };
 
 function resolveRoute(guideId) {
@@ -23,198 +25,281 @@ function resolveRoute(guideId) {
   return null;
 }
 
-function findElement(guideId) {
-  return document.querySelector(`[data-guide-id="${guideId}"]`);
+function isVisible(el) {
+  let node = el;
+  while (node && node !== document.body) {
+    const cs = window.getComputedStyle(node);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+    if (parseFloat(cs.opacity) < 0.05) return false;
+    node = node.parentElement;
+  }
+  const rect = el.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
+function findElement(guideId) {
+  const els = document.querySelectorAll(`[data-guide-id="${guideId}"]`);
+  for (const el of els) {
+    if (isVisible(el)) return el;
+  }
+  return null;
+}
+
 const UIGuideContext = createContext(null);
 
 export function useUIGuide() {
   return useContext(UIGuideContext);
 }
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+// ─── Tooltip component (portaled, Floating UI anchored) ─────────────
+function GuideTooltip({ targetEl, title, description, stepInfo, onSkip }) {
+  const tipRef = useRef(null);
+  const arrowRef = useRef(null);
+
+  useEffect(() => {
+    if (!targetEl || !tipRef.current) return;
+    const tip = tipRef.current;
+    const arrowEl = arrowRef.current;
+
+    const update = () => {
+      computePosition(targetEl, tip, {
+        placement: "bottom-start",
+        middleware: [
+          offset(12),
+          flip({ padding: 12 }),
+          shift({ padding: 12 }),
+          arrow({ element: arrowEl }),
+        ],
+      }).then(({ x, y, placement, middlewareData }) => {
+        Object.assign(tip.style, { left: `${x}px`, top: `${y}px` });
+        if (middlewareData.arrow && arrowEl) {
+          const { x: ax, y: ay } = middlewareData.arrow;
+          const side = placement.split("-")[0];
+          const staticSide = { top: "bottom", bottom: "top", left: "right", right: "left" }[side];
+          Object.assign(arrowEl.style, {
+            left: ax != null ? `${ax}px` : "",
+            top: ay != null ? `${ay}px` : "",
+            [staticSide]: "-5px",
+          });
+        }
+      });
+    };
+
+    const cleanup = autoUpdate(targetEl, tip, update);
+    return cleanup;
+  }, [targetEl]);
+
+  if (!targetEl) return null;
+
+  return createPortal(
+    <div ref={tipRef} className="guide-tooltip" role="dialog" aria-live="polite">
+      <div className="guide-tooltip-title">{title}</div>
+      {description && <div className="guide-tooltip-desc">{description}</div>}
+      <div className="guide-tooltip-actions">
+        <span className="guide-tooltip-step">{stepInfo}</span>
+        <button className="guide-tooltip-skip" onClick={onSkip}>Skip</button>
+      </div>
+      <div ref={arrowRef} className="guide-tooltip-arrow" />
+    </div>,
+    document.body
+  );
+}
+
+// ─── Provider ─────────────────────────────────────────────────────────
 export function UIGuideProvider({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeFlow, setActiveFlow] = useState(null);   // flow key
-  const [stepQueue, setStepQueue] = useState([]);        // remaining guide-ids
-  const driverRef = useRef(null);
-  const pulseElRef = useRef(null);
+  const [activeFlow, setActiveFlow] = useState(null);
+  const [stepQueue, setStepQueue] = useState([]);
+  const [flowStepsTotal, setFlowStepsTotal] = useState(0);
+  const [currentTarget, setCurrentTarget] = useState(null);
+  const [currentGuideId, setCurrentGuideId] = useState(null);
+  const activeElRef = useRef(null);
+  const clickHandlerRef = useRef(null);
 
-  function removePulse() {
-    if (pulseElRef.current) {
-      pulseElRef.current.classList.remove("guide-pulse");
-      pulseElRef.current = null;
+  const cleanupHighlight = useCallback(() => {
+    if (activeElRef.current) {
+      activeElRef.current.classList.remove("guide-active");
+      if (clickHandlerRef.current) {
+        activeElRef.current.removeEventListener("click", clickHandlerRef.current);
+      }
+      activeElRef.current = null;
     }
-  }
+    clickHandlerRef.current = null;
+  }, []);
 
-  function applyPulse(el) {
-    removePulse();
-    el.classList.add("guide-pulse");
-    pulseElRef.current = el;
-  }
+  const endFlow = useCallback(() => {
+    cleanupHighlight();
+    setCurrentTarget(null);
+    setCurrentGuideId(null);
+    setActiveFlow(null);
+    setStepQueue([]);
+    setFlowStepsTotal(0);
+  }, [cleanupHighlight]);
 
-  // Highlight the current step with driver.js popover + pulse class
+  // Advance to next step
+  const advanceFlowRef = useRef(null);
+
   const highlightStep = useCallback((guideId) => {
     const el = findElement(guideId);
     if (!el) return false;
 
-    applyPulse(el);
+    cleanupHighlight();
 
-    if (driverRef.current) {
-      driverRef.current.destroy();
-    }
+    el.classList.add("guide-active");
+    activeElRef.current = el;
+    setCurrentTarget(el);
+    setCurrentGuideId(guideId);
 
-    // Reposition overlay on scroll so highlight tracks the element
-    function onScroll() {
-      if (driverRef.current) {
-        try { driverRef.current.refresh(); } catch (_) {}
-      }
-    }
-    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+    // Scroll element into view if needed
+    el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 
-    const drv = driver({
-      overlayOpacity: 0.45,
-      smoothScroll: true,
-      allowClose: true,
-      onDestroyed: () => {
-        window.removeEventListener("scroll", onScroll, { capture: true });
-        removePulse();
-        setActiveFlow(null);
-        setStepQueue([]);
-      },
-    });
-
-    drv.highlight({
-      element: `[data-guide-id="${guideId}"]`,
-      popover: {
-        title: labelFor(guideId),
-        description: descFor(guideId),
-        side: "bottom",
-        align: "start",
-      },
-    });
-
-    driverRef.current = drv;
-
-    // Auto-advance when user clicks the highlighted element
-    function onClick() {
-      el.removeEventListener("click", onClick);
-      window.removeEventListener("scroll", onScroll, { capture: true });
-      setTimeout(() => advanceFlow(), 80);
-    }
+    // Click on the element itself advances the flow
+    const onClick = () => {
+      setTimeout(() => advanceFlowRef.current?.(), 80);
+    };
     el.addEventListener("click", onClick, { once: true });
+    clickHandlerRef.current = onClick;
 
     return true;
-  }, []);
+  }, [cleanupHighlight]);
 
-  // Try to highlight; if element not yet in DOM, retry after a short delay
-  const tryHighlight = useCallback((guideId, retries = 8) => {
+  const tryHighlight = useCallback((guideId, retries = 10) => {
     if (highlightStep(guideId)) return;
     if (retries <= 0) return;
     setTimeout(() => tryHighlight(guideId, retries - 1), 200);
   }, [highlightStep]);
 
-  // Advance to next step in the queue
   const advanceFlow = useCallback(() => {
-    setStepQueue((prev) => {
-      const [, ...rest] = prev;
-      if (rest.length === 0) {
-        if (driverRef.current) driverRef.current.destroy();
-        removePulse();
-        setActiveFlow(null);
-        return [];
-      }
-      const nextId = rest[0];
-      const route = resolveRoute(nextId);
-      if (route && location.pathname !== route) {
-        navigate(route);
-        // highlight will be triggered by the route-change effect
-      } else {
-        tryHighlight(nextId);
-      }
-      return rest;
-    });
-  }, [navigate, location.pathname, tryHighlight]);
+    setStepQueue((prev) => (prev.length <= 1 ? [] : prev.slice(1)));
+  }, []);
 
-  // When route changes mid-flow, try to highlight the current front-of-queue step
+  advanceFlowRef.current = advanceFlow;
+
+  // Drive navigation/highlight from state changes (not inside setState updaters)
   useEffect(() => {
-    if (stepQueue.length === 0) return;
-    const currentId = stepQueue[0];
-    // Small delay for the new page to render
-    const t = setTimeout(() => tryHighlight(currentId), 300);
-    return () => clearTimeout(t);
-  }, [location.pathname]);
+    if (!activeFlow) return;
 
-  // Public: start a named flow
+    if (stepQueue.length === 0) {
+      endFlow();
+      return;
+    }
+
+    const currentId = stepQueue[0];
+    const route = resolveRoute(currentId);
+
+    if (route && location.pathname !== route) {
+      const navTimer = setTimeout(() => navigate(route), 0);
+      return () => clearTimeout(navTimer);
+    }
+
+    const highlightTimer = setTimeout(() => tryHighlight(currentId), 300);
+    return () => clearTimeout(highlightTimer);
+  }, [activeFlow, stepQueue, location.pathname, navigate, tryHighlight, endFlow]);
+
+  const resolveSteps = useCallback((flowKey) => {
+    if (typeof flowKey !== "string") return null;
+
+    if (Array.isArray(flows[flowKey])) {
+      return flows[flowKey];
+    }
+
+    if (flowKey.startsWith("locate_robot:")) {
+      const targetId = Number.parseInt(flowKey.split(":")[1], 10);
+      if (Number.isFinite(targetId) && targetId > 0) {
+        return [`catalog-card-${targetId}`];
+      }
+    }
+
+    if (flowKey.startsWith("locate_path:")) {
+      const [, category, targetIdRaw] = flowKey.split(":");
+      const targetId = Number.parseInt(targetIdRaw, 10);
+      if (category && Number.isFinite(targetId) && targetId > 0) {
+        return [
+          "nav-catalog",
+          `catalog-filter-${category}`,
+          `catalog-card-${targetId}`,
+        ];
+      }
+    }
+
+    return null;
+  }, []);
+
   const startFlow = useCallback((flowKey) => {
-    const steps = flows[flowKey];
+    const steps = resolveSteps(flowKey);
     if (!steps || steps.length === 0) return;
 
-    // Clean up any running flow
-    if (driverRef.current) driverRef.current.destroy();
-    removePulse();
-
+    cleanupHighlight();
+    setCurrentTarget(null);
+    setCurrentGuideId(null);
     setActiveFlow(flowKey);
     setStepQueue(steps);
+    setFlowStepsTotal(steps.length);
+  }, [cleanupHighlight, resolveSteps]);
 
-    const firstId = steps[0];
-    const route = resolveRoute(firstId);
-    if (route && location.pathname !== route) {
-      navigate(route);
-    } else {
-      tryHighlight(firstId);
-    }
-  }, [location.pathname, navigate, tryHighlight]);
-
-  // Cleanup on unmount
+  // Escape closes guide
   useEffect(() => {
-    return () => {
-      if (driverRef.current) driverRef.current.destroy();
-      removePulse();
-    };
-  }, []);
+    if (!currentTarget) return;
+    const onKey = (e) => { if (e.key === "Escape") endFlow(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [currentTarget, endFlow]);
+
+  useEffect(() => () => cleanupHighlight(), [cleanupHighlight]);
+
+  const totalSteps = flowStepsTotal;
+  const currentStepIdx = totalSteps - stepQueue.length + 1;
 
   return (
     <UIGuideContext.Provider value={{ startFlow, activeFlow }}>
       {children}
+      {currentTarget && currentGuideId && (
+        <GuideTooltip
+          targetEl={currentTarget}
+          title={labelFor(currentGuideId)}
+          description={descFor(currentGuideId)}
+          stepInfo={`Step ${currentStepIdx} of ${totalSteps}`}
+          onSkip={endFlow}
+        />
+      )}
     </UIGuideContext.Provider>
   );
 }
 
-// Human-readable labels for popover titles
 function labelFor(guideId) {
+  if (guideId.startsWith("catalog-card-")) return "Found Robot";
+
   const map = {
-    "nav-home":                   "Go Home",
-    "nav-catalog":                "Browse Products",
-    "nav-assistant":              "AI Assistant",
-    "nav-orders":                 "Your Orders",
-    "nav-cart":                   "Shopping Cart",
-    "cart-checkout":              "Checkout",
-    "order-track-latest":         "Track Latest Order",
-    "catalog-filter-Drone":       "Drone Category",
-    "catalog-filter-Kitchen":     "Kitchen Category",
-    "catalog-filter-Home Cleaner":"Home Cleaner Category",
-    "catalog-filter-Humanoid":    "Humanoid Category",
-    "product-add-to-cart":        "Add to Cart",
-    "product-compare":            "Compare Products",
-    "orders-support-tab":         "Support & Tickets",
-    "support-new-ticket":         "Create New Ticket",
-    "support-ticket-list":        "View Your Tickets",
+    "nav-home": "Go Home",
+    "nav-catalog": "Browse Products",
+    "nav-assistant": "AI Assistant",
+    "nav-orders": "Your Orders",
+    "nav-cart": "Shopping Cart",
+    "cart-checkout": "Checkout",
+    "order-track-latest": "Track Latest Order",
+    "catalog-filter-Drone": "Drone Category",
+    "catalog-filter-Kitchen": "Kitchen Category",
+    "catalog-filter-Home Cleaner": "Home Cleaner Category",
+    "catalog-filter-Humanoid": "Humanoid Category",
+    "product-add-to-cart": "Add to Cart",
+    "product-compare": "Compare Products",
+    "orders-support-tab": "Support & Tickets",
+    "support-new-ticket": "Create New Ticket",
+    "support-ticket-list": "View Your Tickets",
   };
   return map[guideId] ?? guideId;
 }
 
 function descFor(guideId) {
-  if (guideId.startsWith("nav-"))            return "Click to navigate.";
+  if (guideId.startsWith("catalog-card-")) return "Click this robot card to open its details page.";
+  if (guideId.startsWith("nav-")) return "Click the highlighted button to continue.";
   if (guideId.startsWith("catalog-filter-")) return "Click to filter by this category.";
-  if (guideId === "cart-checkout")           return "Proceed to payment when ready.";
-  if (guideId === "order-track-latest")      return "Track the status of your most recent order.";
-  if (guideId === "product-compare")         return "Compare this robot with similar models.";
-  if (guideId === "orders-support-tab")      return "Navigate to the support section.";
-  if (guideId === "support-new-ticket")      return "Create a new support ticket for your issue.";
-  if (guideId === "support-ticket-list")     return "View and manage your existing tickets.";
-  return "Click to continue.";
+  if (guideId === "cart-checkout") return "Proceed to payment when ready.";
+  if (guideId === "order-track-latest") return "Track the status of your most recent order.";
+  if (guideId === "product-compare") return "Compare this robot with similar models.";
+  if (guideId === "orders-support-tab") return "Navigate to the support section.";
+  if (guideId === "support-new-ticket") return "Create a new support ticket for your issue.";
+  if (guideId === "support-ticket-list") return "View and manage your existing tickets.";
+  return "Click the highlighted element to continue.";
 }
