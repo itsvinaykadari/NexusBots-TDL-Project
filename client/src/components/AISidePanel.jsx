@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   Bot,
   Send,
@@ -399,7 +400,9 @@ export default function AISidePanel({ isOpen, onClose }) {
                     : {}
                 }
               >
-                <p>{msg.content}</p>
+                <div className="prose prose-invert prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
 
                 {msg.role === "bot" && msg.toolCalled && (
                   <div className="mt-2 flex flex-wrap gap-2">

@@ -67,11 +67,20 @@ export function UIGuideProvider({ children }) {
       driverRef.current.destroy();
     }
 
+    // Reposition overlay on scroll so highlight tracks the element
+    function onScroll() {
+      if (driverRef.current) {
+        try { driverRef.current.refresh(); } catch (_) {}
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+
     const drv = driver({
       overlayOpacity: 0.45,
       smoothScroll: true,
       allowClose: true,
       onDestroyed: () => {
+        window.removeEventListener("scroll", onScroll, { capture: true });
         removePulse();
         setActiveFlow(null);
         setStepQueue([]);
@@ -93,7 +102,7 @@ export function UIGuideProvider({ children }) {
     // Auto-advance when user clicks the highlighted element
     function onClick() {
       el.removeEventListener("click", onClick);
-      // Give the click a tick to process, then advance
+      window.removeEventListener("scroll", onScroll, { capture: true });
       setTimeout(() => advanceFlow(), 80);
     }
     el.addEventListener("click", onClick, { once: true });
