@@ -13,6 +13,8 @@ import {
   Package,
   Compass,
   MessageCircle,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { getOrCreateUserId } from "../utils/user";
 import { useUserActivity } from "../context/UserActivityContext";
@@ -172,6 +174,9 @@ export default function AISidePanel({ isOpen, onClose }) {
           proficiency: data.proficiency || null,
           products,
           uiGuide: data.ui_guide || null,
+          toolSource: data.toolSource || null,
+          ragEnabled: data.ragEnabled || false,
+          warnings: Array.isArray(data.warnings) ? data.warnings : [],
         },
       ]);
       // Phase 2.3: If AI response includes ui_guide, trigger the visual flow
@@ -264,23 +269,44 @@ export default function AISidePanel({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Collapse arrow */}
-        <button
-          onClick={onClose}
-          className="p-2 rounded-lg transition-colors"
-          style={{ color: "var(--color-text-muted)" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#fff";
-            e.currentTarget.style.background = "oklch(80% 0 0 / 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "var(--color-text-muted)";
-            e.currentTarget.style.background = "transparent";
-          }}
-          title="Collapse panel"
-        >
-          <ChevronRight size={18} />
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Clear chat */}
+          {aiMessages.length > 0 && (
+            <button
+              onClick={() => { setAiMessages([]); setAiChatId(null); }}
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: "var(--color-text-muted)" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#f87171";
+                e.currentTarget.style.background = "oklch(80% 0 0 / 0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--color-text-muted)";
+                e.currentTarget.style.background = "transparent";
+              }}
+              title="Clear chat"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+          {/* Collapse arrow */}
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg transition-colors"
+            style={{ color: "var(--color-text-muted)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.background = "oklch(80% 0 0 / 0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--color-text-muted)";
+              e.currentTarget.style.background = "transparent";
+            }}
+            title="Collapse panel"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
 
       {/* ── Content area ─────────────────────────────────── */}
@@ -414,6 +440,24 @@ export default function AISidePanel({ isOpen, onClose }) {
                         {msg.proficiency}
                       </span>
                     )}
+                    {msg.toolSource && msg.toolSource !== "unknown" && (
+                      <span className="text-[11px] px-2 py-1 rounded-full border" style={
+                        msg.toolSource === "model"
+                          ? { background: "oklch(55% 0.18 145 / 0.2)", color: "#4ade80", borderColor: "oklch(55% 0.18 145 / 0.4)" }
+                          : { background: "oklch(75% 0.18 80 / 0.15)", color: "#facc15", borderColor: "oklch(75% 0.18 80 / 0.35)" }
+                      }>
+                        {msg.toolSource === "model" ? "⚡ Model" : "⚙ Heuristic"}
+                      </span>
+                    )}
+                    {msg.ragEnabled && (
+                      <span className="text-[11px] px-2 py-1 rounded-full border" style={{
+                        background: "oklch(65% 0.20 270 / 0.15)",
+                        color: "#a78bfa",
+                        borderColor: "oklch(65% 0.20 270 / 0.35)",
+                      }}>
+                        ◈ RAG
+                      </span>
+                    )}
                     {msg.uiGuide && (
                       <span className="text-[11px] px-2 py-1 rounded-full border" style={{
                         background: "oklch(78% 0.18 145 / 0.15)",
@@ -423,6 +467,18 @@ export default function AISidePanel({ isOpen, onClose }) {
                         ✦ Guiding you…
                       </span>
                     )}
+                  </div>
+                )}
+
+                {/* Warnings */}
+                {msg.role === "bot" && msg.warnings?.length > 0 && (
+                  <div className="mt-2 flex items-start gap-1.5 rounded-lg px-2.5 py-2 text-[11px] leading-relaxed" style={{
+                    background: "oklch(75% 0.18 80 / 0.08)",
+                    border: "1px solid oklch(75% 0.18 80 / 0.25)",
+                    color: "#fbbf24",
+                  }}>
+                    <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+                    <span>{msg.warnings.join(" · ")}</span>
                   </div>
                 )}
 

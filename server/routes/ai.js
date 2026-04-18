@@ -428,6 +428,8 @@ router.post('/chat', rateLimit, async (req, res) => {
         chatId,
         source: sarvamResult?.source || 'fallback',
         ui_guide: pipelineResult?.ui_guide || null,
+        toolSource: pipelineResult?.toolSource || 'unknown',
+        ragEnabled: pipelineResult?.ragEnabled || false,
         warnings: [pipelineError, sarvamError, sarvamResult?.error].filter(Boolean),
     });
 });
