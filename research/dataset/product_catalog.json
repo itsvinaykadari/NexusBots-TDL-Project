@@ -2,52 +2,148 @@
     {
         "id": 1,
         "name": "Amazon Astro",
-        "category": "Kitchen"
+        "category": "Kitchen",
+        "brand": "Amazon",
+        "price": 1599.99,
+        "in_stock": true,
+        "rating": 4.3,
+        "highlight": "Kitchen Voice Assistant",
+        "tags": ["kitchen", "assistant", "alexa", "smart home"],
+        "specs": { "display": "10-inch HD", "battery": "Up to 5 hours", "assistant": "Alexa built-in", "camera": "1080p periscope", "navigation": "Visual SLAM", "connectivity": "Wi-Fi 6 + Bluetooth" }
     },
     {
         "id": 2,
         "name": "Samsung Ballie",
-        "category": "Kitchen"
+        "category": "Kitchen",
+        "brand": "Samsung",
+        "price": 1299.99,
+        "in_stock": false,
+        "rating": 4.5,
+        "highlight": "Kitchen Companion",
+        "tags": ["kitchen", "projector", "assistant", "smart appliances"],
+        "specs": { "projector": "1080p built-in", "processor": "Edge AI chip", "connectivity": "Wi-Fi 6E", "battery": "Up to 3 hours", "sensors": "ToF + camera array", "control": "SmartThings integration" }
     },
     {
         "id": 3,
         "name": "Enabot EBO X",
-        "category": "Kitchen"
+        "category": "Kitchen",
+        "brand": "Enabot",
+        "price": 599.99,
+        "in_stock": true,
+        "rating": 4.4,
+        "highlight": "Kitchen Monitoring",
+        "tags": ["kitchen", "camera", "monitoring", "remote"],
+        "specs": { "camera": "4K ultra-wide", "audio": "Two-way speaker + mic", "navigation": "LiDAR SLAM", "night_vision": "Infrared mode", "battery": "Up to 4 hours", "docking": "Auto-return charging" }
     },
     {
         "id": 4,
         "name": "iRobot Roomba j9+",
-        "category": "Home Cleaner"
+        "category": "Home Cleaner",
+        "brand": "iRobot",
+        "price": 799.99,
+        "in_stock": true,
+        "rating": 4.5,
+        "highlight": "Smart Vacuum",
+        "tags": ["vacuum", "auto-empty", "mapping"],
+        "specs": { "runtime": "Up to 75 minutes", "navigation": "PrecisionVision", "dock": "Auto-empty Clean Base", "suction": "3-stage cleaning", "control": "App scheduling + zones", "voice": "Alexa + Google Assistant" }
     },
     {
         "id": 5,
         "name": "Roborock S8 MaxV Ultra",
-        "category": "Home Cleaner"
+        "category": "Home Cleaner",
+        "brand": "Roborock",
+        "price": 1799.99,
+        "in_stock": true,
+        "rating": 4.7,
+        "highlight": "Vacuum + Mop Combo",
+        "tags": ["vacuum", "mop", "auto-dock"],
+        "specs": { "suction": "10,000 Pa", "runtime": "Up to 180 minutes", "dock": "Auto-empty + wash + dry", "navigation": "LiDAR + Reactive AI", "mopping": "Dual vibra-rise system", "mapping": "Multi-floor smart maps" }
     },
     {
         "id": 6,
         "name": "Ecovacs WINBOT W2 Omni",
-        "category": "Home Cleaner"
+        "category": "Home Cleaner",
+        "brand": "Ecovacs",
+        "price": 499.99,
+        "in_stock": false,
+        "rating": 4.2,
+        "highlight": "Window Cleaner",
+        "tags": ["window", "cleaning", "auto-spray"],
+        "specs": { "navigation": "WIN-SLAM 4.0", "suction": "2800 Pa", "safety": "Anti-fall detection", "cleaning": "Auto spray + microfiber wipe", "compatibility": "Framed + frameless glass", "noise": "Low-noise mode" }
     },
     {
         "id": 7,
         "name": "Ring Always Home Cam",
-        "category": "Drone"
+        "category": "Drone",
+        "brand": "Ring (Amazon)",
+        "price": 249.99,
+        "in_stock": true,
+        "rating": 4.1,
+        "highlight": "Indoor Patrol Drone",
+        "tags": ["drone", "security", "indoor", "patrol"],
+        "specs": { "camera": "1080p HD", "flight": "Up to 5 minutes", "charging": "Auto-dock", "navigation": "Obstacle avoidance", "integration": "Ring Alarm ecosystem", "control": "Mobile app route presets" }
     },
     {
         "id": 8,
         "name": "DJI Matrice 30T",
-        "category": "Drone"
+        "category": "Drone",
+        "brand": "DJI",
+        "price": 13600.00,
+        "in_stock": true,
+        "rating": 4.7,
+        "highlight": "Thermal Drone",
+        "tags": ["drone", "thermal", "enterprise", "inspection"],
+        "specs": { "camera": "48MP + thermal", "flight": "Up to 41 minutes", "weatherproof": "IP55", "zoom": "200x hybrid", "transmission": "Long-range encrypted link", "safety": "Multi-sensor obstacle avoidance" }
     },
     {
         "id": 9,
         "name": "Aiper Surfer S1",
-        "category": "Drone"
+        "category": "Drone",
+        "brand": "Aiper",
+        "price": 1399.99,
+        "in_stock": false,
+        "rating": 4.4,
+        "highlight": "Pool Surface Drone",
+        "tags": ["drone", "pool", "autonomous", "cleaning"],
+        "specs": { "navigation": "Sonar guidance", "runtime": "Up to 90 minutes", "coverage": "Up to 2,150 sq ft", "filtration": "Fine debris mesh", "charging": "Dock-ready charging", "control": "Mobile app scheduling" }
     },
     {
         "id": 10,
         "name": "Miko 3",
-        "category": "Humanoid"
+        "category": "Humanoid",
+        "brand": "Miko",
+        "price": 249.99,
+        "in_stock": true,
+        "rating": 4.6,
+        "highlight": "Kids Companion",
+        "tags": ["humanoid", "kids", "learning", "AI"],
+        "specs": { "age_range": "5-12 years", "activities": "1000+ sessions", "battery": "Up to 7 hours", "ai": "Conversational + adaptive", "connectivity": "Wi-Fi", "parental_controls": "Companion app" }
+    },
+    {
+        "id": 11,
+        "name": "Wonder Workshop Dash",
+        "category": "Humanoid",
+        "brand": "Wonder Workshop",
+        "price": 149.99,
+        "in_stock": true,
+        "rating": 4.7,
+        "highlight": "Coding Robot",
+        "tags": ["humanoid", "coding", "education", "STEM"],
+        "specs": { "programming": "Blockly", "connectivity": "Bluetooth", "battery": "Up to 5 hours", "sensors": "Proximity + microphone", "age_range": "6-11 years", "classroom_use": "STEM curriculum ready" }
+    },
+    {
+        "id": 12,
+        "name": "LEGO Education Spike Prime",
+        "category": "Humanoid",
+        "brand": "LEGO",
+        "price": 395.95,
+        "in_stock": false,
+        "rating": 4.8,
+        "highlight": "Classroom Robotics Kit",
+        "tags": ["humanoid", "LEGO", "python", "classroom"],
+        "specs": { "pieces": "523", "programming": "Scratch + Python", "hub": "6-port programmable hub", "sensors": "Color + distance + force", "motors": "3 included motors", "curriculum": "40+ guided lessons" }
+    }
+]
     },
     {
         "id": 11,

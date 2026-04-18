@@ -12,6 +12,8 @@ const ID_ROUTE = {
   "product-":          null,         // dynamic — stays on current
   "cart-":             null,         // drawer overlay — stays
   "order-track-":      "/orders",
+  "orders-support-":   "/orders",
+  "support-":          "/orders",    // support is merged into OrderHistory
 };
 
 function resolveRoute(guideId) {
@@ -189,6 +191,9 @@ function labelFor(guideId) {
     "catalog-filter-Humanoid":    "Humanoid Category",
     "product-add-to-cart":        "Add to Cart",
     "product-compare":            "Compare Products",
+    "orders-support-tab":         "Support & Tickets",
+    "support-new-ticket":         "Create New Ticket",
+    "support-ticket-list":        "View Your Tickets",
   };
   return map[guideId] ?? guideId;
 }
@@ -199,5 +204,8 @@ function descFor(guideId) {
   if (guideId === "cart-checkout")           return "Proceed to payment when ready.";
   if (guideId === "order-track-latest")      return "Track the status of your most recent order.";
   if (guideId === "product-compare")         return "Compare this robot with similar models.";
+  if (guideId === "orders-support-tab")      return "Navigate to the support section.";
+  if (guideId === "support-new-ticket")      return "Create a new support ticket for your issue.";
+  if (guideId === "support-ticket-list")     return "View and manage your existing tickets.";
   return "Click to continue.";
 }

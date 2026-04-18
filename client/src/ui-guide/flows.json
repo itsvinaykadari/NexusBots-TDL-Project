@@ -1,10 +1,13 @@
 {
-  "check_orders":    ["nav-orders"],
-  "track_delivery":  ["nav-orders", "order-track-latest"],
-  "update_cart":     ["nav-cart", "cart-checkout"],
-  "find_drone":      ["nav-catalog", "catalog-filter-Drone"],
-  "find_kitchen":    ["nav-catalog", "catalog-filter-Kitchen"],
-  "find_cleaner":    ["nav-catalog", "catalog-filter-Home Cleaner"],
-  "find_humanoid":   ["nav-catalog", "catalog-filter-Humanoid"],
-  "compare_products":["nav-catalog", "product-compare"]
+  "check_orders":      ["nav-orders"],
+  "track_delivery":    ["nav-orders", "order-track-latest"],
+  "update_cart":       ["nav-cart", "cart-checkout"],
+  "find_drone":        ["nav-catalog", "catalog-filter-Drone"],
+  "find_kitchen":      ["nav-catalog", "catalog-filter-Kitchen"],
+  "find_home_cleaner": ["nav-catalog", "catalog-filter-Home Cleaner"],
+  "find_humanoid":     ["nav-catalog", "catalog-filter-Humanoid"],
+  "compare_products":  ["nav-catalog", "product-compare"],
+  "open_support":      ["nav-orders", "orders-support-tab"],
+  "new_ticket":        ["nav-orders", "orders-support-tab", "support-new-ticket"],
+  "view_tickets":      ["nav-orders", "orders-support-tab", "support-ticket-list"]
 }

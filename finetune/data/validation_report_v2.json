@@ -1,0 +1,91 @@
+{
+  "full": {
+    "total": 1000,
+    "by_language": {
+      "en": 500,
+      "hi": 250,
+      "te": 250
+    },
+    "by_tool": {
+      "search_products": 168,
+      "get_product": 168,
+      "compare_products": 168,
+      "recommend": 168,
+      "add_to_cart": 166,
+      "navigate_to": 162
+    },
+    "by_proficiency": {
+      "beginner": 500,
+      "expert": 500
+    },
+    "by_ui_guide": {
+      "find_humanoid": 79,
+      "compare_products": 168,
+      "find_cleaner": 77,
+      "find_drone": 96,
+      "find_kitchen": 84,
+      "check_orders": 19,
+      "update_cart": 27
+    },
+    "ui_guide_null_count": 450
+  },
+  "train": {
+    "total": 900,
+    "by_language": {
+      "te": 224,
+      "hi": 226,
+      "en": 450
+    },
+    "by_tool": {
+      "compare_products": 150,
+      "get_product": 152,
+      "recommend": 151,
+      "add_to_cart": 149,
+      "search_products": 152,
+      "navigate_to": 146
+    },
+    "by_proficiency": {
+      "beginner": 455,
+      "expert": 445
+    },
+    "by_ui_guide": {
+      "compare_products": 150,
+      "find_humanoid": 74,
+      "find_drone": 86,
+      "find_cleaner": 69,
+      "find_kitchen": 74,
+      "check_orders": 18,
+      "update_cart": 27
+    },
+    "ui_guide_null_count": 402
+  },
+  "test": {
+    "total": 100,
+    "by_language": {
+      "en": 50,
+      "hi": 24,
+      "te": 26
+    },
+    "by_tool": {
+      "navigate_to": 16,
+      "recommend": 17,
+      "get_product": 16,
+      "search_products": 16,
+      "compare_products": 18,
+      "add_to_cart": 17
+    },
+    "by_proficiency": {
+      "beginner": 45,
+      "expert": 55
+    },
+    "by_ui_guide": {
+      "find_drone": 10,
+      "find_humanoid": 5,
+      "compare_products": 18,
+      "find_cleaner": 8,
+      "find_kitchen": 10,
+      "check_orders": 1
+    },
+    "ui_guide_null_count": 48
+  }
+}

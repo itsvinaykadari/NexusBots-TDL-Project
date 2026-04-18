@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -109,6 +110,11 @@ def _build_user_prompt(tool_payload: Dict[str, Any], context: Dict[str, Any], la
     return json.dumps(prompt, ensure_ascii=False)
 
 
+def _strip_thinking_tags(text: str) -> str:
+    """Remove <think>...</think> reasoning blocks from model output."""
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
+
 def _extract_text_from_response(data: Dict[str, Any]) -> Optional[str]:
     choices = data.get("choices")
     if isinstance(choices, list) and choices:
@@ -116,16 +122,16 @@ def _extract_text_from_response(data: Dict[str, Any]) -> Optional[str]:
         if isinstance(first, dict):
             message = first.get("message")
             if isinstance(message, dict) and isinstance(message.get("content"), str):
-                return message["content"].strip()
+                return _strip_thinking_tags(message["content"].strip())
 
     if isinstance(data.get("response"), str):
-        return data["response"].strip()
+        return _strip_thinking_tags(data["response"].strip())
 
     output = data.get("output")
     if isinstance(output, list) and output:
         first = output[0]
         if isinstance(first, dict) and isinstance(first.get("content"), str):
-            return first["content"].strip()
+            return _strip_thinking_tags(first["content"].strip())
 
     return None
 
@@ -347,5 +353,40 @@ def _cli() -> int:
         return 0
 
 
+def _worker() -> int:
+    """Long-lived worker: reads JSON lines from stdin, writes JSON lines to stdout."""
+    sys.stdout.write(json.dumps({"ready": True}) + "\n")
+    sys.stdout.flush()
+
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            payload = json.loads(line)
+            tool_payload = payload.get("toolPayload")
+            if not isinstance(tool_payload, dict):
+                tool_payload = payload.get("pipeline") if isinstance(
+                    payload.get("pipeline"), dict) else {}
+            language = payload.get("language", "en")
+            context = payload.get("context", {})
+            proficiency = payload.get(
+                "proficiency", tool_payload.get("proficiency", "beginner"))
+            output = generate_response(
+                tool_payload=tool_payload, language=language,
+                context=context, proficiency=proficiency)
+        except Exception as error:
+            output = {
+                "ok": False, "source": "fallback", "language": "en",
+                "response": "Pipeline error. Please try again.",
+                "error": str(error),
+            }
+        sys.stdout.write(json.dumps(output, ensure_ascii=False) + "\n")
+        sys.stdout.flush()
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--worker":
+        raise SystemExit(_worker())
     raise SystemExit(_cli())

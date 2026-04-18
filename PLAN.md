@@ -34,27 +34,36 @@
 ## Verified Baseline (already done — do not rebuild)
 
 - ✅ Express + SQLite backend, 12 robots / 4 categories (Kitchen, Home Cleaner, Drone, Humanoid)
-- ✅ React 19 + Vite + Tailwind scaffold with 5 pages + 7 components
+- ✅ React 19 + Vite + Tailwind scaffold with 4 pages (Home, Catalog, RobotDetail, OrderHistory) + active components
 - ✅ `UserActivityContext` tracks page, viewed, cart, search, category, currentProduct
-- ✅ `pipeline.py` — 6 tools, dual-path decider, FAISS+context re-rank
-- ✅ `sarvam_client.py` — persona-adaptive, EN/HI/TE, fallback wired
+- ✅ `pipeline.py` — 6 tools, dual-path decider, FAISS+context re-rank, PipelineRuntime singleton, worker mode
+- ✅ `sarvam_client.py` — persona-adaptive, EN/HI/TE, fallback wired, worker mode
 - ✅ 1000-row function-calling dataset (EN 500 / HI 250 / TE 250, beginner 500 / expert 500), all strict checks pass
-- ✅ `ChatWidget` + `AIAssistant` hit `/api/ai/chat` with full context
+- ✅ `AISidePanel` hits `/api/ai/chat` with full context, triggers UI guidance via `startFlow()`
 - ✅ STT via Web Speech API
+- ✅ Premium UI: ParticleNetwork hero, bento layouts, editorial category sections, mega-menu navbar
+- ✅ UI Guidance system: driver.js + 11 flows + guide-pulse.css + UIGuideProvider with auto-navigation
+- ✅ CartDrawer: 3-step flow (cart → payment → success), posts to `/api/orders`
+- ✅ OrderHistory: merged Orders + Support tabs, inline support forms, ticket management
+- ✅ `ai.js` PythonWorker: persistent subprocess reuse via JSON-line IPC, rate limiting, Chat.addMessage try/catch
+- ✅ P2.2 correctness fixes: budget extraction, Hindi/Telugu tokens, category fallback
+- ✅ P2.3 ui_guide emission: check_orders, update_cart, compare_products, find_{category}
+- ✅ Orphaned files removed: ChatWidget, AIAssistant, SupportTickets, HeroSection, FeaturedRobots, RobotCard
 
 ---
 
 ## Missing (the 24-hour scope)
 
-| # | Item | Phase |
-|---|---|---|
-| M1 | Grand Vercel-grade UI redesign (Home, Catalog, RobotDetail) | **P1** |
-| M2 | UI guidance system (driver.js + intent-keyed flows) | **P1** |
-| M3 | Performance fixes: PipelineRuntime singleton, subprocess reuse | **P2** |
-| M4 | Correctness fixes: `_extract_ids`, `_extract_budget`, `detect_proficiency` HI/TE, category fallback | **P2** |
-| M5 | Fine-tuned Qwen3.5-0.8B weights (LoRA adapter + merged) | **P3** |
-| M6 | Benchmarks B1, B2, B4 filled with real numbers | **P3** |
-| M7 | Demo video + slides + README refresh | **P4** |
+| # | Item | Phase | Status |
+|---|---|---|---|
+| M1 | Grand Vercel-grade UI redesign (Home, Catalog, RobotDetail) | **P1** | ✅ Complete |
+| M2 | UI guidance system (driver.js + intent-keyed flows) | **P1** | ✅ Complete |
+| M3 | Performance fixes: PipelineRuntime singleton, subprocess reuse | **P2** | ✅ Complete |
+| M4 | Correctness fixes: `_extract_ids`, `_extract_budget`, `detect_proficiency` HI/TE, category fallback | **P2** | ✅ Complete |
+| M4b | Model integration: fc_model.py (ChatML), base Qwen3.5-0.8B on GPU, Sarvam API connected, semantic RAG enabled | **P3** | ✅ Complete |
+| M5 | Fine-tuned Qwen3.5-0.8B weights (LoRA adapter + merged) | **P3** | Pending |
+| M6 | Benchmarks B1, B2, B4 filled with real numbers | **P3** | Pending |
+| M7 | Demo video + slides + README refresh | **P4** | Pending |
 
 ---
 
@@ -123,7 +132,7 @@ Update `OrderHistory.jsx`:
     "update_cart":     ["nav-cart", "cart-checkout"],
     "find_drone":      ["nav-catalog", "catalog-filter-Drone"],
     "find_kitchen":    ["nav-catalog", "catalog-filter-Kitchen"],
-    "find_cleaner":    ["nav-catalog", "catalog-filter-Home Cleaner"],
+    "find_home_cleaner":    ["nav-catalog", "catalog-filter-Home Cleaner"],
     "find_humanoid":   ["nav-catalog", "catalog-filter-Humanoid"],
     "compare_products":["nav-catalog", "product-compare"]
   }

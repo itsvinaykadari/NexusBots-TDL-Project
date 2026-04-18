@@ -1,23 +1,21 @@
 @keyframes guide-pulse {
   0%, 100% {
     box-shadow:
-      0 0 0 0   oklch(65% 0.28 290 / 0.7),
-      0 0 0 6px oklch(65% 0.28 290 / 0.25);
-    transform: scale(1);
+      0 0 0 0   oklch(78% 0.16 195 / 0.8),
+      0 0 0 6px oklch(78% 0.16 195 / 0.2);
   }
   50% {
     box-shadow:
-      0 0 0 4px  oklch(65% 0.28 290 / 0.5),
-      0 0 0 12px oklch(65% 0.28 290 / 0.12);
-    transform: scale(1.04);
+      0 0 0 3px  oklch(78% 0.16 195 / 0.6),
+      0 0 0 10px oklch(78% 0.16 195 / 0.08);
   }
 }
 
 .guide-pulse {
-  animation: guide-pulse 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: guide-pulse 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   position: relative;
   z-index: 9999;
-  outline: 2px solid oklch(65% 0.28 290 / 0.8);
+  outline: 2px solid oklch(78% 0.16 195 / 0.9);
   outline-offset: 3px;
   border-radius: 8px;
 }

@@ -240,13 +240,14 @@ export default function RobotDetail() {
                 <ShoppingCart size={17} />
                 {addedFlash ? "Added!" : "Add to Cart"}
               </button>
-              <Link
-                to="/assistant"
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white text-sm border border-white/12 hover:border-white/25 hover:bg-white/5 transition-all"
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("open-chat", { detail: { mode: "ai" } }))}
+                className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white text-sm border border-white/12 hover:border-white/25 hover:bg-white/5 transition-all cursor-pointer"
+                style={{ background: "none" }}
               >
                 <MessageCircle size={17} />
                 Ask AI
-              </Link>
+              </button>
             </div>
           </div>
         </div>

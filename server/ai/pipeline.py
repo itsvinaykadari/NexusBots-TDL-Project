@@ -81,6 +81,8 @@ TECHNICAL_TOKENS_HI = {
     "सटीकता",
     "एपीआई",
     "तुलना",
+    "स्पेक",
+    "कीमत",
 }
 
 TECHNICAL_TOKENS_TE = {
@@ -95,6 +97,8 @@ TECHNICAL_TOKENS_TE = {
     "ఖచ్చితత్వం",
     "ఏపీఐ",
     "పోలిక",
+    "స్పెక్",
+    "ధర",
 }
 
 _ROUTE_MAP = {
@@ -474,7 +478,7 @@ class PipelineRuntime:
         budgets: List[int] = []
         for value in pattern.findall(lowered):
             amount = _to_float(value)
-            if 50 <= amount <= 50000:
+            if 50 <= amount <= 50000 and not (1900 <= amount <= 2100):
                 budgets.append(int(amount))
 
         trailing = re.findall(
@@ -483,7 +487,7 @@ class PipelineRuntime:
         )
         for value in trailing:
             amount = _to_float(value)
-            if 50 <= amount <= 50000:
+            if 50 <= amount <= 50000 and not (1900 <= amount <= 2100):
                 budgets.append(int(amount))
 
         if not budgets:
@@ -614,6 +618,27 @@ class PipelineRuntime:
                 },
             }
 
+        # Order / tracking intent (HI: order kahan, EN: my order, where is my order, track)
+        if any(token in text for token in [
+            "my order", "my orders", "where is my order", "order status",
+            "track my", "order kahan", "mera order", "delivery status",
+            "ఆర్డర్", "నా ఆర్డర్",
+        ]):
+            return {
+                "tool": "navigate_to",
+                "arguments": {"page": "orders", "params": {}},
+            }
+
+        # Cart intent
+        if any(token in text for token in [
+            "my cart", "view cart", "show cart", "checkout",
+            "कार्ट", "mera cart",
+        ]):
+            return {
+                "tool": "navigate_to",
+                "arguments": {"page": "cart", "params": {}},
+            }
+
         if any(token in text for token in ["detail", "details", "spec", "specs", "price of", "about"]):
             product_id = ids[0] if ids else self._default_product_id(context)
             return {
@@ -630,6 +655,17 @@ class PipelineRuntime:
         }
 
     def _model_tool_call(self, message: str, language: str, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        # Use ChatML-based fc_model for proper model inference
+        try:
+            # Ensure the server/ai directory is on sys.path for sibling imports
+            _ai_dir = str(Path(__file__).resolve().parent)
+            if _ai_dir not in sys.path:
+                sys.path.insert(0, _ai_dir)
+            import fc_model  # type: ignore
+            return fc_model.predict_tool_call(message, language, context)
+        except ImportError:
+            pass
+        # If fc_model not available, fall back to legacy generator
         generator = _load_fc_generator()
         if generator is None:
             return None
@@ -736,6 +772,14 @@ class PipelineRuntime:
         if tool == "navigate_to":
             page = _normalize_page(
                 args.get("page", self._detect_page(message, context)))
+            # Keyword-based page correction (fixes base model misrouting)
+            text_lower = message.lower()
+            order_tokens = ["order", "orders", "ऑर्डर", "ఆర్డర్", "track", "delivery"]
+            cart_tokens = ["cart", "checkout", "basket", "कार्ट"]
+            if page == "cart" and any(t in text_lower for t in order_tokens) and not any(t in text_lower for t in cart_tokens):
+                page = "orders"
+            elif page == "orders" and any(t in text_lower for t in cart_tokens) and not any(t in text_lower for t in order_tokens):
+                page = "cart"
             params = args.get("params") if isinstance(
                 args.get("params"), dict) else {}
             normalized_params: Dict[str, Any] = {}
@@ -959,12 +1003,14 @@ class PipelineRuntime:
         walk(payload)
         return sorted(found)
 
-    def decide_tool(self, message: str, language: str, context: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
+    def decide_tool(self, message: str, language: str, context: Dict[str, Any]) -> Tuple[Dict[str, Any], str, Optional[str]]:
+        """Returns (sanitized_tool_call, source, model_ui_guide_or_None)."""
         tool_call = self._model_tool_call(
             message=message, language=language, context=context)
         if tool_call:
-            return self._sanitize_tool_call(tool_call, message=message, context=context), "model"
-        return self._sanitize_tool_call(self._heuristic_tool_call(message, context), message=message, context=context), "heuristic"
+            model_ui_guide = tool_call.get("ui_guide")  # from fc_model
+            return self._sanitize_tool_call(tool_call, message=message, context=context), "model", model_ui_guide
+        return self._sanitize_tool_call(self._heuristic_tool_call(message, context), message=message, context=context), "heuristic", None
 
 
 def detect_proficiency(message: str, context: Dict[str, Any], language: str = "en") -> str:
@@ -1095,7 +1141,7 @@ def run_pipeline(message: str, language: str = "en", context: Optional[Dict[str,
 
     runtime = _get_runtime()
     proficiency = detect_proficiency(user_message, normalized_context, normalized_language)
-    selected_tool, tool_source = runtime.decide_tool(
+    selected_tool, tool_source, model_ui_guide = runtime.decide_tool(
         message=user_message,
         language=normalized_language,
         context=normalized_context,
@@ -1106,6 +1152,37 @@ def run_pipeline(message: str, language: str = "en", context: Optional[Dict[str,
     tool_result = runtime.execute_tool(
         tool_name, tool_args, normalized_context)
     referenced_ids = runtime._collect_product_ids(tool_result)
+
+    # P2.3: Derive ui_guide intent for visual walkthrough in the frontend
+    # For navigate_to, always derive from sanitized page (sanitizer may have
+    # corrected the model's page, e.g. cart→orders for Hindi order queries).
+    ui_guide = model_ui_guide if tool_name != "navigate_to" else None
+    if not ui_guide:
+        text_lower = user_message.lower()
+        if tool_name == "navigate_to":
+            page = (tool_args.get("page") or "").lower()
+            if page == "orders":
+                # Distinguish track_delivery from check_orders
+                if any(t in text_lower for t in ["track", "delivery", "shipping", "status"]):
+                    ui_guide = "track_delivery"
+                else:
+                    ui_guide = "check_orders"
+            elif page == "cart":
+                ui_guide = "update_cart"
+        elif tool_name == "compare_products":
+            ui_guide = "compare_products"
+        elif tool_name == "search_products":
+            category = (tool_args.get("category") or "").strip()
+            if category:
+                ui_guide = f"find_{category.lower().replace(' ', '_')}"
+        # Support-related intents
+        if not ui_guide and any(t in text_lower for t in ["support", "help", "ticket", "complaint", "issue"]):
+            if any(t in text_lower for t in ["new", "create", "file", "submit", "raise"]):
+                ui_guide = "new_ticket"
+            elif any(t in text_lower for t in ["my ticket", "view ticket", "existing"]):
+                ui_guide = "view_tickets"
+            else:
+                ui_guide = "open_support"
 
     return {
         "ok": True,
@@ -1118,6 +1195,7 @@ def run_pipeline(message: str, language: str = "en", context: Optional[Dict[str,
         "productsReferenced": referenced_ids,
         "toolSource": tool_source,
         "ragEnabled": runtime.ranker.semantic_enabled,
+        "ui_guide": ui_guide,
     }
 
 
@@ -1153,5 +1231,40 @@ def _cli() -> int:
         return 0
 
 
+def _worker() -> int:
+    """Long-lived worker: reads JSON lines from stdin, writes JSON lines to stdout."""
+    # Eagerly initialize the runtime so the first request is fast.
+    _get_runtime()
+    sys.stdout.write(json.dumps({"ready": True}) + "\n")
+    sys.stdout.flush()
+
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            payload = json.loads(line)
+            message = payload.get("message", "")
+            language = payload.get("language", "en")
+            context = payload.get("context", {})
+            output = run_pipeline(message=message, language=language, context=context)
+        except Exception as error:
+            output = {
+                "ok": False,
+                "error": str(error),
+                "toolCalled": "search_products",
+                "toolArgs": {"query": "robot", "category": "Kitchen"},
+                "toolResult": {"summary": "Pipeline fallback activated.", "products": [], "total": 0},
+                "productsReferenced": [],
+                "proficiency": "beginner",
+                "language": "en",
+            }
+        sys.stdout.write(json.dumps(output, ensure_ascii=False) + "\n")
+        sys.stdout.flush()
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--worker":
+        raise SystemExit(_worker())
     raise SystemExit(_cli())

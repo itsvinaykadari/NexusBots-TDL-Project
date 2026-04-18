@@ -1,15 +1,15 @@
-/* Design tokens — P1.1 */
+/* Design tokens — P1.1 · Dark Luxury */
 :root {
-  /* Colors — oklch(lightness chroma hue) */
-  --color-surface:          oklch(18% 0.032 255);
-  --color-surface-elevated: oklch(25% 0.040 255);
-  --color-surface-high:     oklch(33% 0.040 255);
-  --color-text:             oklch(93% 0.010 255);
-  --color-text-muted:       oklch(65% 0.025 255);
+  /* Colors — oklch(lightness chroma hue) · deeper, richer darks */
+  --color-surface:          oklch(12% 0.025 260);
+  --color-surface-elevated: oklch(18% 0.032 260);
+  --color-surface-high:     oklch(26% 0.035 260);
+  --color-text:             oklch(94% 0.008 260);
+  --color-text-muted:       oklch(60% 0.020 260);
   --color-accent:           oklch(65% 0.280 290);   /* electric violet */
   --color-accent-dark:      oklch(55% 0.280 290);
-  --color-accent-glow:      oklch(65% 0.280 290 / 0.4);
-  --color-neon:             oklch(78% 0.160 195);   /* cyan carry-over */
+  --color-accent-glow:      oklch(65% 0.280 290 / 0.45);
+  --color-neon:             oklch(78% 0.160 195);   /* cyan */
   --color-neon-green:       oklch(78% 0.180 145);
 
   /* Fluid type */
