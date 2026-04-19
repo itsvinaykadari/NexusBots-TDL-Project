@@ -1,91 +1,131 @@
 {
   "full": {
-    "total": 1000,
+    "total": 1040,
     "by_language": {
-      "en": 500,
-      "hi": 250,
-      "te": 250
+      "hi": 290,
+      "te": 180,
+      "en": 570
     },
     "by_tool": {
-      "search_products": 168,
-      "get_product": 168,
-      "compare_products": 168,
-      "recommend": 168,
-      "add_to_cart": 166,
-      "navigate_to": 162
+      "search_products": 271,
+      "navigate_to": 316,
+      "compare_products": 117,
+      "recommend": 122,
+      "get_product": 118,
+      "add_to_cart": 96
     },
     "by_proficiency": {
-      "beginner": 500,
-      "expert": 500
+      "beginner": 556,
+      "expert": 484
     },
     "by_ui_guide": {
-      "find_humanoid": 79,
-      "compare_products": 168,
-      "find_cleaner": 77,
-      "find_drone": 96,
-      "find_kitchen": 84,
-      "check_orders": 19,
-      "update_cart": 27
+      "find_home_cleaner": 100,
+      "find_drone": 88,
+      "view_tickets": 32,
+      "compare_products": 117,
+      "find_kitchen": 75,
+      "find_humanoid": 90,
+      "new_ticket": 38,
+      "check_orders": 49,
+      "locate_path:home-cleaner:5": 5,
+      "locate_path:drone:8": 4,
+      "update_cart": 38,
+      "locate_path:home-cleaner:4": 7,
+      "locate_path:kitchen:3": 11,
+      "locate_path:drone:9": 7,
+      "locate_path:humanoid:12": 8,
+      "locate_path:humanoid:11": 11,
+      "open_support": 26,
+      "locate_path:home-cleaner:6": 7,
+      "locate_path:humanoid:10": 10,
+      "locate_path:drone:7": 8,
+      "locate_path:kitchen:1": 12,
+      "locate_path:kitchen:2": 4
     },
-    "ui_guide_null_count": 450
+    "ui_guide_null_count": 293
   },
   "train": {
-    "total": 900,
+    "total": 940,
     "by_language": {
-      "te": 224,
-      "hi": 226,
-      "en": 450
+      "en": 516,
+      "hi": 263,
+      "te": 161
     },
     "by_tool": {
-      "compare_products": 150,
-      "get_product": 152,
-      "recommend": 151,
-      "add_to_cart": 149,
-      "search_products": 152,
-      "navigate_to": 146
+      "add_to_cart": 86,
+      "compare_products": 105,
+      "navigate_to": 285,
+      "search_products": 245,
+      "get_product": 107,
+      "recommend": 112
     },
     "by_proficiency": {
-      "beginner": 455,
-      "expert": 445
+      "beginner": 499,
+      "expert": 441
     },
     "by_ui_guide": {
-      "compare_products": 150,
-      "find_humanoid": 74,
-      "find_drone": 86,
-      "find_cleaner": 69,
-      "find_kitchen": 74,
-      "check_orders": 18,
-      "update_cart": 27
+      "compare_products": 105,
+      "view_tickets": 30,
+      "find_kitchen": 66,
+      "update_cart": 36,
+      "find_humanoid": 79,
+      "locate_path:humanoid:11": 10,
+      "find_drone": 80,
+      "new_ticket": 34,
+      "open_support": 24,
+      "check_orders": 43,
+      "find_home_cleaner": 94,
+      "locate_path:humanoid:10": 10,
+      "locate_path:drone:9": 7,
+      "locate_path:kitchen:3": 11,
+      "locate_path:home-cleaner:6": 7,
+      "locate_path:drone:8": 4,
+      "locate_path:home-cleaner:4": 6,
+      "locate_path:kitchen:1": 10,
+      "locate_path:drone:7": 5,
+      "locate_path:kitchen:2": 4,
+      "locate_path:humanoid:12": 5,
+      "locate_path:home-cleaner:5": 4
     },
-    "ui_guide_null_count": 402
+    "ui_guide_null_count": 266
   },
   "test": {
     "total": 100,
     "by_language": {
-      "en": 50,
-      "hi": 24,
-      "te": 26
+      "en": 54,
+      "te": 19,
+      "hi": 27
     },
     "by_tool": {
-      "navigate_to": 16,
-      "recommend": 17,
-      "get_product": 16,
-      "search_products": 16,
-      "compare_products": 18,
-      "add_to_cart": 17
+      "navigate_to": 31,
+      "recommend": 10,
+      "add_to_cart": 10,
+      "search_products": 26,
+      "compare_products": 12,
+      "get_product": 11
     },
     "by_proficiency": {
-      "beginner": 45,
-      "expert": 55
+      "beginner": 57,
+      "expert": 43
     },
     "by_ui_guide": {
-      "find_drone": 10,
-      "find_humanoid": 5,
-      "compare_products": 18,
-      "find_cleaner": 8,
-      "find_kitchen": 10,
-      "check_orders": 1
+      "check_orders": 6,
+      "new_ticket": 4,
+      "find_humanoid": 11,
+      "locate_path:kitchen:1": 2,
+      "find_kitchen": 9,
+      "find_drone": 8,
+      "locate_path:humanoid:12": 3,
+      "locate_path:drone:7": 3,
+      "compare_products": 12,
+      "find_home_cleaner": 6,
+      "view_tickets": 2,
+      "update_cart": 2,
+      "locate_path:home-cleaner:5": 1,
+      "locate_path:home-cleaner:4": 1,
+      "open_support": 2,
+      "locate_path:humanoid:11": 1
     },
-    "ui_guide_null_count": 48
+    "ui_guide_null_count": 27
   }
 }

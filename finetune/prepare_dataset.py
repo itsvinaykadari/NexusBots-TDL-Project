@@ -54,7 +54,12 @@ def convert_row(row: dict) -> dict:
     fc = row.get("function_call", {})
     tool_name = fc.get("name", "")
     args = fc.get("arguments", {})
-    ui_guide = compute_ui_guide(tool_name, args)
+    # Prefer explicit ui_guide from raw data (covers support/location intents);
+    # fall back to heuristic for older JS-generated rows that lack the field.
+    if "ui_guide" in row:
+        ui_guide = row["ui_guide"]
+    else:
+        ui_guide = compute_ui_guide(tool_name, args)
 
     # Build user message with query + context
     user_query = row.get("user_query", "")

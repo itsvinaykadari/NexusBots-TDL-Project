@@ -1,338 +1,616 @@
-# Nexus Bots — 24-Hour Execution Plan (v2, LLM-Executable)
+# NexusBots — Final Project Plan
 
-> **Date:** 2026-04-17 | **Deadline:** +24h | **Team:** Digvijaysing Rajput (CS24MTECH14020), Vinay Kadari (CS24MTECH14008)
-> This plan supersedes all prior versions. Each task is written as a direct prompt for an LLM-assisted build.
-
----
-
-## Locked Decisions (no further debate)
-
-| Area | Choice | Reason |
-|---|---|---|
-| Base model | **Qwen3.5-0.8B** | Released 2026-03-02. 119 languages incl. HI/TE. Unsloth-supported. |
-| Fine-tune method | **Unsloth + QLoRA**, r=16, alpha=32, lr=2e-4, 3 epochs | Free Colab T4 fits in 4 hrs |
-| UI direction | **Vercel / Linear / Apple-grade**, rebuild in place | 12 premium products need editorial treatment, not Amazon grid |
-| UI guidance lib | **driver.js** (MIT, 5 KB) + CSS `@keyframes` pulse | Zero-JS animation, LLM emits intent key only |
-| Orchestration | Direct Python dispatch (no LangChain) | 6 fixed tools — LangChain adds latency, no upside |
-| Voice | **STT only** via Web Speech API | TTS skipped for demo |
-| Model plan cuts | No SmolLM, no Qwen2 ablation, no trained proficiency classifier | Ship one model well |
+> **Course:** CS6420 Topics in Deep Learning, IIT Hyderabad
+> **Team:** Digvijaysing Rajput (CS24MTECH14020) · Vinay Kadari (CS24MTECH14008)
+> **Last updated:** 2026-04-19 · **Time remaining: ~12 hours**
 
 ---
 
-## Novelty (final, what we actually defend)
+## Quick Reference
 
-1. **Domain-fine-tuned 0.8B model matches frontier LLMs** on robotics function-calling (B1)
-2. **Activity-aware re-ranking** boosts retrieval relevance over stateless semantic search (B2)
-3. **Multilingual function calling** (EN/HI/TE) on a small model (B4)
-4. **Persona-adaptive generation** from auto-detected proficiency
-5. **LLM-driven UI guidance** — bot converts intent into on-screen step-by-step highlights
+### Run the Project
 
-(Dual-path fallback, no-LangChain, heuristic baseline → moved to "System Design," not novelty.)
+```bash
+# Terminal 1 — Server
+cd server && npm install
+# Ensure server/.env has SARVAM_API_KEY and ENABLE_FC_MODEL=1
+node index.js
+
+# Terminal 2 — Client
+cd client && npm install && npm run dev
+# Open http://localhost:5173
+```
+
+### Environment Variables (`server/.env`)
+
+```
+PORT=5000
+SARVAM_API_KEY=<key>
+SARVAM_MODEL=sarvam-m
+ENABLE_FC_MODEL=1
+FC_MODEL_ID=Qwen/Qwen3.5-0.8B         # base; override with FC_MODEL_PATH after fine-tune
+FC_MODEL_PATH=                          # set to local adapter path after Colab training
+ENABLE_SEMANTIC_RAG=1
+RAG_EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2
+PYTHON_BIN=python3
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `server/ai/pipeline.py` | Core AI router — `decide_tool()` → `execute_tool()`. 6 tools. Dual-path: model → heuristic. Emits `ui_guide`. |
+| `server/ai/fc_model.py` | Qwen3.5-0.8B inference. ChatML via `apply_chat_template()`. Returns `{tool, arguments, ui_guide}`. |
+| `server/ai/sarvam_client.py` | Sarvam AI for natural language. Strips `<think>`. Adapts to proficiency (beginner/expert). |
+| `server/routes/ai.js` | Express route. `PythonWorker` persistent subprocess via JSON-line IPC. Rate limiter. JSONL logging. |
+| `server/database/init.js` | SQLite schema + 12 robot seed data. |
+| `client/src/components/AISidePanel.jsx` | AI chat panel. Voice via Web Speech API. Sends full context. |
+| `client/src/ui-guide/UIGuideProvider.jsx` | Element-anchored guide system. `startFlow(key)` triggers multi-step highlights. Floating UI tooltips. |
+| `client/src/ui-guide/flows.json` | 11 flows: check_orders, track_delivery, update_cart, find_{category}×4, compare_products, open_support, new_ticket, view_tickets. |
+| `client/src/context/UserActivityContext.jsx` | Tracks: currentPage, viewedProducts, cart, searchQuery, selectedCategory, currentProduct. Sent with every AI request. |
+| `finetune/config.py` | All hyperparameters + system prompt + product catalog. |
+| `finetune/train.py` | Training script (Unsloth + QLoRA). |
+| `finetune/prepare_dataset.py` | Raw v2 → ChatML v2 → stratified train/test split. |
+| `finetune/eval/bench_function_calling.py` | B1 (tool accuracy) + B4 (multilingual) benchmark. |
+| `finetune/eval/bench_rag.py` | B2 (RAG re-ranking vs static) benchmark. |
+| `server/logs/ai_sessions.jsonl` | Append-only log of every AI request/response cycle. |
+
+### Architecture
+
+```
+Client (React 19 + Vite, port 5173)     Server (Express 5 + SQLite, port 5000)
+        │                                           │
+        ├── /api proxy ────────────────────────────►├── POST /api/ai/chat
+        │                                           │   ├── ai.js → PythonWorker (pipeline.py)
+        │                                           │   │   ├── fc_model.py (Qwen3.5-0.8B)
+        │                                           │   │   ├── FAISS + context re-rank (RAG)
+        │                                           │   │   └── heuristic fallback
+        │                                           │   └── PythonWorker (sarvam_client.py)
+        │                                           ├── GET /api/products
+        │                                           ├── POST/GET /api/orders
+        │                                           └── POST/GET /api/chats
+        │
+        ├── AISidePanel.jsx ──── AI chat + voice
+        ├── UIGuideProvider.jsx ── element-anchored spotlight
+        ├── CartDrawer.jsx ────── 3-step checkout flow
+        ├── Navbar.jsx ──────────── mega-menu (click-only)
+        └── Pages: Home, /catalog/:slug, /robot/:id, /orders
+```
 
 ---
 
-## Verified Baseline (already done — do not rebuild)
+## Data Model (Fixed — Do Not Change)
 
-- ✅ Express + SQLite backend, 12 robots / 4 categories (Kitchen, Home Cleaner, Drone, Humanoid)
-- ✅ React 19 + Vite + Tailwind scaffold with 4 pages (Home, Catalog, RobotDetail, OrderHistory) + active components
-- ✅ `UserActivityContext` tracks page, viewed, cart, search, category, currentProduct
-- ✅ `pipeline.py` — 6 tools, dual-path decider, FAISS+context re-rank, PipelineRuntime singleton, worker mode
-- ✅ `sarvam_client.py` — persona-adaptive, EN/HI/TE, fallback wired, worker mode
-- ✅ 1000-row function-calling dataset (EN 500 / HI 250 / TE 250, beginner 500 / expert 500), all strict checks pass
-- ✅ `AISidePanel` hits `/api/ai/chat` with full context, triggers UI guidance via `startFlow()`
-- ✅ STT via Web Speech API
-- ✅ Premium UI: ParticleNetwork hero, bento layouts, editorial category sections, mega-menu navbar
-- ✅ UI Guidance system: driver.js + 11 flows + guide-pulse.css + UIGuideProvider with auto-navigation
-- ✅ CartDrawer: 3-step flow (cart → payment → success), posts to `/api/orders`
-- ✅ OrderHistory: merged Orders + Support tabs, inline support forms, ticket management
-- ✅ `ai.js` PythonWorker: persistent subprocess reuse via JSON-line IPC, rate limiting, Chat.addMessage try/catch
-- ✅ P2.2 correctness fixes: budget extraction, Hindi/Telugu tokens, category fallback
-- ✅ P2.3 ui_guide emission: check_orders, update_cart, compare_products, find_{category}
-- ✅ Orphaned files removed: ChatWidget, AIAssistant, SupportTickets, HeroSection, FeaturedRobots, RobotCard
+### 12 Products Across 4 Categories
+
+| ID | Name | Category | Price | Key Tags |
+|----|------|----------|-------|----------|
+| 1 | Amazon Astro | Kitchen | $1,599.99 | alexa, kitchen assistant, voice |
+| 2 | Samsung Ballie | Kitchen | $1,299.99 | projector, rolling, smart appliances |
+| 3 | Enabot EBO X | Kitchen | $599.99 | 4K camera, monitoring, remote |
+| 4 | iRobot Roomba j9+ | Home Cleaner | $799.99 | vacuum, auto-empty, mapping |
+| 5 | Roborock S8 MaxV Ultra | Home Cleaner | $1,799.99 | vacuum+mop, 10000Pa suction, dock |
+| 6 | Ecovacs WINBOT W2 Omni | Home Cleaner | $499.99 | window cleaning, edge detection |
+| 7 | Ring Always Home Cam | Drone | $249.99 | indoor patrol, security, cheapest drone |
+| 8 | DJI Matrice 30T | Drone | $13,600.00 | thermal, enterprise, 48MP, inspection |
+| 9 | Aiper Surfer S1 | Drone | $1,399.99 | pool cleaning, surface drone |
+| 10 | Miko 3 | Humanoid | $249.99 | kids companion, age 5-12, learning |
+| 11 | Wonder Workshop Dash | Humanoid | $149.99 | coding, STEM, cheapest humanoid |
+| 12 | LEGO Education Spike Prime | Humanoid | $395.95 | classroom, python, build-and-program |
+
+### Tools (6 — Final, No Changes)
+
+| Tool | Intent |
+|------|--------|
+| `search_products(query, category)` | Browse / filter catalog |
+| `get_product(product_id)` | Single product details by name or ID |
+| `compare_products(id1, id2, focus)` | Side-by-side comparison |
+| `recommend(need, budget, category)` | Budget + need-based selection |
+| `add_to_cart(product_id)` | Add to cart |
+| `navigate_to(page, params)` | All UI navigation — orders, support (via ui_guide), cart, home, catalog, product page |
+
+Support section lives inside `/orders` page — handled by `navigate_to(page=orders)` + `ui_guide = open_support / new_ticket / view_tickets`. No 7th tool needed.
+
+### UI Guide Flows (11)
+
+`check_orders` · `track_delivery` · `update_cart` · `find_kitchen` · `find_drone` · `find_home_cleaner` · `find_humanoid` · `compare_products` · `open_support` · `new_ticket` · `view_tickets`
+
+Dynamic: `locate_robot:{id}` · `locate_path:{category}:{id}`
+
+### Pages & Routes
+
+| Route | Page |
+|-------|------|
+| `/` | Home — hero, category cards, flagship robots |
+| `/catalog/kitchen` | Kitchen robots (IDs 1, 2, 3) |
+| `/catalog/home-cleaner` | Home Cleaner robots (IDs 4, 5, 6) |
+| `/catalog/drone` | Drone robots (IDs 7, 8, 9) |
+| `/catalog/humanoid` | Humanoid robots (IDs 10, 11, 12) |
+| `/robot/:id` | Robot detail page |
+| `/orders` | Order history + Support tab |
+| Cart | Side drawer (navigate_to page=cart triggers it) |
 
 ---
 
-## Missing (the 24-hour scope)
+## What Is Already Done
 
-| # | Item | Phase | Status |
-|---|---|---|---|
-| M1 | Grand Vercel-grade UI redesign (Home, Catalog, RobotDetail) | **P1** | ✅ Complete |
-| M2 | UI guidance system (driver.js + intent-keyed flows) | **P1** | ✅ Complete |
-| M3 | Performance fixes: PipelineRuntime singleton, subprocess reuse | **P2** | ✅ Complete |
-| M4 | Correctness fixes: `_extract_ids`, `_extract_budget`, `detect_proficiency` HI/TE, category fallback | **P2** | ✅ Complete |
-| M4b | Model integration: fc_model.py (ChatML), base Qwen3.5-0.8B on GPU, Sarvam API connected, semantic RAG enabled | **P3** | ✅ Complete |
-| M5 | Fine-tuned Qwen3.5-0.8B weights (LoRA adapter + merged) | **P3** | Pending |
-| M6 | Benchmarks B1, B2, B4 filled with real numbers | **P3** | Pending |
-| M7 | Demo video + slides + README refresh | **P4** | Pending |
+- ✅ Express + SQLite backend, 12 robots / 4 categories
+- ✅ React 19 + Vite + Tailwind — Home, /catalog/:slug, RobotDetail, OrderHistory
+- ✅ `UserActivityContext` — tracks page, viewed, cart, search, category, currentProduct
+- ✅ `pipeline.py` — 6 tools, dual-path decider, FAISS + context re-rank, PipelineRuntime singleton, worker mode
+- ✅ `sarvam_client.py` — persona-adaptive (beginner/expert), EN/HI/TE, fallback, worker mode
+- ✅ `fc_model.py` — Qwen3.5-0.8B ChatML inference, GPU fp16 when available
+- ✅ `AISidePanel` — AI chat, voice via Web Speech API, context sending
+- ✅ `UIGuideProvider` — element-anchored spotlight, Floating UI tooltips, auto-navigation, Escape to close
+- ✅ `flows.json` — 11 flows wired
+- ✅ `CartDrawer` — 3-step flow (cart → payment → success), posts to `/api/orders`
+- ✅ `OrderHistory` — merged Orders + Support tabs, inline support forms, ticket management
+- ✅ PythonWorker — persistent subprocess reuse, JSON-line IPC, rate limiting
+- ✅ JSONL session logging at `server/logs/ai_sessions.jsonl`
+- ✅ Admin auto-login (localStorage-based), "Admin" shown in Navbar
+- ✅ All 12 products always in stock; new orders show as Delivered
+- ✅ Category pages (`/catalog/:slug`) with editorial content
+- ✅ Navbar mega-menu click-only; active state highlights catalog pages
+- ✅ BUG-1 Fixed: UI guide scroll tracking (element-anchored, not overlay)
+- ✅ BUG-2 Fixed: Guide pulse CSS — oklch glow animation, no zoom artifact
+- ✅ BUG-3 Fixed: react-markdown renders AI responses correctly
+- ✅ Home page category hover — image lightens, dark overlay reduces
 
 ---
 
-## Parallelization Model
+## 12-Hour Execution Plan
 
-- **Operator 1 (O1):** Phase 3 fine-tune (long-pole Colab) → runs Phase 3 benchmarks when weights ready
-- **Operator 2 (O2):** Phase 1 UI → Phase 2 backend fixes → Phase 4 demo artifacts
-- Both converge at Hour 20 for integration + rehearsal
+> **Core goal:** Fine-tune Qwen3.5-0.8B, prove it beats base model, show multilingual + persona + voice working. Demo-ready by end.
 
 ---
 
-# Phase 1 — UI (Hours 0-10) · Operator 2
+### PHASE A — Immediate System Prompt Fix (Hour 0–1)
 
-**Goal:** The frontend looks like a premium robot-selling corporation, not a CS project. 12 products presented as flagship launches, not SKUs. UI guidance on every cross-page flow.
+**Why first:** The base model hallucinates because it has no product knowledge. Adding the catalog to the system prompt fixes this NOW, before fine-tuning, and is also the correct training-time prompt.
 
-## P1.1 — Design tokens + global polish (1h)
-**Prompt:** In `client/src/styles/tokens.css` create a token system:
-- Colors in `oklch()`: surface, surface-elevated, text, text-muted, accent (electric violet), accent-glow
-- Fluid type: `--text-hero: clamp(3rem, 1rem + 7vw, 8rem)`, same pattern for body/heading
-- Spacing: `--space-section: clamp(4rem, 3rem + 5vw, 10rem)`
-- Duration + `--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1)`
-Update `client/src/index.css` to import tokens. Replace hardcoded colors in existing components.
+**Task A1:** Update `server/ai/fc_model.py` and `finetune/config.py` — both must have identical `SYSTEM_PROMPT` that includes:
 
-## P1.2 — Home (hero + category showcase) (2h)
-**Prompt:** Rebuild `client/src/pages/Home.jsx`:
-- Full-bleed hero: massive type (`--text-hero`), tagline "Robotics, delivered.", CTA button, isometric product silhouette on right (use existing robot image with `mix-blend-mode`)
-- Below: 4 category tiles in **bento layout** (1 large + 3 medium), each linking to `/catalog?category=<Name>`. Tile = category name, robot count, representative image, hover scale 1.02 + shadow lift
-- Below: "Flagship" section — feature 1 robot from each category as editorial cards with large imagery
-- Scroll-triggered reveal via `IntersectionObserver` + `opacity`/`translate-y`
-No carousels, no uniform grids.
+```python
+PRODUCT_CATALOG_BLOCK = """
+Product Catalog (12 robots, fixed):
+ID  | Name                       | Category     | Price
+1   | Amazon Astro               | Kitchen      | $1599.99
+2   | Samsung Ballie             | Kitchen      | $1299.99
+3   | Enabot EBO X               | Kitchen      | $599.99
+4   | iRobot Roomba j9+          | Home Cleaner | $799.99
+5   | Roborock S8 MaxV Ultra     | Home Cleaner | $1799.99
+6   | Ecovacs WINBOT W2 Omni     | Home Cleaner | $499.99
+7   | Ring Always Home Cam       | Drone        | $249.99   (cheapest drone)
+8   | DJI Matrice 30T            | Drone        | $13600.00 (enterprise, thermal)
+9   | Aiper Surfer S1            | Drone        | $1399.99  (pool drone)
+10  | Miko 3                     | Humanoid     | $249.99   (kids, age 5-12)
+11  | Wonder Workshop Dash       | Humanoid     | $149.99   (cheapest humanoid, coding)
+12  | LEGO Education Spike Prime | Humanoid     | $395.95   (classroom, python)
+"""
 
-## P1.3 — Catalog (category → 3 robots) (2h)
-**Prompt:** Rebuild `client/src/pages/Catalog.jsx`:
-- Sticky category nav bar at top: 4 pill buttons (Kitchen, Home Cleaner, Drone, Humanoid) + "All". Active pill has accent background + glow. Clicking smooth-scrolls to that section.
-- Below: one `<section>` per category. Section heading = large category name + 1-line description + robot count.
-- 3 robots per category displayed as **bento** (1 tall hero card + 2 smaller), NOT a uniform 3-col grid. Each card: image, name, price, 1-line tagline, "View →" CTA.
-- Hover: card lifts, image scales 1.05, CTA arrow translates right.
-- `data-guide-id="catalog-filter-<Name>"` on each category pill. `data-guide-id="catalog-card-<id>"` on each card.
+UI_STRUCTURE_BLOCK = """
+App Structure:
+- /catalog/kitchen → Kitchen robots (IDs 1-3)
+- /catalog/home-cleaner → Home Cleaner robots (IDs 4-6)
+- /catalog/drone → Drone robots (IDs 7-9)
+- /catalog/humanoid → Humanoid robots (IDs 10-12)
+- /robot/:id → Product detail
+- /orders → Order history + Support tab (tickets, complaints)
+- Cart: side drawer (navigate_to page=cart)
 
-## P1.4 — RobotDetail (flagship product page) (2h)
-**Prompt:** Rebuild `client/src/pages/RobotDetail.jsx` as a product-launch page:
-- Hero: full-bleed image left 60% / spec summary right 40%. Massive name + price, short tagline, "Add to Cart" primary CTA.
-- Specs section: 4-column bento of key specs (battery, payload, category, availability) with large numbers + small labels.
-- "Inside the <RobotName>" — narrative section with 2-3 long-form paragraphs + detail shots.
-- "Compare" band at bottom: 3 horizontal cards of other robots in same category with "Compare →" CTA.
-- Sticky bottom bar on mobile with "Add to Cart" + price.
-- `data-guide-id="product-add-to-cart"`, `data-guide-id="product-compare"`.
+Rules:
+- For product names, resolve ID from catalog above
+- Support/ticket queries → navigate_to page=orders + ui_guide=open_support/new_ticket/view_tickets
+- Location queries ("where is X", "kahan", "ekkada") → navigate_to page=catalog with product_id
+- Out-of-scope queries (not about robots) → search_products query=robot
+"""
+```
 
-## P1.5 — Navbar, CartDrawer, OrderHistory polish (1h)
-**Prompt:** Update `Navbar.jsx`:
-- Translucent backdrop-blur on scroll, `data-guide-id="nav-home|catalog|assistant|cart|orders"` on each link.
-- Cart indicator shows count as a small circle on cart icon.
-Update `CartDrawer.jsx`:
-- Slide-in from right, backdrop blur, item cards with image + quantity stepper.
-- `data-guide-id="cart-checkout"` on checkout button.
-Update `OrderHistory.jsx`:
-- Card per order with status pill, items summary, `data-guide-id="order-track-<id>"` on track button.
+**Verify:** Restart server, send "tell me about DJI Matrice" and "drone kahan milega" — both should now route correctly without hallucination.
 
-## P1.6 — UI Guidance system (2h, highest-impact novelty)
-**Prompt:** Create `client/src/ui-guide/`:
-- `flows.json` — 8 pre-defined flows:
-  ```json
-  {
-    "check_orders":    ["nav-orders"],
-    "track_delivery":  ["nav-orders", "order-track-latest"],
-    "update_cart":     ["nav-cart", "cart-checkout"],
-    "find_drone":      ["nav-catalog", "catalog-filter-Drone"],
-    "find_kitchen":    ["nav-catalog", "catalog-filter-Kitchen"],
-    "find_home_cleaner":    ["nav-catalog", "catalog-filter-Home Cleaner"],
-    "find_humanoid":   ["nav-catalog", "catalog-filter-Humanoid"],
-    "compare_products":["nav-catalog", "product-compare"]
+---
+
+### PHASE B — Dataset Generation (Hour 1–3)
+
+**What to build:** `research/dataset/raw/function_calls_raw_v2.jsonl` (1020 rows)
+
+Each row format (consumed by `finetune/prepare_dataset.py`):
+
+```json
+{
+  "id": "v2_en_search_001",
+  "user_query": "show me kitchen robots",
+  "language": "en",
+  "proficiency": "beginner",
+  "page_context": {
+    "currentPage": "home",
+    "viewedProducts": [],
+    "cart": [],
+    "currentProduct": null,
+    "searchQuery": "",
+    "selectedCategory": ""
+  },
+  "function_call": {
+    "name": "search_products",
+    "arguments": {"query": "kitchen robots", "category": "Kitchen"}
+  },
+  "metadata": {"intent": "browse_category", "difficulty": "easy"}
+}
+```
+
+**Target distribution (1020 rows):**
+
+| Intent Group | Tool | EN | HI Romanized | TE Romanized | Total |
+|---|---|---|---|---|---|
+| Browse category | search_products | 70 | 35 | 25 | 130 |
+| Search by product name | search_products | 50 | 25 | 15 | 90 |
+| Get product details | get_product | 60 | 30 | 20 | 110 |
+| Compare two robots | compare_products | 65 | 30 | 15 | 110 |
+| Recommend by budget/need | recommend | 65 | 30 | 15 | 110 |
+| Add to cart | add_to_cart | 50 | 25 | 15 | 90 |
+| Navigate: orders/support | navigate_to | 70 | 35 | 25 | 130 |
+| Navigate: cart/home | navigate_to | 40 | 20 | 10 | 70 |
+| Navigate: location intent | navigate_to | 50 | 25 | 15 | 90 |
+| Out-of-scope robustness | search_products | 25 | 10 | 5 | 40 |
+| **Total** | | **545** | **265** | **160** | **970** |
+
+**Critical Romanized HI/TE examples that must be covered:**
+
+```
+# Hindi (Romanized — English script, Hindi words)
+"drone kahan milega"              → navigate_to(catalog, Drone) + locate_path
+"mera order kahan hai"            → navigate_to(orders) + check_orders
+"DJI Matrice ke baare mein batao" → get_product(8)
+"sasta drone dikhao"              → recommend(budget=500, category=Drone)
+"Miko 3 ko cart mein daalo"       → add_to_cart(10)
+"kitchen ke robots dikhao"        → search_products(category=Kitchen)
+"support chahiye mujhe"           → navigate_to(orders) + open_support
+"Roomba aur Roborock compare karo"→ compare_products(4, 5, suction)
+
+# Telugu (Romanized — English script, Telugu words)
+"drone ekkada dorikutundi"        → navigate_to(catalog, Drone)
+"naa order chupinchu"             → navigate_to(orders) + check_orders
+"Miko 3 gurinchi cheppu"          → get_product(10)
+"kitchen robots chupinchu"        → search_products(category=Kitchen)
+"cheapest humanoid cheppu"        → recommend(budget=200, category=Humanoid)
+"robot 8 ni cart lo petto"        → add_to_cart(8)
+```
+
+**Task B1:** Write `research/dataset/generator/template_generator_v2.py`
+- Iterate over all (intent × tool × language × proficiency × product) combinations
+- Fill product names/IDs/prices from the catalog table above
+- Output to `research/dataset/raw/function_calls_raw_v2.jsonl`
+
+**Task B2:** Run 50–70 real prompts through the live AI panel (mix EN/HI/TE)
+- The logs appear in `server/logs/ai_sessions.jsonl`
+- Use Claude to label each: "Given this message and context, what is the correct {tool, arguments, ui_guide}?"
+- Human-verify 20% — these are the highest-quality real-world examples
+
+**Task B3:** Run `finetune/prepare_dataset.py`
+- Reads `research/dataset/raw/function_calls_raw_v2.jsonl`
+- Converts to ChatML format
+- Stratified split → `finetune/data/train.jsonl` (900) + `finetune/data/test.jsonl` (100)
+
+---
+
+### PHASE C — Fine-Tune on Colab (Hour 3–7, runs in parallel)
+
+**Start this immediately after dataset is ready — it takes ~4 hours on free T4.**
+
+**Task C1:** Upload `finetune/data/train.jsonl` and `finetune/data/test.jsonl` to Google Drive.
+
+**Task C2:** Open `finetune/train.py` in Colab (or copy to a notebook), run with:
+```bash
+python train.py --colab --merge
+```
+
+Config already set in `finetune/config.py`:
+- Model: `unsloth/Qwen3.5-0.8B`
+- QLoRA: r=16, alpha=32, dropout=0
+- Epochs: 3 (increase to 5 if loss hasn't plateaued)
+- **Change lr from 2e-4 → 1e-4** (reduces instability on small datasets)
+- Batch: 4, grad_accum: 4 → effective batch 16
+- bf16 ✅
+
+**Task C3:** After training completes:
+- Download LoRA adapter from Drive to `models/nexus-fc-qwen35-0.8b/`
+- Set `FC_MODEL_PATH=../models/nexus-fc-qwen35-0.8b` in `server/.env`
+- Restart server — it auto-loads fine-tuned adapter
+
+---
+
+### PHASE D — Parallel Work While Colab Trains (Hour 3–7)
+
+While Colab runs, do these in parallel:
+
+**Task D1 — Multilingual Verification**
+Test 20 queries covering all critical HI/TE romanized patterns. Verify `pipeline.py` routes them correctly. Fix any misrouting in `_sanitize_tool_call()` or `_heuristic_tool_call()`.
+
+**Task D2 — Voice End-to-End Test**
+- Open AI panel, click mic button
+- Speak in English: "show me drone robots"
+- Speak in Hindi: "drone dikhao"
+- Verify STT captures it and routes correctly
+- Document any browser compatibility issues (Chrome preferred)
+
+**Task D3 — Persona Adaptation Verification**
+Send the same question twice with different user profiles:
+- Beginner: "what robot should I buy" → response should be simple, no jargon
+- Expert: "compare payload and suction specs of products 4 and 5" → response should include technical details
+
+Verify `sarvam_client.py` adapts correctly via `proficiency` field. Check `detect_proficiency()` in `pipeline.py` correctly classifies both.
+
+**Task D4 — Optional: Sales Agent / Proactive Conversation**
+
+If time permits, implement a lightweight proactive agent:
+
+```jsx
+// In UserActivityContext or AISidePanel
+// After user views 3+ products without buying, trigger proactive message
+useEffect(() => {
+  if (viewedProducts.length >= 3 && cart.length === 0 && !proactiveShown) {
+    setProactiveShown(true);
+    // Dispatch event to open AI panel with a pre-filled message
+    window.dispatchEvent(new CustomEvent('open-chat', {
+      detail: { message: `I noticed you've been looking at ${viewedProducts[viewedProducts.length-1].name}. Want a recommendation?` }
+    }));
   }
-  ```
-- `UIGuideProvider.jsx` — React context exposing `startFlow(key)`. Uses `driver.js` for spotlight/tooltip + adds a `.guide-pulse` class to current target for CSS pulse animation.
-- CSS `@keyframes pulse` on `box-shadow` + `transform: scale(1.05)`, 1.2s infinite, compositor-only.
-- Auto-advance: when user clicks target or route changes to expected page, pop next step from flow.
-- `guide-pulse.css` — single keyframe using accent glow.
-- Install: `cd client && npm install driver.js`.
-- Wire `UIGuideProvider` at `App.jsx` root, below `UserActivityProvider`.
+}, [viewedProducts]);
+```
+
+This uses existing `UserActivityContext` + `open-chat` event (already wired in `App.jsx`). No new backend needed.
+
+**Task D5 — Optional: Real-Time Product Streaming**
+
+For demo impressiveness, show typing indicator + stream-like reveal:
+- The server already returns full response; add a character-by-character reveal animation in `AISidePanel.jsx` using `useState` + `setInterval` or CSS animation
+- No actual streaming needed — visual effect is sufficient for demo
 
 ---
 
-# Phase 2 — Backend Polish (Hours 8-14) · Operator 2 (after P1)
+### PHASE E — Integration & Benchmarks (Hour 7–9)
 
-**Goal:** Pipeline is correct, fast, and emits `ui_guide` intent keys. No new features — fix what exists.
+**Task E1:** Verify fine-tuned model end-to-end
+```bash
+# Test 3 queries — EN, HI, TE
+curl -X POST http://localhost:5000/api/ai/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"show me drones under 1500","language":"en","context":{"currentPage":"home","viewedProducts":[],"cart":[]}}'
 
-## P2.1 — PipelineRuntime singleton + subprocess reuse (1h)
-**Prompt:** In `server/ai/pipeline.py`:
-- Move `PipelineRuntime()` to a module-level lazy singleton (`_RUNTIME` with `_get_runtime()`).
-- Index FAISS + encode corpus **once** at first call, never again.
-- In `server/routes/ai.js`: replace per-request `spawn('python3', ...)` with a long-lived Python worker (`python3 -m server.ai.worker`) that reads JSON requests from stdin and writes responses to stdout. Start worker on Express boot.
-- Rationale comment on singleton: "FAISS + encoder load is ~3s, keep warm."
+curl -X POST http://localhost:5000/api/ai/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"drone kahan milega","language":"hi","context":{"currentPage":"home","viewedProducts":[],"cart":[]}}'
+```
 
-## P2.2 — Correctness fixes (1h)
-**Prompt:** In `server/ai/pipeline.py`:
-- `_extract_ids()`: only capture 1-12 when preceded by `#|id|product|robot|compare|vs` keyword. Regex: `/(?:#|id|product|robot|compare|vs)[^\w]{0,3}([1-9]|1[0-2])\b/i`.
-- `_extract_budget()`: only accept numbers near `₹|rs|rupees|budget|under|below|k` and ≥ 500. Reject years (1900-2100) and 5-6 digit pincodes.
-- `detect_proficiency()`: add HI technical tokens (`स्पेक`, `बैटरी`, `कीमत`) and TE (`స్పెక్`, `బ్యాటరీ`, `ధర`) alongside English. Gate token check by detected language.
-- Default category fallback: return empty (search all) instead of `"Kitchen"` in `_heuristic_tool_call` and `_sanitize_tool_call`.
+Confirm: `toolSource = "model"` (not "heuristic"), `ui_guide` present, no hallucination.
 
-## P2.3 — UI guide intent emission (1h)
-**Prompt:** In `pipeline.py`:
-- Add a new output field `ui_guide` on the tool-call JSON. Valid values: same keys as `client/src/ui-guide/flows.json`.
-- Heuristic mapping: if tool == `navigate_to` + page == `orders` → `ui_guide: "check_orders"`; page == `cart` → `update_cart`; tool == `compare_products` → `compare_products`; tool == `search_products` + category present → `find_<category>`.
-- Add `ui_guide` to the system prompt for the fine-tuned model (Phase 3 dataset update — see P3.2).
-- In `ChatWidget.jsx` + `AIAssistant.jsx`: when response has `ui_guide`, call `useUIGuide().startFlow(key)`.
+**Task E2:** Run B1 + B4 benchmarks
+```bash
+cd finetune
+python eval/bench_function_calling.py --all-models
+# Outputs: research/results/b1_function_calling.md, b4_multilingual.md
+```
 
-## P2.4 — Operational hardening (1h)
-**Prompt:**
-- Add `express-rate-limit` to `/api/ai/chat` (10 req / min / IP).
-- Wrap `Chat.addMessage` in try/catch, log error, don't block response.
-- Drop redundant auth headers in `sarvam_client.py` — keep only `api-subscription-key`.
-- Create `server/.env.example` listing: `SARVAM_API_KEY`, `ENABLE_FC_MODEL`, `ENABLE_SEMANTIC_RAG`, `FC_MODEL_PATH`, `PORT`.
+**Task E3:** Run B2 benchmark
+```bash
+python eval/bench_rag.py
+# Outputs: research/results/b2_rag.md
+```
 
-## P2.5 — Smoke test (30 min)
-**Prompt:** `curl` test 6 queries covering every tool + language. Verify `ui_guide` field appears on `navigate_to` + `compare_products`. Verify first request latency after warmup is under 1.5s.
-
-## P2.6 — README doc-drift fix (30 min)
-**Prompt:** Update `README.md`:
-- "22 robots / 6 categories" → "12 robots / 4 categories"
-- Remove `get_support` tool, confirm 6 tools
-- Drop Support page references from nav
-- Replace benchmark TBDs with placeholder rows (Phase 3 fills real numbers)
+**Task E4:** Fill benchmark tables in README.md with real numbers.
 
 ---
 
-# Phase 3 — Fine-Tune + Benchmarks (Hours 0-22) · Operator 1 (parallel to P1/P2)
+### PHASE F — Demo & Submission (Hour 9–12)
 
-**Goal:** Qwen3.5-0.8B LoRA adapter with measurable gains on B1, B2, B4.
+**Task F1:** Record 3–5 minute demo video showing:
+1. Home page (0:00) — hero, category cards
+2. Category page (0:20) — click Drone → 3 robot bento
+3. Robot detail page (0:40) — DJI Matrice flagship view
+4. AI panel — English query → products shown (1:00)
+5. AI panel — Hindi voice query "drone kahan milega" → UI guide highlights catalog (1:30)
+6. AI panel — beginner vs expert response comparison (2:00)
+7. Benchmark table walkthrough — show fine-tuned > base model numbers (2:30)
+8. Cart checkout flow (3:00)
 
-## P3.1 — Colab setup (30 min)
-**Prompt:** Create `research/notebooks/qwen35_0_8b_finetune.ipynb`:
-- Install: `unsloth==latest transformers datasets peft trl`
-- Load base: `unsloth/Qwen3.5-0.8B` (or HF `Qwen/Qwen3.5-0.8B` if Unsloth mirror not yet ready)
-- 4-bit QLoRA, target modules: `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj`
-- Upload `research/dataset/final/function_calling_v1.jsonl` to Drive, mount, load via `datasets.load_dataset('json', ...)`
-
-## P3.2 — Dataset `ui_guide` augmentation (30 min, can do locally before Colab)
-**Prompt:** In `research/dataset/scripts/add_ui_guide.js`:
-- Read `final/function_calling_v1.jsonl`
-- For each row, compute `ui_guide` by same heuristic as P2.3 (`navigate_to→page` mapping, `compare_products→compare_products`, `search_products→find_<category>`)
-- Add `ui_guide` to `assistant` response JSON. Save as `final/function_calling_v2.jsonl`.
-- Validate: every row has `ui_guide` ∈ the 8 defined keys OR `null`.
-
-## P3.3 — Training (4h)
-**Prompt:** In the Colab notebook:
-- Chat template: Qwen3.5 default (`<|im_start|>system ... <|im_end|>`).
-- System prompt: tool schema JSON + "respond only with a single JSON object with keys `tool`, `args`, `ui_guide`."
-- Train: 3 epochs, batch 4, grad accum 4, lr 2e-4, warmup 0.03, LR scheduler cosine.
-- Checkpoint every 200 steps to Drive.
-- Save LoRA adapter + merged fp16 to `research/models/qwen35-0_8b-fc-v1/`.
-- Push adapter to HF Hub as `nexus-bots/qwen35-0_8b-fc-v1`.
-
-## P3.4 — Local integration smoke test (30 min)
-**Prompt:** On local box (if GPU) or via HF Inference API:
-- Set `ENABLE_FC_MODEL=1`, `FC_MODEL_ID=nexus-bots/qwen35-0_8b-fc-v1` in `server/.env`.
-- Hit `/api/ai/chat` with 3 queries (EN, HI, TE). Confirm valid JSON tool call + `ui_guide` field.
-
-## P3.5 — Benchmark harness (3h, parallel to P3.3)
-**Prompt:** Create `research/eval/`:
-
-- **`bench_function_calling.py`** (B1 + B4):
-  - Hold-out: 100 rows stratified by `language × tool`, seed=42
-  - Score: `tool_accuracy`, `arg_f1` (per-key exact match avg), `latency_ms`
-  - Systems: (1) our fine-tuned Qwen3.5-0.8B local, (2) heuristic `_heuristic_tool_call`, (3) GPT-4o zero-shot, (4) Claude Opus 4.7 zero-shot, (5) Gemini 2.5 zero-shot
-  - Output: `research/results/b1_function_calling.csv` + `.md` table. Separate slice per language for B4.
-
-- **`bench_rag.py`** (B2):
-  - 50 recommend queries with gold product IDs (hand-label from dataset)
-  - Systems: (1) FAISS + context re-rank (ours), (2) FAISS only (disable re-rank), (3) BM25 via `rank_bm25`
-  - Metrics: Recall@3, MRR
-  - Output: `research/results/b2_rag.csv` + `.md`
-
-- Skip B3 (proficiency) and B5 (persona LLM-judge) for 24h scope.
-
-## P3.6 — Run benchmarks + fill tables (2h)
-**Prompt:** Run all three scripts after P3.3 completes. Paste result tables into `README.md` at benchmark section. Commit results under `research/results/`.
-
----
-
-# Phase 4 — Demo + Submission (Hours 20-24) · Both
-
-## P4.1 — Integration rehearsal (1h)
-**Prompt:** Walk the demo path twice end-to-end:
-1. EN: "show me drones under 50k" → tool call → RAG results → reply
-2. HI romanized: "mera order kahan hai" → `ui_guide: check_orders` → on-screen guide pulses Navbar Orders
-3. Product page → "compare with others" → `ui_guide: compare_products`
-Fix any UI-guide targeting bugs.
-
-## P4.2 — Demo video (1h)
-**Prompt:** Record 3-minute screencast (OBS or equivalent):
-- 0:00 landing hero
-- 0:20 category showcase → click Drone → bento of 3
-- 0:45 RobotDetail flagship
-- 1:10 open ChatWidget, HI voice query, guide kicks in
-- 1:40 persona demo (beginner vs expert back-to-back)
-- 2:10 benchmark table walkthrough
-- 2:50 outro
-
-## P4.3 — Slides (1h)
-**Prompt:** 10 slides PDF:
-1. Problem
+**Task F2:** 10-slide PDF presentation:
+1. Problem statement (3 problems: routing cost, context-blind, one-size-fits-all)
 2. Architecture diagram
-3. Dataset (1000 rows, splits, strict validation)
-4. Model (Qwen3.5-0.8B, QLoRA, 3 epochs)
-5. B1 Function-calling table
-6. B2 RAG table
-7. B4 Multilingual table
-8. Novelty 5-point summary
-9. Live demo screenshots
+3. Dataset (1020 rows, EN/HI/TE split, 6 tools, stratified)
+4. Fine-tuning (Qwen3.5-0.8B, QLoRA, product-aware system prompt)
+5. B1 — Function-Calling Accuracy table
+6. B2 — Context-Aware RAG table
+7. B4 — Multilingual table
+8. Novelty summary (5 points)
+9. Demo screenshots
 10. Limitations + future work
 
-## P4.4 — Submission (1h)
-**Prompt:**
-- Update `README.md` with real benchmark numbers and final architecture.
-- Run `graphify update .` — confirm `graphify-out/GRAPH_REPORT.md` reflects current code.
-- `git add -A && git commit -m "feat: v1.0 submission"`, `git tag v1.0-submission`, `git push --tags`.
+**Task F3:** Final git commit
+```bash
+git add -A
+git commit -m "feat: v1.0 submission — fine-tuned Qwen3.5-0.8B, multilingual dataset, full benchmarks"
+git tag v1.0-submission
+git push --tags
+```
 
 ---
 
-## Benchmark Tables (to fill during P3.6)
+## Research Goals & Novelty
+
+### What We Are Proving
+
+1. **Domain-fine-tuned 0.8B matches frontier LLMs** at robotics function-calling — small model, specific domain, competitive accuracy (B1)
+2. **Activity-aware RAG** (re-ranked by views, cart, current page) beats static semantic search (B2)
+3. **Multilingual function-calling on a small model** — EN/HI/TE Romanized, same 0.8B (B4)
+4. **Persona-adaptive generation** — auto-detected proficiency (beginner/expert) adapts Sarvam's response style
+5. **LLM-driven UI guidance** — model emits `ui_guide` intent key → frontend highlights the exact UI element, no hardcoded flows
+
+### Why The System Prompt Fix Matters for Research
+
+The root cause of base model hallucination: it had no product knowledge. With the catalog embedded in the system prompt:
+- Base model improves significantly (validates the system prompt design)
+- Fine-tuned model improves further (validates fine-tuning on top of good prompting)
+- This 2-step comparison (base → base+catalog → fine-tuned) is itself a finding worth documenting
+
+---
+
+## Dataset Design Details
+
+### System Prompt (identical in fc_model.py and finetune/config.py)
+
+The system prompt must include:
+1. Tool schemas (already present)
+2. Product catalog table (add this — see Phase A)
+3. UI structure (add this — see Phase A)
+4. ui_guide rules
+5. Out-of-scope handling rule
+
+### Proficiency Detection
+
+`detect_proficiency()` in `pipeline.py` classifies queries as beginner/expert based on:
+- Token count (≥18 tokens → +1)
+- Technical terms: EN (`latency`, `payload`, `slam`, `thermal`) → +2 if ≥2 hits
+- HI technical: `बैटरी`, `वारंटी`, `तुलना`, `स्पेक`, `कीमत`
+- TE technical: `బ్యాటరీ`, `వారెంటీ`, `పోలిక`, `స్పెక్`, `ధర`
+- Viewed ≥4 products → +1; cart ≥2 items → +1
+- Score ≥3 → `expert`, else → `beginner`
+
+The fine-tuning dataset should have ~50/50 beginner/expert split per language.
+
+### Teacher Model for UI Guide Labeling
+
+For log-based examples, use Claude as teacher:
+```
+Given this NexusBots query: "{message}"
+Page context: {context}
+Product catalog: [the 12 products with IDs and prices]
+App structure: /catalog/drone has IDs 7-9, /orders has Support tab
+
+What is the single correct function call? Output JSON:
+{"tool": "...", "arguments": {...}, "ui_guide": "..."}
+```
+
+Valid `ui_guide` values: `check_orders`, `track_delivery`, `update_cart`, `find_kitchen`, `find_drone`, `find_home_cleaner`, `find_humanoid`, `compare_products`, `open_support`, `new_ticket`, `view_tickets`, `locate_robot:{id}`, `locate_path:{category}:{id}`, or `null`.
+
+---
+
+## Benchmark Tables (Fill During Phase E)
 
 ### B1 — Function-Calling Accuracy
-| System | Tool Acc | Arg F1 | p50 Latency | $/1000 |
-|---|---|---|---|---|
-| Qwen3.5-0.8B-FC (ours) | — | — | — | ~$0 |
-| Heuristic router | — | — | ~1 ms | $0 |
+
+| System | Tool Acc | Arg F1 | UI Guide Acc | p50 Latency |
+|--------|----------|--------|--------------|-------------|
+| Qwen3.5-0.8B-FC fine-tuned (ours) | — | — | — | — |
+| Qwen3.5-0.8B base (zero-shot) | — | — | — | — |
+| Heuristic router | — | — | — | ~1ms |
 | GPT-4o zero-shot | — | — | — | — |
-| Claude Opus 4.7 zero-shot | — | — | — | — |
+| Claude zero-shot | — | — | — | — |
 | Gemini 2.5 zero-shot | — | — | — | — |
 
 ### B2 — Context-Aware RAG
-| Method | Recall@3 | MRR |
-|---|---|---|
-| FAISS + context re-rank (ours) | — | — |
-| FAISS only | — | — |
-| BM25 | — | — |
 
-### B4 — Multilingual Function-Calling (ours vs best frontier)
-| Language | Qwen3.5-0.8B-FC Acc | Best Frontier Acc |
-|---|---|---|
-| English | — | — |
-| Hindi | — | — |
-| Telugu | — | — |
+| Method | Recall@3 | MRR |
+|--------|----------|-----|
+| FAISS + context re-rank (ours) | — | — |
+| FAISS only (no re-rank) | — | — |
+| BM25 baseline | — | — |
+
+### B4 — Multilingual Function-Calling
+
+| Language | Fine-tuned Acc | Base Model Acc | Heuristic Acc |
+|----------|---------------|----------------|---------------|
+| English | — | — | — |
+| Hindi (Romanized) | — | — | — |
+| Telugu (Romanized) | — | — | — |
+
+---
+
+## Optional Features (If Time Permits)
+
+### OPT-1: Proactive Sales Agent
+
+Trigger proactive AI message based on `UserActivityContext`:
+- User views 3+ products without adding to cart → suggest comparison
+- User on catalog page 60+ seconds → offer recommendation
+- User returns to home after viewing a product → ask if they need help
+
+Implementation: React `useEffect` watching `viewedProducts.length` + `open-chat` custom event (already wired in `App.jsx`).
+
+### OPT-2: Real-Time Typing Effect
+
+Add character-reveal animation in `AISidePanel.jsx` to make responses feel real-time:
+```jsx
+// Reveal response character by character
+useEffect(() => {
+  if (!newMessage) return;
+  let i = 0;
+  const timer = setInterval(() => {
+    setDisplayed(prev => prev + newMessage[i++]);
+    if (i >= newMessage.length) clearInterval(timer);
+  }, 12);
+  return () => clearInterval(timer);
+}, [newMessage]);
+```
+
+### OPT-3: Model Source Badge
+
+Show "Model" (green) or "Heuristic" (yellow) + "RAG" badge on each AI message. The server already returns `toolSource` and `ragEnabled` — wire them to `AISidePanel.jsx`.
+
+---
+
+## Known Security Issues (Fix If Time Allows)
+
+| Issue | Location | Fix |
+|-------|----------|-----|
+| `.env` not in `.gitignore` | root `.gitignore` | Add `.env`, `.env.local` |
+| Callback tickets endpoint returns all users' data | `server/routes/chats.js:84` | Filter by user ID |
+| Payment form has zero validation | `client/src/components/CartDrawer.jsx:49` | Add format checks for card/expiry/CVV |
 
 ---
 
 ## Risk Register
 
 | Risk | Likelihood | Mitigation |
-|---|---|---|
-| Qwen3.5-0.8B Unsloth mirror not ready | Low | Fall back to raw HF weights + manual PEFT |
-| Colab T4 session expires mid-train | Medium | Checkpoint every 200 steps |
-| driver.js conflicts with Tailwind | Low | Scope overrides to `.driver-*` with `@layer` |
-| Fine-tuned model loses to heuristic on tool accuracy | Low-Med | Still reportable — negative result is a finding |
+|------|------------|------------|
+| Colab T4 session expires mid-train | Medium | Checkpoint every 200 steps (already configured) |
+| Fine-tuned model loses to heuristic on tool accuracy | Low-Med | Still reportable — negative result is a valid finding |
 | Sarvam API flakes during demo | Medium | Fallback in `sarvam_client.py` already wired |
+| Dataset too small → overfitting | Low | 900 train / 100 test; monitor eval loss; stop early if gap widens |
+| Romanized HI/TE coverage too thin | Medium | Ensure ≥100 HI + 75 TE rows minimum before training |
 
 ---
 
-## Submission Checklist (end of hour 24)
+## Submission Checklist
 
-- [ ] Qwen3.5-0.8B LoRA adapter on HF Hub + local merged copy
-- [ ] B1, B2, B4 tables filled in `README.md`
-- [ ] `ui_guide` system wired end-to-end on 3+ flows
-- [ ] Demo video (3 min) recorded
-- [ ] Slides (PDF, 10 slides)
-- [ ] `graphify update .` run, `graphify-out/` reflects final code
-- [ ] Git tag `v1.0-submission` pushed
+- [ ] System prompt updated with product catalog + UI structure in both `fc_model.py` and `finetune/config.py`
+- [ ] `research/dataset/raw/function_calls_raw_v2.jsonl` generated (≥970 rows)
+- [ ] `finetune/data/train.jsonl` + `test.jsonl` created by `prepare_dataset.py`
+- [ ] Qwen3.5-0.8B LoRA adapter trained (Colab), downloaded, placed in `models/`
+- [ ] Fine-tuned model verified end-to-end via curl (EN + HI + TE)
+- [ ] B1, B2, B4 benchmark tables filled in `README.md`
+- [ ] Voice input working (Chrome, STT via Web Speech API)
+- [ ] Persona adaptation verified (beginner vs expert response comparison)
+- [ ] Multilingual routing verified (HI/TE romanized → correct tool + ui_guide)
+- [ ] UI guide working on 3+ flows end-to-end
+- [ ] Demo video recorded (3–5 min)
+- [ ] Slides PDF (10 slides)
+- [ ] `git tag v1.0-submission` pushed
 
 ---
 
-*Academic project — IIT Hyderabad, M.Tech, CS6420 Topics in Deep Learning*
+## Locked Decisions (Do Not Revisit)
+
+| Area | Choice |
+|------|--------|
+| Base model | Qwen3.5-0.8B |
+| Fine-tune method | Unsloth + QLoRA, r=16, α=32, lr=1e-4, 3 epochs |
+| Tool count | 6 tools — final |
+| Languages | EN + Romanized Hindi + Romanized Telugu |
+| Voice | STT only via Web Speech API (no TTS for demo) |
+| Orchestration | Direct Python dispatch — no LangChain |
+| Dataset size | ~1000 rows (900 train / 100 test) |
+| UI guidance | Element-anchored CSS + Floating UI tooltip (driver.js removed) |
+
+---
+
+*IIT Hyderabad · M.Tech · CS6420 Topics in Deep Learning · April 2026*

@@ -114,25 +114,61 @@ UI_GUIDE_KEYS = [
     "update_cart",
     "find_drone",
     "find_kitchen",
-    "find_cleaner",
+    "find_home_cleaner",
     "find_humanoid",
     "compare_products",
+    "open_support",
+    "new_ticket",
+    "view_tickets",
 ]
 
 CATEGORY_TO_GUIDE = {
     "Drone": "find_drone",
     "Kitchen": "find_kitchen",
-    "Home Cleaner": "find_cleaner",
+    "Home Cleaner": "find_home_cleaner",
     "Humanoid": "find_humanoid",
 }
 
 # ── System prompt template ───────────────────────────────────────────────────
 import json
 
+PRODUCT_CATALOG_BLOCK = """Product Catalog (12 robots, fixed):
+ID  | Name                       | Category     | Price
+1   | Amazon Astro               | Kitchen      | $1599.99
+2   | Samsung Ballie             | Kitchen      | $1299.99
+3   | Enabot EBO X               | Kitchen      | $599.99
+4   | iRobot Roomba j9+          | Home Cleaner | $799.99
+5   | Roborock S8 MaxV Ultra     | Home Cleaner | $1799.99
+6   | Ecovacs WINBOT W2 Omni     | Home Cleaner | $499.99
+7   | Ring Always Home Cam       | Drone        | $249.99   (cheapest drone)
+8   | DJI Matrice 30T            | Drone        | $13600.00 (enterprise, thermal)
+9   | Aiper Surfer S1            | Drone        | $1399.99  (pool drone)
+10  | Miko 3                     | Humanoid     | $249.99   (kids, age 5-12)
+11  | Wonder Workshop Dash       | Humanoid     | $149.99   (cheapest humanoid, coding)
+12  | LEGO Education Spike Prime | Humanoid     | $395.95   (classroom, python)"""
+
+UI_STRUCTURE_BLOCK = """App Structure:
+- /catalog/kitchen → Kitchen robots (IDs 1-3)
+- /catalog/home-cleaner → Home Cleaner robots (IDs 4-6)
+- /catalog/drone → Drone robots (IDs 7-9)
+- /catalog/humanoid → Humanoid robots (IDs 10-12)
+- /robot/:id → Product detail
+- /orders → Order history + Support tab (tickets, complaints)
+- Cart: side drawer (navigate_to page=cart)
+
+Rules:
+- For product names, resolve ID from catalog above
+- Support/ticket queries → navigate_to page=orders + ui_guide=open_support/new_ticket/view_tickets
+- Location queries ("where is X", "kahan", "ekkada") → navigate_to page=catalog with product_id
+- Out-of-scope queries (not about robots) → search_products query=robot"""
+
 # SYSTEM_PROMPT: used for ChatML-based training (system/user/assistant messages).
-# This is our full-featured prompt with ui_guide.  The pipeline can be updated
-# to use ChatML once Phase 2 integrates the fine-tuned model properly.
+# Identical to server/ai/fc_model.py SYSTEM_PROMPT — keep both in sync.
 SYSTEM_PROMPT = f"""You are a robotics commerce assistant. Given a user query and page context, respond with exactly one JSON object selecting a tool call.
+
+{PRODUCT_CATALOG_BLOCK}
+
+{UI_STRUCTURE_BLOCK}
 
 Available tools:
 {json.dumps(TOOL_SCHEMAS_COMPACT, indent=2)}
@@ -150,6 +186,7 @@ Rules:
 - For navigate_to page=orders, set ui_guide to "check_orders".
 - For navigate_to page=cart, set ui_guide to "update_cart".
 - For compare_products, set ui_guide to "compare_products".
+- For support/ticket queries, set ui_guide to open_support/new_ticket/view_tickets.
 - Otherwise set ui_guide to null."""
 
 
