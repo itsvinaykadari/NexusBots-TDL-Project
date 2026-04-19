@@ -96,6 +96,8 @@ def score_ui_guide(pred_guide: str | None, gold_guide: str | None) -> float:
 def parse_json_from_text(text: str) -> dict:
     """Best-effort JSON extraction from model output."""
     text = text.strip()
+    # Strip any <think>...</think> block (safety net for thinking mode leakage)
+    text = re.sub(r"<think>[\s\S]*?</think>", "", text).strip()
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -120,12 +122,14 @@ def predict_finetuned(model, tokenizer, query: str, context_str: str) -> tuple[d
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"Query: {query}\nContext: {context_str}"},
     ]
-    input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    input_text = tokenizer.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
+    )
     inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
 
     start = time.perf_counter()
     outputs = model.generate(
-        **inputs, max_new_tokens=256, temperature=0.1, do_sample=True,
+        **inputs, max_new_tokens=200, temperature=0.0, do_sample=False,
         pad_token_id=tokenizer.eos_token_id,
     )
     latency = (time.perf_counter() - start) * 1000

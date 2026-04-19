@@ -107,7 +107,7 @@ def predict_tool_call(message: str, language: str, context: Dict[str, Any]) -> O
 
     try:
         input_text = _tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
+            messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
         )
         inputs = _tokenizer(input_text, return_tensors="pt")
         if hasattr(_model, "device"):
@@ -115,7 +115,7 @@ def predict_tool_call(message: str, language: str, context: Dict[str, Any]) -> O
 
         outputs = _model.generate(
             **inputs,
-            max_new_tokens=180,
+            max_new_tokens=200,
             do_sample=False,
             temperature=0.0,
             pad_token_id=_tokenizer.eos_token_id,
@@ -147,6 +147,9 @@ def _extract_json(text: str) -> Optional[dict]:
     text = text.strip()
     if not text:
         return None
+
+    # Strip any <think>...</think> block (safety net)
+    text = re.sub(r"<think>[\s\S]*?</think>", "", text).strip()
 
     try:
         parsed = json.loads(text)
