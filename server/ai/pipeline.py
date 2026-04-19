@@ -852,9 +852,20 @@ class PipelineRuntime:
             if _ai_dir not in sys.path:
                 sys.path.insert(0, _ai_dir)
             import fc_model  # type: ignore
-            return fc_model.predict_tool_call(message, language, context)
-        except ImportError:
-            pass
+            result = fc_model.predict_tool_call(message, language, context)
+            if result is None:
+                # Surface the load error so it appears in server logs
+                err = getattr(fc_model, '_load_error', None)
+                print(f"[PIPELINE] fc_model returned None (load_error={err!r}) → heuristic fallback",
+                      file=sys.stderr, flush=True)
+            return result
+        except ImportError as e:
+            print(f"[PIPELINE] fc_model import failed: {e} → trying legacy generator",
+                  file=sys.stderr, flush=True)
+        except Exception as e:
+            print(f"[PIPELINE] fc_model.predict_tool_call raised {type(e).__name__}: {e} → heuristic fallback",
+                  file=sys.stderr, flush=True)
+            return None
         # If fc_model not available, fall back to legacy generator
         generator = _load_fc_generator()
         if generator is None:
@@ -1228,7 +1239,11 @@ class PipelineRuntime:
             message=message, language=language, context=context)
         if tool_call:
             model_ui_guide = tool_call.get("ui_guide")  # from fc_model
+            print(f"[PIPELINE] decide_tool → MODEL | tool={tool_call.get('tool')!r}",
+                  file=sys.stderr, flush=True)
             return self._sanitize_tool_call(tool_call, message=message, context=context), "model", model_ui_guide
+        print(f"[PIPELINE] decide_tool → HEURISTIC (model returned None)",
+              file=sys.stderr, flush=True)
         return self._sanitize_tool_call(self._heuristic_tool_call(message, context), message=message, context=context), "heuristic", None
 
 

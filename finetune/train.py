@@ -1,5 +1,5 @@
 """
-Nexus Bots — Qwen3.5-0.8B fine-tuning with Unsloth + QLoRA.
+Nexus Bots — Qwen3-0.6B fine-tuning with Unsloth + QLoRA.
 
 Usage:
     python train.py                          # Local GPU
@@ -66,7 +66,7 @@ def format_chat_for_training(row: dict) -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fine-tune Qwen3.5-0.8B for function calling")
+    parser = argparse.ArgumentParser(description="Fine-tune Qwen3-0.6B for function calling")
     parser.add_argument("--colab", action="store_true", help="Enable Colab mode (Drive checkpoints)")
     parser.add_argument("--push-to-hub", action="store_true", help="Push adapter to HF Hub after training")
     parser.add_argument("--merge", action="store_true", help="Save merged fp16 model after training")
@@ -80,7 +80,7 @@ def main():
         sys.exit(1)
 
     print("=" * 60)
-    print("Nexus Bots — Qwen3.5-0.8B Fine-Tuning")
+    print("Nexus Bots — Qwen3-0.6B Fine-Tuning")
     print("=" * 60)
 
     # ── Load model via Unsloth ───────────────────────────────────────────

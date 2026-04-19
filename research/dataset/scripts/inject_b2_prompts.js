@@ -5,7 +5,7 @@
  * Flow:
  *   1. Spawns server/ai/pipeline.py --worker (same as the server does)
  *   2. Sends each of the 70 B2 prompts to pipeline.py via JSON-line IPC
- *   3. pipeline.py routes using Qwen3.5-0.8B (if GPU + ENABLE_FC_MODEL=1)
+ *   3. pipeline.py routes using Qwen3-0.6B (if GPU + ENABLE_FC_MODEL=1)
  *      or heuristic fallback (CPU-only, no GPU needed)
  *   4. Compares pipeline prediction vs our ground-truth label → logs ✓/✗
  *   5. Writes JSONL rows with GROUND-TRUTH labels (not pipeline prediction)
@@ -203,7 +203,7 @@ async function main() {
   console.log(`Pipeline : ${PIPELINE}`);
   console.log(`Python   : ${PYTHON}`);
   console.log(`Prompts  : ${PROMPTS.length}  (EN:25 HI:25 TE:20)`);
-  console.log(`GPU mode : ${process.env.ENABLE_FC_MODEL === "1" ? "Qwen3.5-0.8B (ENABLE_FC_MODEL=1)" : "heuristic (no GPU — set ENABLE_FC_MODEL=1 for Qwen)"}`);
+  console.log(`GPU mode : ${process.env.ENABLE_FC_MODEL === "1" ? "Qwen3-0.6B (ENABLE_FC_MODEL=1)" : "heuristic (no GPU — set ENABLE_FC_MODEL=1 for Qwen)"}`)
   console.log(`─────────────────────────────────────────────`);
 
   // Start pipeline worker

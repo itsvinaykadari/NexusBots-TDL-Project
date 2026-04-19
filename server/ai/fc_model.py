@@ -20,7 +20,14 @@ This ensures:
 import json
 import os
 import re
+import sys
+import time
 from typing import Any, Dict, Optional
+
+
+def _log(msg: str) -> None:
+    """Write a timestamped diagnostic line to stderr (visible in server logs)."""
+    print(f"[FC_MODEL] {msg}", file=sys.stderr, flush=True)
 
 # ── Singleton state ──────────────────────────────────────────────────────────
 _model = None
@@ -94,36 +101,60 @@ ALLOWED_TOOLS = {"search_products", "get_product", "compare_products", "recommen
 
 
 def load_model() -> bool:
-    """Load the fine-tuned model. Returns True if successful."""
+    """Load the model. Returns True if successful. All errors go to stderr."""
     global _model, _tokenizer, _load_error
 
     if _model is not None:
         return True
     if _load_error is not None:
+        _log(f"Skipping load (cached error): {_load_error}")
         return False
 
     model_path = os.getenv("FC_MODEL_PATH") or os.getenv("FC_MODEL_ID")
     if not model_path:
-        _load_error = "FC_MODEL_PATH or FC_MODEL_ID not set"
+        _load_error = "FC_MODEL_PATH or FC_MODEL_ID not set in environment"
+        _log(f"ERROR: {_load_error}")
         return False
+
+    _log(f"Loading model: {model_path!r}")
+    _log(f"ENABLE_FC_MODEL={os.getenv('ENABLE_FC_MODEL', '(not set)')!r}")
+    t0 = time.time()
 
     try:
         import torch
+        _log(f"torch {torch.__version__} | CUDA available: {torch.cuda.is_available()}")
+        if torch.cuda.is_available():
+            for i in range(torch.cuda.device_count()):
+                props = torch.cuda.get_device_properties(i)
+                mem_gb = props.total_memory / 1024**3
+                _log(f"  GPU {i}: {props.name} | {mem_gb:.1f} GB VRAM")
+
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         local_only = bool(os.getenv("FC_MODEL_PATH"))
+        _log(f"local_files_only={local_only} | loading tokenizer...")
         _tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=local_only)
+        _log(f"Tokenizer loaded: vocab_size={_tokenizer.vocab_size}")
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         dtype = torch.float16 if device == "cuda" else torch.float32
+        _log(f"Loading model onto device={device!r} dtype={dtype} ...")
         _model = AutoModelForCausalLM.from_pretrained(
             model_path, local_files_only=local_only,
-            dtype=dtype,
+            dtype=dtype,               # transformers v5+ uses 'dtype', not 'torch_dtype'
         ).to(device)
         _model.eval()
+        param_count = sum(p.numel() for p in _model.parameters()) / 1e6
+        elapsed = time.time() - t0
+        _log(f"Model ready: {param_count:.0f}M params on {device} | load took {elapsed:.1f}s")
+        if device == "cuda":
+            allocated_gb = torch.cuda.memory_allocated() / 1024**3
+            reserved_gb = torch.cuda.memory_reserved() / 1024**3
+            _log(f"VRAM after load: allocated={allocated_gb:.2f} GB | reserved={reserved_gb:.2f} GB")
         return True
     except Exception as e:
         _load_error = str(e)
+        _log(f"ERROR loading model: {_load_error}")
         return False
 
 
@@ -135,6 +166,7 @@ def predict_tool_call(message: str, language: str, context: Dict[str, Any]) -> O
     The pipeline's _sanitize_tool_call() handles validation downstream.
     """
     if not load_model():
+        _log(f"predict_tool_call: model not loaded (_load_error={_load_error!r}) → returning None")
         return None
 
     context_json = json.dumps(context, ensure_ascii=False)
@@ -145,31 +177,64 @@ def predict_tool_call(message: str, language: str, context: Dict[str, Any]) -> O
         {"role": "user", "content": user_content},
     ]
 
+    _log(f"--- Inference START ---")
+    _log(f"  language : {language!r}")
+    _log(f"  query    : {message!r}")
+    _log(f"  context  : {json.dumps(context, ensure_ascii=False)[:120]}")
+
     try:
-        input_text = _tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
+        # Disable Qwen3 "thinking" mode — without this the model outputs a
+        # <think>...</think> reasoning trace that fills all tokens before the
+        # JSON, causing a parse fail and heuristic fallback every time.
+        try:
+            input_text = _tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True,
+                enable_thinking=False,   # Qwen3-specific: skip chain-of-thought
+            )
+            _log("  thinking mode: DISABLED (enable_thinking=False)")
+        except TypeError:
+            # Older tokenizer config that doesn't understand enable_thinking
+            input_text = _tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True,
+            )
+            _log("  thinking mode: tokenizer does not support enable_thinking flag")
+
         inputs = _tokenizer(input_text, return_tensors="pt")
+        input_token_count = inputs["input_ids"].shape[1]
+        _log(f"  input tokens : {input_token_count} | max_new_tokens: 300")
+
         if hasattr(_model, "device"):
             inputs = {k: v.to(_model.device) for k, v in inputs.items()}
 
+        t0 = time.time()
         outputs = _model.generate(
             **inputs,
-            max_new_tokens=180,
+            max_new_tokens=300,
             do_sample=False,
-            temperature=0.0,
             pad_token_id=_tokenizer.eos_token_id,
         )
+        latency_ms = (time.time() - t0) * 1000
 
         generated_ids = outputs[0][inputs["input_ids"].shape[1]:]
+        output_token_count = len(generated_ids)
         text = _tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
+
+        _log(f"  output tokens: {output_token_count} | latency: {latency_ms:.0f}ms")
+        _log(f"  raw output   : {text!r}")
+
+        import torch
+        if torch.cuda.is_available():
+            alloc = torch.cuda.memory_allocated() / 1024**3
+            _log(f"  VRAM used    : {alloc:.2f} GB")
 
         parsed = _extract_json(text)
         if not isinstance(parsed, dict):
+            _log(f"  PARSE FAIL: could not extract JSON from output → returning None")
             return None
 
         tool = parsed.get("tool")
         if tool not in ALLOWED_TOOLS:
+            _log(f"  INVALID TOOL: {tool!r} not in allowed set → returning None")
             return None
 
         arguments = parsed.get("arguments")
@@ -180,18 +245,30 @@ def predict_tool_call(message: str, language: str, context: Dict[str, Any]) -> O
         ui_guide = parsed.get("ui_guide")
         if isinstance(ui_guide, str) and ui_guide in UI_GUIDE_KEYS:
             result["ui_guide"] = ui_guide
+
+        _log(f"  result       : tool={tool!r} args={arguments} ui_guide={result.get('ui_guide')!r}")
+        _log(f"--- Inference END ---")
         return result
 
-    except Exception:
+    except Exception as e:
+        _log(f"  EXCEPTION during inference: {type(e).__name__}: {e}")
         return None
 
 
 def _extract_json(text: str) -> Optional[dict]:
-    """Extract first JSON object from text."""
+    """Extract first JSON object from text, stripping Qwen3 artifacts."""
     text = text.strip()
     if not text:
         return None
 
+    # 1. Strip residual <think>...</think> blocks (safety net).
+    text = re.sub(r"<think>[\s\S]*?</think>", "", text, flags=re.IGNORECASE).strip()
+
+    # 2. Strip markdown code fences — Qwen3 sometimes wraps output in ```json ... ```
+    text = re.sub(r"^```(?:json)?\s*", "", text).strip()
+    text = re.sub(r"\s*```\s*$", "", text).strip()
+
+    # 3. Fast path: the whole text is valid JSON
     try:
         parsed = json.loads(text)
         if isinstance(parsed, dict):
@@ -199,6 +276,27 @@ def _extract_json(text: str) -> Optional[dict]:
     except Exception:
         pass
 
+    # 4. Find the outermost {...} (handles nested braces correctly)
+    depth = 0
+    start = -1
+    for i, ch in enumerate(text):
+        if ch == "{":
+            if depth == 0:
+                start = i
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0 and start != -1:
+                candidate = text[start:i + 1]
+                try:
+                    parsed = json.loads(candidate)
+                    if isinstance(parsed, dict):
+                        return parsed
+                except Exception:
+                    pass
+                start = -1
+
+    # 5. Last-resort: try every {...} substring (no nesting check)
     for match in re.findall(r"\{[^{}]*\}", text):
         try:
             parsed = json.loads(match)

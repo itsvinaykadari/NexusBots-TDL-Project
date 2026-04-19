@@ -1,5 +1,5 @@
 """
-Nexus Bots — Fine-tuning configuration for Qwen3.5-0.8B.
+Nexus Bots — Fine-tuning configuration for Qwen3-0.6B.
 
 All hyperparameters, paths, and constants in one place.
 """
@@ -21,15 +21,15 @@ TEST_PATH = DATA_DIR / "test.jsonl"
 FULL_V2_PATH = DATA_DIR / "function_calling_v2.jsonl"
 
 OUTPUT_DIR = FINETUNE_ROOT / "output"
-ADAPTER_DIR = OUTPUT_DIR / "qwen35-0_8b-fc-v1"
-MERGED_DIR = OUTPUT_DIR / "qwen35-0_8b-fc-v1-merged"
+ADAPTER_DIR = OUTPUT_DIR / "qwen3-0_6b-fc-v1"
+MERGED_DIR = OUTPUT_DIR / "qwen3-0_6b-fc-v1-merged"
 
 RESULTS_DIR = PROJECT_ROOT / "research" / "results"
 
 # ── Model ────────────────────────────────────────────────────────────────────
-BASE_MODEL = os.getenv("BASE_MODEL", "Qwen/Qwen3.5-0.8B")  # HF model ID
+BASE_MODEL = os.getenv("BASE_MODEL", "Qwen/Qwen3-0.6B")  # HF model ID
 # Unsloth mirror if available:
-UNSLOTH_MODEL = os.getenv("UNSLOTH_MODEL", "unsloth/Qwen3.5-0.8B")
+UNSLOTH_MODEL = os.getenv("UNSLOTH_MODEL", "unsloth/Qwen3-0.6B")
 
 MAX_SEQ_LENGTH = 1024
 
@@ -207,4 +207,4 @@ PIPELINE_PROMPT_TEMPLATE = (
 )
 
 # ── HuggingFace Hub ──────────────────────────────────────────────────────────
-HF_REPO_ID = os.getenv("HF_REPO_ID", "nexus-bots/qwen35-0_8b-fc-v1")
+HF_REPO_ID = os.getenv("HF_REPO_ID", "nexus-bots/qwen3-0_6b-fc-v1")

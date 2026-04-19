@@ -600,7 +600,7 @@ async function callSarvamSTT(audioBuffer, mimeType) {
 // Receives raw audio blob from MediaRecorder (WebM/Opus from Chrome/Firefox).
 // POSTs it to Sarvam /speech-to-text and returns { transcript }.
 // That transcript is then fed into the normal /api/ai/chat pipeline:
-//   Qwen3.5-0.8B (tool routing) → tool execution → Sarvam NLG → response.
+//   Qwen3-0.6B (tool routing) → tool execution → Sarvam NLG → response.
 router.post(
     '/stt',
     rateLimit,

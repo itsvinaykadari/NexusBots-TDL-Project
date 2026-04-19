@@ -1,5 +1,5 @@
 """
-Nexus Bots — Inference module for fine-tuned Qwen3.5-0.8B.
+Nexus Bots — Inference module for fine-tuned Qwen3-0.6B.
 
 Usage:
     # Interactive
@@ -7,7 +7,7 @@ Usage:
 
     # As a library
     from inference import FunctionCallingModel
-    model = FunctionCallingModel("output/qwen35-0_8b-fc-v1")
+    model = FunctionCallingModel("output/qwen3-0_6b-fc-v1")
     result = model.predict("Show me drones", {"current_page": "catalog"})
 """
 
@@ -24,7 +24,7 @@ from config import ADAPTER_DIR, MERGED_DIR, SYSTEM_PROMPT, MAX_SEQ_LENGTH, UI_GU
 
 
 class FunctionCallingModel:
-    """Loads fine-tuned Qwen3.5-0.8B and predicts tool calls."""
+    """Loads fine-tuned Qwen3-0.6B and predicts tool calls."""
 
     def __init__(self, model_path: str | None = None, use_merged: bool = False):
         self._model = None

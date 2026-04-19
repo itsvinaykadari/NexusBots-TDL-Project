@@ -4,7 +4,7 @@ Nexus Bots — Benchmark B1 (Function-Calling Accuracy) + B4 (Multilingual).
 Evaluates tool selection accuracy and argument correctness on the holdout test set.
 
 Systems compared:
-  1. Fine-tuned Qwen3.5-0.8B (ours)
+  1. Fine-tuned Qwen3-0.6B (ours)
   2. Heuristic router (from pipeline.py)
   3. GPT-4o zero-shot (optional, needs OPENAI_API_KEY)
   4. Claude Opus (optional, needs ANTHROPIC_API_KEY)
@@ -110,7 +110,7 @@ def parse_json_from_text(text: str) -> dict:
     return {}
 
 
-# ── System: Fine-tuned Qwen3.5-0.8B ─────────────────────────────────────────
+# ── System: Fine-tuned Qwen3-0.6B ───────────────────────────────────────────
 
 def predict_finetuned(model, tokenizer, query: str, context_str: str) -> tuple[dict, float]:
     """Run inference with fine-tuned model. Returns (parsed_result, latency_ms)."""
@@ -432,7 +432,7 @@ def main():
 
     # 1. Fine-tuned model
     if not args.skip_ours:
-        print("\n=== Evaluating: Qwen3.5-0.8B-FC (ours) ===")
+        print("\n=== Evaluating: Qwen3-0.6B-FC (ours) ===")
         try:
             from config import ADAPTER_DIR, MERGED_DIR, MAX_SEQ_LENGTH
             from unsloth import FastLanguageModel
@@ -456,10 +456,10 @@ def main():
                 def predict_ours(query, ctx_str):
                     return predict_finetuned(model, tokenizer, query, ctx_str)
 
-                all_results["Qwen3.5-0.8B-FC (ours)"] = evaluate_system(
-                    "Qwen3.5-0.8B-FC", predict_ours, test_rows
+                all_results["Qwen3-0.6B-FC (ours)"] = evaluate_system(
+                    "Qwen3-0.6B-FC", predict_ours, test_rows
                 )
-                print(f"  Overall: {all_results['Qwen3.5-0.8B-FC (ours)']['overall']}")
+                print(f"  Overall: {all_results['Qwen3-0.6B-FC (ours)']['overall']}")
             else:
                 print("  Fine-tuned model not found, skipping.")
         except ImportError:

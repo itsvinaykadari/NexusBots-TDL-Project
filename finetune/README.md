@@ -1,8 +1,8 @@
-# Nexus Bots — Qwen3.5-0.8B Fine-Tuning for Domain-Specific Function Calling
+# Nexus Bots — Qwen3-0.6B Fine-Tuning for Domain-Specific Function Calling
 
 ## Overview
 
-Fine-tune **Qwen3.5-0.8B** (released 2026-03-02, 119 languages incl. HI/TE) using **QLoRA via Unsloth** for domain-specific function calling in robotics e-commerce.
+Fine-tune **Qwen3-0.6B** (released 2026-03-02, 119 languages incl. HI/TE) using **QLoRA via Unsloth** for domain-specific function calling in robotics e-commerce.
 
 The model learns to:
 1. Select the correct tool (6 tools) from user query + page context
@@ -62,7 +62,7 @@ python eval/bench_rag.py                # B2
 
 | Parameter | Value |
 |-----------|-------|
-| Base model | Qwen3.5-0.8B |
+| Base model | Qwen3-0.6B |
 | Method | QLoRA (4-bit NF4) |
 | Rank | 16 |
 | Alpha | 32 |
@@ -105,7 +105,7 @@ Each training example follows Qwen3.5 ChatML format:
 ## Benchmarks
 
 ### B1 — Function-Calling Accuracy
-Compare: Fine-tuned Qwen3.5-0.8B vs Heuristic vs GPT-4o vs Claude vs Gemini
+Compare: Fine-tuned Qwen3-0.6B vs Heuristic vs GPT-4o vs Claude vs Gemini
 
 ### B2 — Context-Aware RAG
 Compare: FAISS + context re-rank vs FAISS-only vs BM25

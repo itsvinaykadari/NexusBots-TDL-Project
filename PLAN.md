@@ -28,7 +28,7 @@ PORT=5000
 SARVAM_API_KEY=<key>
 SARVAM_MODEL=sarvam-m
 ENABLE_FC_MODEL=1
-FC_MODEL_ID=Qwen/Qwen3.5-0.8B         # base; override with FC_MODEL_PATH after fine-tune
+FC_MODEL_ID=Qwen/Qwen3-0.6B         # base; override with FC_MODEL_PATH after fine-tune
 FC_MODEL_PATH=                          # set to local adapter path after Colab training
 ENABLE_SEMANTIC_RAG=1
 RAG_EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2
@@ -40,7 +40,7 @@ PYTHON_BIN=python3
 | File | Purpose |
 |------|---------|
 | `server/ai/pipeline.py` | Core AI router — `decide_tool()` → `execute_tool()`. 6 tools. Dual-path: model → heuristic. Emits `ui_guide`. |
-| `server/ai/fc_model.py` | Qwen3.5-0.8B inference. ChatML via `apply_chat_template()`. Returns `{tool, arguments, ui_guide}`. |
+| `server/ai/fc_model.py` | Qwen3-0.6B inference. ChatML via `apply_chat_template()`. Returns `{tool, arguments, ui_guide}`. |
 | `server/ai/sarvam_client.py` | Sarvam AI for natural language. Strips `<think>`. Adapts to proficiency (beginner/expert). |
 | `server/routes/ai.js` | Express route. `PythonWorker` persistent subprocess via JSON-line IPC. Rate limiter. JSONL logging. |
 | `server/database/init.js` | SQLite schema + 12 robot seed data. |
@@ -62,7 +62,7 @@ Client (React 19 + Vite, port 5173)     Server (Express 5 + SQLite, port 5000)
         │                                           │
         ├── /api proxy ────────────────────────────►├── POST /api/ai/chat
         │                                           │   ├── ai.js → PythonWorker (pipeline.py)
-        │                                           │   │   ├── fc_model.py (Qwen3.5-0.8B)
+        │                                           │   │   ├── fc_model.py (Qwen3-0.6B)
         │                                           │   │   ├── FAISS + context re-rank (RAG)
         │                                           │   │   └── heuristic fallback
         │                                           │   └── PythonWorker (sarvam_client.py)
@@ -139,7 +139,7 @@ Dynamic: `locate_robot:{id}` · `locate_path:{category}:{id}`
 - ✅ `UserActivityContext` — tracks page, viewed, cart, search, category, currentProduct
 - ✅ `pipeline.py` — 6 tools, dual-path decider, FAISS + context re-rank, PipelineRuntime singleton, worker mode
 - ✅ `sarvam_client.py` — persona-adaptive (beginner/expert), EN/HI/TE, fallback, worker mode
-- ✅ `fc_model.py` — Qwen3.5-0.8B ChatML inference, GPU fp16 when available
+- ✅ `fc_model.py` — Qwen3-0.6B ChatML inference, GPU fp16 when available
 - ✅ `AISidePanel` — AI chat, voice via Web Speech API, context sending
 - ✅ `UIGuideProvider` — element-anchored spotlight, Floating UI tooltips, auto-navigation, Escape to close
 - ✅ `flows.json` — 11 flows wired
@@ -160,7 +160,7 @@ Dynamic: `locate_robot:{id}` · `locate_path:{category}:{id}`
 
 ## 12-Hour Execution Plan
 
-> **Core goal:** Fine-tune Qwen3.5-0.8B, prove it beats base model, show multilingual + persona + voice working. Demo-ready by end.
+> **Core goal:** Fine-tune Qwen3-0.6B, prove it beats base model, show multilingual + persona + voice working. Demo-ready by end.
 
 ---
 
@@ -305,7 +305,7 @@ python train.py --colab --merge
 ```
 
 Config already set in `finetune/config.py`:
-- Model: `unsloth/Qwen3.5-0.8B`
+- Model: `unsloth/Qwen3-0.6B`
 - QLoRA: r=16, alpha=32, dropout=0
 - Epochs: 3 (increase to 5 if loss hasn't plateaued)
 - **Change lr from 2e-4 → 1e-4** (reduces instability on small datasets)
@@ -313,8 +313,8 @@ Config already set in `finetune/config.py`:
 - bf16 ✅
 
 **Task C3:** After training completes:
-- Download LoRA adapter from Drive to `models/nexus-fc-qwen35-0.8b/`
-- Set `FC_MODEL_PATH=../models/nexus-fc-qwen35-0.8b` in `server/.env`
+- Download LoRA adapter from Drive to `models/nexus-fc-qwen3-0.6b/`
+- Set `FC_MODEL_PATH=../models/nexus-fc-qwen3-0.6b` in `server/.env`
 - Restart server — it auto-loads fine-tuned adapter
 
 ---
@@ -417,7 +417,7 @@ python eval/bench_rag.py
 1. Problem statement (3 problems: routing cost, context-blind, one-size-fits-all)
 2. Architecture diagram
 3. Dataset (1020 rows, EN/HI/TE split, 6 tools, stratified)
-4. Fine-tuning (Qwen3.5-0.8B, QLoRA, product-aware system prompt)
+4. Fine-tuning (Qwen3-0.6B, QLoRA, product-aware system prompt)
 5. B1 — Function-Calling Accuracy table
 6. B2 — Context-Aware RAG table
 7. B4 — Multilingual table
@@ -428,7 +428,7 @@ python eval/bench_rag.py
 **Task F3:** Final git commit
 ```bash
 git add -A
-git commit -m "feat: v1.0 submission — fine-tuned Qwen3.5-0.8B, multilingual dataset, full benchmarks"
+git commit -m "feat: v1.0 submission — fine-tuned Qwen3-0.6B, multilingual dataset, full benchmarks"
 git tag v1.0-submission
 git push --tags
 ```
@@ -439,9 +439,9 @@ git push --tags
 
 ### What We Are Proving
 
-1. **Domain-fine-tuned 0.8B matches frontier LLMs** at robotics function-calling — small model, specific domain, competitive accuracy (B1)
+1. **Domain-fine-tuned 0.6B matches frontier LLMs** at robotics function-calling — small model, specific domain, competitive accuracy (B1)
 2. **Activity-aware RAG** (re-ranked by views, cart, current page) beats static semantic search (B2)
-3. **Multilingual function-calling on a small model** — EN/HI/TE Romanized, same 0.8B (B4)
+3. **Multilingual function-calling on a small model** — EN/HI/TE Romanized, same 0.6B (B4)
 4. **Persona-adaptive generation** — auto-detected proficiency (beginner/expert) adapts Sarvam's response style
 5. **LLM-driven UI guidance** — model emits `ui_guide` intent key → frontend highlights the exact UI element, no hardcoded flows
 
@@ -500,8 +500,8 @@ Valid `ui_guide` values: `check_orders`, `track_delivery`, `update_cart`, `find_
 
 | System | Tool Acc | Arg F1 | UI Guide Acc | p50 Latency |
 |--------|----------|--------|--------------|-------------|
-| Qwen3.5-0.8B-FC fine-tuned (ours) | — | — | — | — |
-| Qwen3.5-0.8B base (zero-shot) | — | — | — | — |
+| Qwen3-0.6B-FC fine-tuned (ours) | — | — | — | — |
+| Qwen3-0.6B base (zero-shot) | — | — | — | — |
 | Heuristic router | — | — | — | ~1ms |
 | GPT-4o zero-shot | — | — | — | — |
 | Claude zero-shot | — | — | — | — |
@@ -585,7 +585,7 @@ Show "Model" (green) or "Heuristic" (yellow) + "RAG" badge on each AI message. T
 - [ ] System prompt updated with product catalog + UI structure in both `fc_model.py` and `finetune/config.py`
 - [ ] `research/dataset/raw/function_calls_raw_v2.jsonl` generated (≥970 rows)
 - [ ] `finetune/data/train.jsonl` + `test.jsonl` created by `prepare_dataset.py`
-- [ ] Qwen3.5-0.8B LoRA adapter trained (Colab), downloaded, placed in `models/`
+- [ ] Qwen3-0.6B LoRA adapter trained (Colab), downloaded, placed in `models/`
 - [ ] Fine-tuned model verified end-to-end via curl (EN + HI + TE)
 - [ ] B1, B2, B4 benchmark tables filled in `README.md`
 - [ ] Voice input working (Chrome, STT via Web Speech API)
@@ -602,7 +602,7 @@ Show "Model" (green) or "Heuristic" (yellow) + "RAG" badge on each AI message. T
 
 | Area | Choice |
 |------|--------|
-| Base model | Qwen3.5-0.8B |
+| Base model | Qwen3-0.6B |
 | Fine-tune method | Unsloth + QLoRA, r=16, α=32, lr=1e-4, 3 epochs |
 | Tool count | 6 tools — final |
 | Languages | EN + Romanized Hindi + Romanized Telugu |

@@ -36,11 +36,11 @@ This correctly uses ChatML format (`tokenizer.apply_chat_template()`) instead of
 ```bash
 # Point to the merged model directory (after training):
 export ENABLE_FC_MODEL=1
-export FC_MODEL_PATH=/path/to/qwen35-0_8b-fc-v1-merged
+export FC_MODEL_PATH=/path/to/qwen3-0_6b-fc-v1-merged
 
 # OR use HuggingFace model ID:
 export ENABLE_FC_MODEL=1
-export FC_MODEL_ID=nexus-bots/qwen35-0_8b-fc-v1
+export FC_MODEL_ID=nexus-bots/qwen3-0_6b-fc-v1
 ```
 
 ## What Still Works Without Integration

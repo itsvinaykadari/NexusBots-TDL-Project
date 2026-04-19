@@ -6,7 +6,7 @@
 
 ## Abstract
 
-We present Nexus Bots, a robotics commerce platform that investigates whether a fine-tuned small language model (~0.8B parameters) can match large models (GPT-4, Claude, Gemini) at domain-specific function calling — selecting the right tool and generating correct arguments for robotics e-commerce queries. The system combines: (1) a QLoRA-fine-tuned Qwen3.5-0.8B for structured function calls, (2) context-aware RAG re-ranked by real-time user activity, (3) automatic user proficiency detection for persona-adaptive responses via Sarvam AI, and (4) LLM-driven UI guidance that highlights on-screen elements to walk users through multi-step flows. We benchmark across English, Hindi, and Telugu.
+We present Nexus Bots, a robotics commerce platform that investigates whether a fine-tuned small language model (~0.6B parameters) can match large models (GPT-4, Claude, Gemini) at domain-specific function calling — selecting the right tool and generating correct arguments for robotics e-commerce queries. The system combines: (1) a QLoRA-fine-tuned Qwen3-0.6B for structured function calls, (2) context-aware RAG re-ranked by real-time user activity, (3) automatic user proficiency detection for persona-adaptive responses via Sarvam AI, and (4) LLM-driven UI guidance that highlights on-screen elements to walk users through multi-step flows. We benchmark across English, Hindi, and Telugu.
 
 ## System Architecture
 
@@ -109,7 +109,7 @@ The pipeline routes user queries to these domain-specific tools:
 | Frontend | React 19 + Vite + Tailwind CSS 4 |
 | Backend | Node.js + Express 5 |
 | Database | SQLite (better-sqlite3) |
-| Function Calling | Heuristic router + Qwen3.5-0.8B base (ChatML, GPU/CPU) |
+| Function Calling | Heuristic router + Qwen3-0.6B base (ChatML, GPU/CPU) |
 | Retrieval | Sentence-transformers + FAISS (context-aware re-ranking) |
 | Orchestration | Direct Python dispatch (pipeline.py ↔ ai.js via JSON-line IPC) |
 | Reasoning/Response | Sarvam AI (EN/HI/TE, persona-adaptive) |
@@ -185,8 +185,8 @@ Automatic proficiency detection (beginner vs expert) adjusts Sarvam's response c
 
 - [x] Phase 1 — Premium UI (Home, Catalog, RobotDetail, OrderHistory, Navbar, CartDrawer, AISidePanel, UIGuide system)
 - [x] Phase 2 — Backend Polish (PipelineRuntime singleton, subprocess reuse, correctness fixes, ui_guide emission, rate limiting, .env config)
-- [x] Phase 3 — Model Integration (Qwen3.5-0.8B base model via ChatML, fc_model.py, Sarvam AI response generation, semantic RAG enabled)
-- [ ] Phase 4 — Fine-Tune + Benchmarks (Qwen3.5-0.8B LoRA adapter, B1/B2/B4 benchmark tables)
+- [x] Phase 3 — Model Integration (Qwen3-0.6B base model via ChatML, fc_model.py, Sarvam AI response generation, semantic RAG enabled)
+- [ ] Phase 4 — Fine-Tune + Benchmarks (Qwen3-0.6B LoRA adapter, B1/B2/B4 benchmark tables)
 - [ ] Phase 5 — Demo + Submission (video, slides, README refresh with real numbers)
 
 ## Benchmark Tables (Phase 3 — TBD)
@@ -194,7 +194,7 @@ Automatic proficiency detection (beginner vs expert) adjusts Sarvam's response c
 ### B1 — Function-Calling Accuracy
 | System | Tool Acc | Arg F1 | p50 Latency | $/1000 |
 |---|---|---|---|---|
-| Qwen3.5-0.8B-FC (ours) | — | — | — | ~$0 |
+| Qwen3-0.6B-FC (ours) | — | — | — | ~$0 |
 | Heuristic router | — | — | ~1 ms | $0 |
 | GPT-4o zero-shot | — | — | — | — |
 | Claude Opus 4.7 zero-shot | — | — | — | — |
@@ -208,7 +208,7 @@ Automatic proficiency detection (beginner vs expert) adjusts Sarvam's response c
 | BM25 | — | — |
 
 ### B4 — Multilingual Function-Calling
-| Language | Qwen3.5-0.8B-FC Acc | Best Frontier Acc |
+| Language | Qwen3-0.6B-FC Acc | Best Frontier Acc |
 |---|---|---|
 | English | — | — |
 | Hindi | — | — |
