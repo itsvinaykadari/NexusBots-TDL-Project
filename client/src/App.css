@@ -1,1 +1,27 @@
 /* App-level styles - minimal, Tailwind handles most styling */
+
+/* ── Voice recognition animation ───────────────────────────── */
+@keyframes voiceBar {
+  0%, 100% { height: 3px; opacity: 0.45; }
+  50%       { height: 18px; opacity: 1; }
+}
+
+.voice-bar {
+  display: inline-block;
+  width: 3px;
+  min-height: 3px;
+  background: oklch(65% 0.28 290);
+  border-radius: 2px;
+  animation: voiceBar 0.65s ease-in-out infinite alternate;
+}
+
+@keyframes micRing {
+  0%   { box-shadow: 0 0 0 0   oklch(65% 0.28 290 / 0.5); }
+  70%  { box-shadow: 0 0 0 7px oklch(65% 0.28 290 / 0);   }
+  100% { box-shadow: 0 0 0 0   oklch(65% 0.28 290 / 0);   }
+}
+
+.mic-listening {
+  animation: micRing 1.1s ease-out infinite;
+  border-radius: 8px;
+}

@@ -6,11 +6,8 @@ import {
   Sparkles,
   Mic,
   MicOff,
+  Loader,
   ChevronRight,
-  Search,
-  GitCompareArrows,
-  ShoppingCart,
-  Package,
   Compass,
   MessageCircle,
   Trash2,
@@ -62,33 +59,7 @@ function buildContextPayload({
   };
 }
 
-/* ── Quick action cards for the welcome screen ────────────── */
-const QUICK_ACTIONS = [
-  {
-    icon: Search,
-    label: "Find robots",
-    prompt: "Show me the best robots for home use",
-    color: "oklch(78% 0.16 240)",
-  },
-  {
-    icon: GitCompareArrows,
-    label: "Compare",
-    prompt: "Compare the top two kitchen robots",
-    color: "oklch(78% 0.16 160)",
-  },
-  {
-    icon: ShoppingCart,
-    label: "Smart cart",
-    prompt: "What's in my cart? Any recommendations?",
-    color: "oklch(78% 0.16 80)",
-  },
-  {
-    icon: Package,
-    label: "Track order",
-    prompt: "Help me check my order status",
-    color: "oklch(78% 0.16 310)",
-  },
-];
+
 
 export default function AISidePanel({ isOpen, onClose }) {
   const { startFlow } = useUIGuide();
@@ -101,7 +72,9 @@ export default function AISidePanel({ isOpen, onClose }) {
 
   // STT state
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   const aiScrollRef = useRef(null);
 
@@ -135,6 +108,23 @@ export default function AISidePanel({ isOpen, onClose }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
+
+  // Stop recording if the panel closes while mic is active
+  useEffect(() => {
+    if (!isOpen && mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+      setIsListening(false);
+    }
+  }, [isOpen]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, []);
 
   // Determine if welcome screen should show
   const showWelcome = aiMessages.length === 0;
@@ -210,27 +200,75 @@ export default function AISidePanel({ isOpen, onClose }) {
     }
   }
 
-  // ─── STT (Web Speech API) ─────────────────────────────────
-  function toggleListening() {
+  // ─── STT via MediaRecorder → Sarvam AI ────────────────────────
+  // Root cause of the old "mic starts and stops" bug:
+  // Web Speech API streams to Google's servers in real-time. On campus/lab
+  // networks those servers are often blocked, causing an immediate onend.
+  // This implementation records locally via MediaRecorder and sends the
+  // complete audio blob to our own /api/ai/stt endpoint, which calls Sarvam.
+  async function toggleListening() {
     if (isListening) {
-      recognitionRef.current?.stop();
+      mediaRecorderRef.current?.stop();
       setIsListening(false);
       return;
     }
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    const recognition = new SpeechRecognition();
-    // Auto-detect language — no explicit lang setting lets browser use system default
-    recognition.interimResults = false;
-    recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      setAiInput((prev) => (prev ? prev + " " + transcript : transcript));
+
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      console.error("Microphone access denied:", err.message);
+      return;
+    }
+
+    // Pick the best audio format the browser supports
+    const mimeType = [
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/ogg;codecs=opus",
+      "audio/ogg",
+    ].find((m) => MediaRecorder.isTypeSupported(m)) || "audio/webm";
+
+    audioChunksRef.current = [];
+    const recorder = new MediaRecorder(stream, { mimeType });
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunksRef.current.push(e.data);
     };
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
-    recognitionRef.current = recognition;
-    recognition.start();
+
+    recorder.onstop = async () => {
+      // Always release the mic track immediately after recording stops
+      stream.getTracks().forEach((t) => t.stop());
+
+      const audioBlob = new Blob(audioChunksRef.current, {
+        type: mimeType.split(";")[0],
+      });
+
+      // Ignore recordings too short to contain speech (< ~0.5 s = ~8 KB WebM)
+      if (audioBlob.size < 500) return;
+
+      setIsTranscribing(true);
+      try {
+        const resp = await fetch(`${API_BASE}/api/ai/stt`, {
+          method: "POST",
+          headers: { "Content-Type": mimeType.split(";")[0] },
+          body: audioBlob,
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.transcript) {
+          throw new Error(data.error || "Transcription failed.");
+        }
+        // Auto-submit the transcript straight into the AI pipeline
+        submitAiMessage(null, data.transcript);
+      } catch (err) {
+        console.error("STT error:", err.message);
+      } finally {
+        setIsTranscribing(false);
+      }
+    };
+
+    mediaRecorderRef.current = recorder;
+    recorder.start(250); // collect chunks every 250 ms
     setIsListening(true);
   }
 
@@ -381,37 +419,6 @@ export default function AISidePanel({ isOpen, onClose }) {
                     context and call the right tools automatically.
                   </p>
                 </div>
-              </div>
-
-              {/* Quick actions */}
-              <p className="text-text-muted text-[11px] font-medium uppercase tracking-wider mb-3 self-start">
-                Quick actions
-              </p>
-              <div className="grid grid-cols-2 gap-2 w-full">
-                {QUICK_ACTIONS.map((action) => (
-                  <button
-                    key={action.label}
-                    onClick={() => submitAiMessage(null, action.prompt)}
-                    className="flex items-center gap-2.5 p-3 rounded-xl text-left text-xs font-medium cursor-pointer"
-                    style={{
-                      background: "oklch(18% 0.025 255 / 0.5)",
-                      border: "1px solid oklch(80% 0 0 / 0.08)",
-                      color: "#fff",
-                      transition: "border-color 0.2s, background 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = `${action.color.replace(")", " / 0.3)")}`;
-                      e.currentTarget.style.background = "oklch(20% 0.030 255 / 0.6)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "oklch(80% 0 0 / 0.08)";
-                      e.currentTarget.style.background = "oklch(18% 0.025 255 / 0.5)";
-                    }}
-                  >
-                    <action.icon size={16} style={{ color: action.color, flexShrink: 0 }} />
-                    {action.label}
-                  </button>
-                ))}
               </div>
             </div>
           )}
@@ -579,28 +586,82 @@ export default function AISidePanel({ isOpen, onClose }) {
               className="flex-1 flex items-center rounded-xl border"
               style={{
                 background: "oklch(14% 0.020 260)",
-                borderColor: "oklch(80% 0 0 / 0.08)",
+                borderColor: isListening
+                  ? "oklch(65% 0.28 290 / 0.5)"
+                  : isTranscribing
+                  ? "oklch(78% 0.16 195 / 0.4)"
+                  : "oklch(80% 0 0 / 0.08)",
+                transition: "border-color 0.3s",
               }}
             >
               <input
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
-                placeholder="Ask about robots…"
-                className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white outline-none"
+                placeholder={
+                  isListening
+                    ? "Recording… tap mic to stop"
+                    : isTranscribing
+                    ? "Transcribing your voice…"
+                    : "Ask about robots…"
+                }
+                disabled={isTranscribing}
+                className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white outline-none disabled:opacity-50"
               />
+              {isListening && (
+                <div
+                  className="flex items-end gap-[2px] px-2 self-center"
+                  style={{ height: "20px" }}
+                  aria-hidden="true"
+                >
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <span
+                      key={i}
+                      className="voice-bar"
+                      style={{ animationDelay: `${i * 0.12}s` }}
+                    />
+                  ))}
+                </div>
+              )}
+              {isTranscribing && (
+                <div className="flex items-center px-2 self-center">
+                  <Loader
+                    size={13}
+                    className="animate-spin"
+                    style={{ color: "var(--color-accent)" }}
+                  />
+                </div>
+              )}
               <button
                 type="button"
-                onClick={toggleListening}
-                className="p-2 transition-colors cursor-pointer"
+                onClick={isTranscribing ? undefined : toggleListening}
+                disabled={isTranscribing}
+                className={`p-2 rounded-lg mr-0.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed${
+                  isListening ? " mic-listening" : ""
+                }`}
                 style={{
                   color: isListening
-                    ? "oklch(70% 0.20 25)"
+                    ? "oklch(65% 0.28 290)"
                     : "var(--color-text-muted)",
-                  background: "none",
+                  background: isListening
+                    ? "oklch(65% 0.28 290 / 0.12)"
+                    : "none",
                   border: "none",
                 }}
+                aria-label={
+                  isTranscribing
+                    ? "Processing voice…"
+                    : isListening
+                    ? "Stop recording"
+                    : "Start voice input"
+                }
               >
-                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                {isTranscribing ? (
+                  <Loader size={16} className="animate-spin" />
+                ) : isListening ? (
+                  <MicOff size={16} />
+                ) : (
+                  <Mic size={16} />
+                )}
               </button>
             </div>
 

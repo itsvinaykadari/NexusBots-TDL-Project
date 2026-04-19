@@ -86,7 +86,9 @@ def _build_system_prompt(language: str, proficiency: str) -> str:
         f"Respond in {_language_name(language)}. "
         f"User proficiency is {proficiency}. {style} "
         "Ground every recommendation in the provided tool result and product data only. "
-        "If data is missing, say so clearly instead of inventing facts."
+        "If data is missing, say so clearly instead of inventing facts. "
+        "Be concise: 1-3 sentences for direct queries, use a short bullet list only when presenting multiple products. "
+        "Never repeat information already stated in the same response."
     )
 
 

@@ -1,4 +1,5 @@
 const express = require('express');
+const https = require('https');
 const path = require('path');
 const { spawn } = require('child_process');
 const { createInterface } = require('readline');
@@ -491,5 +492,142 @@ router.post('/chat', rateLimit, async (req, res) => {
         warnings: [pipelineError, sarvamError, sarvamResult?.error].filter(Boolean),
     });
 });
+
+/* ── Sarvam Speech-to-Text helper ───────────────────────── */
+/**
+ * Sends a raw audio Buffer to Sarvam's STT API and returns the transcript.
+ *
+ * Correct REST endpoint (confirmed from Sarvam docs):
+ *   POST https://api.sarvam.ai/speech-to-text          ← no /v1/ prefix
+ *
+ * Previous bug: endpoint was /v1/speech-to-text (→ 404 Not Found → our 502).
+ * Model is saarika:v2.5 (default). language_code "unknown" = auto-detect EN/HI/TE.
+ * Supported audio: WAV, MP3, WebM, OGG, FLAC, AAC, M4A (confirmed in docs).
+ */
+async function callSarvamSTT(audioBuffer, mimeType) {
+    const apiKey = (process.env.SARVAM_API_KEY || '').trim();
+    if (!apiKey) throw new Error('SARVAM_API_KEY not set — check server/.env');
+
+    // Confirmed correct endpoint from https://docs.sarvam.ai/api-reference-docs/speech-to-text
+    const endpoint = process.env.SARVAM_STT_ENDPOINT || 'https://api.sarvam.ai/speech-to-text';
+    const authHeader = (process.env.SARVAM_AUTH_HEADER || 'api-subscription-key').trim();
+    const timeoutMs = Number(process.env.SARVAM_TIMEOUT_SEC || 30) * 1000;
+
+    // Derive safe filename extension from the MIME type
+    const cleanMime = mimeType.split(';')[0].trim() || 'audio/webm';
+    let ext = 'webm';
+    if (cleanMime.includes('ogg'))  ext = 'ogg';
+    else if (cleanMime.includes('mp4') || cleanMime.includes('m4a')) ext = 'm4a';
+    else if (cleanMime.includes('mp3') || cleanMime.includes('mpeg')) ext = 'mp3';
+    else if (cleanMime.includes('wav')) ext = 'wav';
+
+    // Build multipart/form-data manually (no extra npm dependencies)
+    const boundary = 'NexusBotsBoundary' + Date.now().toString(16);
+    const CRLF = '\r\n';
+
+    const body = Buffer.concat([
+        // model — saarika:v2.5 is the default and works for EN/HI/TE
+        Buffer.from(
+            `--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="model"${CRLF}${CRLF}` +
+            `saarika:v2.5${CRLF}`
+        ),
+        // language_code "unknown" → Sarvam auto-detects language
+        Buffer.from(
+            `--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="language_code"${CRLF}${CRLF}` +
+            `unknown${CRLF}`
+        ),
+        // audio file
+        Buffer.from(
+            `--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="file"; filename="audio.${ext}"${CRLF}` +
+            `Content-Type: ${cleanMime}${CRLF}${CRLF}`
+        ),
+        audioBuffer,
+        Buffer.from(CRLF),
+        Buffer.from(`--${boundary}--${CRLF}`),
+    ]);
+
+    return new Promise((resolve, reject) => {
+        const url = new URL(endpoint);
+        const reqOptions = {
+            hostname: url.hostname,
+            port: 443,
+            path: url.pathname + (url.search || ''),
+            method: 'POST',
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'Content-Length': body.length,
+                // Sarvam auth is always api-subscription-key header (not Bearer)
+                'api-subscription-key': apiKey,
+            },
+        };
+
+        const req = https.request(reqOptions, (res) => {
+            let raw = '';
+            res.on('data', (chunk) => { raw += chunk; });
+            res.on('end', () => {
+                console.log(`[STT] Sarvam HTTP ${res.statusCode} — body: ${raw.slice(0, 300)}`);
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (typeof parsed.transcript === 'string' && parsed.transcript.trim()) {
+                        return resolve(parsed.transcript.trim());
+                    }
+                    // Surface Sarvam's own error message
+                    const errMsg =
+                        parsed?.message ||
+                        parsed?.error?.message ||
+                        parsed?.detail ||
+                        raw.slice(0, 300);
+                    reject(new Error(`Sarvam STT (HTTP ${res.statusCode}): ${errMsg}`));
+                } catch {
+                    reject(new Error(`Sarvam STT parse error (HTTP ${res.statusCode}): ${raw.slice(0, 200)}`));
+                }
+            });
+        });
+
+        req.setTimeout(timeoutMs, () => {
+            req.destroy(new Error(`Sarvam STT timed out after ${timeoutMs}ms`));
+        });
+        req.on('error', reject);
+        req.write(body);
+        req.end();
+    });
+}
+
+/* ── POST /api/ai/stt — voice transcription via Sarvam ────── */
+// Receives raw audio blob from MediaRecorder (WebM/Opus from Chrome/Firefox).
+// POSTs it to Sarvam /speech-to-text and returns { transcript }.
+// That transcript is then fed into the normal /api/ai/chat pipeline:
+//   Qwen3.5-0.8B (tool routing) → tool execution → Sarvam NLG → response.
+router.post(
+    '/stt',
+    rateLimit,
+    express.raw({ type: ['audio/*', 'application/octet-stream'], limit: '10mb' }),
+    async (req, res) => {
+        const audioSize = Buffer.isBuffer(req.body) ? req.body.length : 0;
+        console.log(`[STT] Received audio: ${audioSize} bytes, type: ${req.headers['content-type']}`);
+
+        if (audioSize < 500) {
+            return res.status(400).json({
+                error: 'No audio captured. Hold the mic button while speaking, then release.',
+            });
+        }
+
+        const mimeType = (req.headers['content-type'] || 'audio/webm').split(',')[0].trim();
+
+        try {
+            const transcript = await callSarvamSTT(req.body, mimeType);
+            console.log(`[STT] Transcript: "${transcript}"`);
+            return res.json({ transcript });
+        } catch (err) {
+            console.error('[STT] Error:', err.message);
+            return res.status(502).json({
+                error: err.message || 'Speech-to-text failed. Please try again.',
+            });
+        }
+    }
+);
 
 module.exports = router;
