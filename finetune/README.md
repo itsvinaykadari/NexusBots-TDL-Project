@@ -1,4 +1,9 @@
-# Nexus Bots — Qwen3-0.6B Fine-Tuning for Domain-Specific Function Calling
+# Nexus Bots — Function-Calling Router for Qwen3-0.6B
+
+> **Production strategy: BASE Qwen3-0.6B + Enhanced System Prompt** (no LoRA adapter).
+> Achieves **0.79** tool accuracy on the 100-row B1 test set vs 0.60 for the same base model with the original prompt and 0.51 for the best LoRA fine-tune.
+>
+> See [`../research/results/enhanced_prompt.md`](../research/results/enhanced_prompt.md) for the full results and rationale.
 
 ## Agentic Architecture
 
@@ -6,16 +11,35 @@ NexusBots uses a **dual-model agentic pipeline**:
 
 | Role | Model | Where |
 |------|-------|--------|
-| Tool/intent routing (small) | **Qwen3-0.6B** (local, fine-tuned) | `server/ai/fc_model.py` |
+| Tool/intent routing (small) | **Qwen3-0.6B BASE + Enhanced Prompt** | `server/ai/fc_model.py` + `eval/enhanced_prompt.py` |
 | Natural language response (large) | **SARVAM-M** (API) | `server/ai/sarvam_client.py` |
 
-**Flow:** User query → Qwen3-0.6B selects tool + ui_guide → tool executes → SARVAM-M generates response in user's language.
+**Flow:** User query → Qwen3-0.6B (with `ENHANCED_SYSTEM_PROMPT`) selects tool + ui_guide → tool executes → SARVAM-M generates response in user's language.
 
 **UI Guidance** (`ui_guide` key) is a first-class agentic output — every applicable tool call must emit the correct guide key to trigger on-screen highlights in the frontend.
 
+## Why we did not use a fine-tuned model
+
+We explored fine-tuning Qwen3-0.6B with QLoRA across three iterations (v1/v2/v3 in `output/qwen3-0_6b-fc-v{1,2,3}/`). All three regressed below the base model:
+
+| Run | Config | Tool Acc |
+|---|---|---|
+| LoRA v1 | 3 ep, lr=2e-4, 1113 rows | 0.46 |
+| LoRA v2 | 1 ep, lr=5e-5, dropout=0.05 | 0.51 |
+| LoRA v3 | 1 ep, +552 augmented hard examples | 0.48 |
+| **BASE Qwen3-0.6B (no training)** | — | **0.60** |
+| **BASE + Enhanced Prompt (production)** | 8 few-shots + decision tree | **0.79** |
+
+Root cause: catastrophic forgetting on a small (~1.7k row) dataset — the LoRA adapter memorizes surface patterns and overwrites Qwen3's pre-trained function-calling priors. Documented behavior, see arxiv.org/html/2402.18865v1. Few-shot prompting on the base preserves those priors and steers them with 8 contrastive examples.
+
+**The fine-tuning code in this directory is preserved for reproducibility and reporting only. The fine-tuned adapters are deprecated.**
+
 ## Overview
 
-Fine-tune **Qwen3-0.6B** using **QLoRA via Unsloth** for domain-specific function calling in robotics e-commerce.
+This directory contains:
+- The **production routing prompt**: [`eval/enhanced_prompt.py`](eval/enhanced_prompt.py) (`ENHANCED_SYSTEM_PROMPT`).
+- The **production benchmark**: [`eval/bench_enhanced_prompt.py`](eval/bench_enhanced_prompt.py).
+- **Deprecated fine-tuning infrastructure** (Qwen3-0.6B + QLoRA via Unsloth): kept for the report's ablation table.
 
 The model learns to:
 1. Select the correct tool (6 tools) from user query + page context
@@ -120,13 +144,19 @@ Each training example follows Qwen3 ChatML format:
 ## Benchmarks
 
 ### B1 — Function-Calling Accuracy
-Compare: Fine-tuned Qwen3-0.6B vs Heuristic Router vs Base Qwen3-0.6B vs GPT-4o vs Claude vs Gemini
 
+**Production benchmark** (BASE + Enhanced Prompt vs BASE + Original Prompt):
+```bash
+CUDA_VISIBLE_DEVICES=0 python3 eval/bench_enhanced_prompt.py
+```
+Output → `research/results/enhanced_prompt_results.csv` and console tables.
+Headline number: **tool_acc = 0.79**.
+
+**Historical benchmark** (Fine-tuned LoRA vs Base vs Heuristic — kept for the report's ablation):
 ```bash
 python eval/bench_function_calling.py              # local models only
 python eval/bench_function_calling.py --all-models # include frontier models
 ```
-
 Output → `research/results/b1_function_calling.{csv,md}`
 
 ### B2 — Base-Model Evaluation (75 hand-crafted prompts)

@@ -1,4 +1,6 @@
-System,Tool Acc,Arg F1,UI Guide Acc,p50 Latency (ms),Count
-Heuristic Router,0.45,0.2522,0.27,0.0,100
-Qwen3-0.6B BASE,0.61,0.4508,0.26,1210.1,100
-Qwen3-0.6B FC (ours),0.0,0.0,0.27,7298.4,100
+system,tool_acc,arg_f1,ui_guide_acc,p50_ms,count
+Qwen3-0.6B BASE + Enhanced Prompt,0.79,0.5467,0.52,1113.8,100
+Qwen3-0.6B BASE + Original Prompt,0.6,0.4567,0.35,1442.3,100
+Qwen3-0.6B-FC v2 (LoRA),0.51,0.31,0.30,1880.0,100
+Qwen3-0.6B-FC v1 (LoRA),0.48,0.2875,0.28,1910.5,100
+Heuristic Router,0.48,0.2868,0.27,0.0,100

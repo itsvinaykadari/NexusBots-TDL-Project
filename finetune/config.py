@@ -16,13 +16,13 @@ TOOL_SCHEMAS_PATH = PROJECT_ROOT / "research" / "dataset" / "tool_schemas.json"
 PRODUCT_CATALOG_PATH = PROJECT_ROOT / "research" / "dataset" / "product_catalog.json"
 
 DATA_DIR = FINETUNE_ROOT / "data"
-TRAIN_PATH = DATA_DIR / "train.jsonl"
+TRAIN_PATH = DATA_DIR / "train_v3.jsonl"
 TEST_PATH = DATA_DIR / "test.jsonl"
 FULL_V2_PATH = DATA_DIR / "function_calling_v2.jsonl"
 
 OUTPUT_DIR = FINETUNE_ROOT / "output"
-ADAPTER_DIR = OUTPUT_DIR / "qwen3-0_6b-fc-v1"
-MERGED_DIR = OUTPUT_DIR / "qwen3-0_6b-fc-v1-merged"
+ADAPTER_DIR = OUTPUT_DIR / "qwen3-0_6b-fc-v3"
+MERGED_DIR = OUTPUT_DIR / "qwen3-0_6b-fc-v3-merged"
 
 RESULTS_DIR = PROJECT_ROOT / "research" / "results"
 
@@ -36,20 +36,20 @@ MAX_SEQ_LENGTH = 1024
 # ── QLoRA ────────────────────────────────────────────────────────────────────
 LORA_R = 16
 LORA_ALPHA = 32
-LORA_DROPOUT = 0.0
+LORA_DROPOUT = 0.05
 TARGET_MODULES = [
     "q_proj", "k_proj", "v_proj", "o_proj",
     "gate_proj", "up_proj", "down_proj",
 ]
 
 # ── Training ─────────────────────────────────────────────────────────────────
-NUM_EPOCHS = 3
+NUM_EPOCHS = 1
 PER_DEVICE_BATCH_SIZE = 4
 GRADIENT_ACCUMULATION_STEPS = 4  # effective batch = 16
-LEARNING_RATE = 2e-4
-WARMUP_RATIO = 0.03
-# Warmup steps = ceil(WARMUP_RATIO × total_steps); total_steps ≈ (1113 / 16) × 3 ≈ 209
-WARMUP_STEPS = max(1, int(WARMUP_RATIO * (1113 // (4 * 4)) * 3))  # ≈ 6
+LEARNING_RATE = 5e-5
+WARMUP_RATIO = 0.1
+# Warmup steps = ceil(WARMUP_RATIO × total_steps); total_steps ≈ (1113 / 16) × 1 ≈ 70
+WARMUP_STEPS = max(1, int(WARMUP_RATIO * (1113 // (4 * 4)) * 1))  # ≈ 7
 LR_SCHEDULER = "cosine"
 WEIGHT_DECAY = 0.01
 SAVE_STEPS = 200

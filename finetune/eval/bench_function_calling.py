@@ -35,6 +35,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config import (
+    ADAPTER_DIR,
+    MAX_SEQ_LENGTH,
     RESULTS_DIR,
     SYSTEM_PROMPT,
     TEST_PATH,
@@ -115,17 +117,20 @@ def parse_json_from_text(text: str) -> dict:
 # ── System: Fine-tuned Qwen3-0.6B ───────────────────────────────────────────
 
 def predict_finetuned(model, tokenizer, query: str, context_str: str) -> tuple[dict, float]:
-    """Run inference with fine-tuned model. Returns (parsed_result, latency_ms)."""
-    from unsloth import FastLanguageModel
-
+    """Run inference with a model+tokenizer pair. Returns (parsed_result, latency_ms)."""
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"Query: {query}\nContext: {context_str}"},
     ]
+    # enable_thinking=False: SFTTrainer never inserts <think> into training targets;
+    # Qwen3's default enable_thinking=True at inference causes the model to reason
+    # and hallucinate ui_guide keys as tool names. Match the training format exactly.
     input_text = tokenizer.apply_chat_template(
         messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
     )
-    inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
+    inputs = tokenizer(
+        input_text, return_tensors="pt",
+    ).to(model.device)
 
     start = time.perf_counter()
     outputs = model.generate(
@@ -310,7 +315,10 @@ def evaluate_system(
         "total": 0, "latencies": [],
     })
 
-    for row in test_rows:
+    n_total = len(test_rows)
+    running_correct = 0
+
+    for idx, row in enumerate(test_rows):
         gold_tool, gold_args, gold_guide = extract_gold(row)
         lang = row.get("language", "en")
         user_msg = ""
@@ -339,11 +347,24 @@ def evaluate_system(
             pred_tool, pred_args, pred_guide, latency = "", {}, None, 0.0
 
         bucket = results_by_lang[lang]
-        bucket["tool_correct"] += score_tool_accuracy(pred_tool, gold_tool)
+        correct = score_tool_accuracy(pred_tool, gold_tool)
+        bucket["tool_correct"] += correct
         bucket["arg_f1_sum"] += score_arg_f1(pred_args, gold_args)
         bucket["ui_guide_correct"] += score_ui_guide(pred_guide, gold_guide)
         bucket["total"] += 1
         bucket["latencies"].append(latency)
+
+        # Running progress line
+        running_correct += correct
+        done = idx + 1
+        running_acc = running_correct / done
+        bar = "#" * (done * 40 // n_total) + "-" * (40 - done * 40 // n_total)
+        status = "✓" if correct else "✗"
+        print(
+            f"  [{bar}] {done:3d}/{n_total} {status} pred={pred_tool or '?':20s} gold={gold_tool:20s} "
+            f"acc={running_acc:.2f} lat={latency:6.0f}ms",
+            flush=True,
+        )
 
     # Aggregate
     summary = {}
@@ -452,6 +473,7 @@ def main():
     parser.add_argument("--skip-ours", action="store_true", help="Skip fine-tuned model")
     parser.add_argument("--skip-base", action="store_true", help="Skip base model evaluation")
     parser.add_argument("--model-path", type=str, default=None, help="Path to fine-tuned model")
+    parser.add_argument("--max-rows", type=int, default=None, help="Limit rows for smoke test")
     args = parser.parse_args()
 
     if not TEST_PATH.exists():
@@ -460,6 +482,9 @@ def main():
         sys.exit(1)
 
     test_rows = load_jsonl(TEST_PATH)
+    if args.max_rows:
+        test_rows = test_rows[:args.max_rows]
+        print(f"[SMOKE TEST] Limiting to {args.max_rows} rows")
     print(f"Loaded {len(test_rows)} test rows")
 
     all_results = {}
@@ -468,8 +493,7 @@ def main():
     if not args.skip_ours:
         print("\n=== Evaluating: Qwen3-0.6B-FC (ours) ===")
         try:
-            from config import ADAPTER_DIR, MERGED_DIR, MAX_SEQ_LENGTH
-            from unsloth import FastLanguageModel
+            from config import BASE_MODEL, MERGED_DIR
 
             model_path = args.model_path
             if model_path is None:
@@ -479,25 +503,46 @@ def main():
                     model_path = str(ADAPTER_DIR)
 
             if model_path and Path(model_path).exists():
-                model, tokenizer = FastLanguageModel.from_pretrained(
-                    model_name=model_path,
-                    max_seq_length=MAX_SEQ_LENGTH,
-                    dtype=None,
-                    load_in_4bit=True,
-                )
-                FastLanguageModel.for_inference(model)
+                try:
+                    from unsloth import FastLanguageModel
+                    ft_model, ft_tokenizer = FastLanguageModel.from_pretrained(
+                        model_name=model_path,
+                        max_seq_length=MAX_SEQ_LENGTH,
+                        dtype=None,
+                        load_in_4bit=True,
+                    )
+                    FastLanguageModel.for_inference(ft_model)
+                    print("  Loaded via unsloth")
+                except ImportError:
+                    import torch
+                    from peft import PeftModel
+                    from transformers import AutoModelForCausalLM, AutoTokenizer
+                    print("  unsloth not available — loading via PEFT (base + LoRA adapter)...")
+                    adapter_path = str(ADAPTER_DIR)
+                    base_id = os.getenv("BASE_MODEL_ID", BASE_MODEL)
+                    ft_tokenizer = AutoTokenizer.from_pretrained(adapter_path)
+                    _base = AutoModelForCausalLM.from_pretrained(
+                        base_id,
+                        dtype=torch.float16,
+                        device_map="cuda:0",
+                    )
+                    ft_model = PeftModel.from_pretrained(_base, adapter_path)
+                    ft_model.eval()
+                    print(f"  Loaded via PEFT: base={base_id} + adapter={adapter_path}")
 
                 def predict_ours(query, ctx_str):
-                    return predict_finetuned(model, tokenizer, query, ctx_str)
+                    return predict_finetuned(ft_model, ft_tokenizer, query, ctx_str)
 
                 all_results["Qwen3-0.6B-FC (ours)"] = evaluate_system(
                     "Qwen3-0.6B-FC", predict_ours, test_rows
                 )
                 print(f"  Overall: {all_results['Qwen3-0.6B-FC (ours)']['overall']}")
             else:
-                print("  Fine-tuned model not found, skipping.")
-        except ImportError:
-            print("  unsloth not installed, skipping fine-tuned model.")
+                print(f"  Fine-tuned model not found at {model_path}, skipping.")
+        except Exception as e:
+            import traceback
+            print(f"  Fine-tuned model eval failed: {e}")
+            traceback.print_exc()
 
     # 2. Heuristic
     print("\n=== Evaluating: Heuristic Router ===")
@@ -506,12 +551,30 @@ def main():
     )
     print(f"  Overall: {all_results['Heuristic Router']['overall']}")
 
-    # 3. Base Qwen3-0.6B (no fine-tune)
+    # 3. Base Qwen3-0.6B (no fine-tune, loaded directly via transformers)
     if not args.skip_base:
         print("\n=== Evaluating: Qwen3-0.6B BASE (no fine-tune) ===")
         try:
+            import torch
+            from transformers import AutoModelForCausalLM, AutoTokenizer
+            from config import BASE_MODEL, MAX_SEQ_LENGTH
+
+            base_model_id = os.getenv("BASE_MODEL_ID", BASE_MODEL)
+            print(f"  Loading base model: {base_model_id}")
+            base_tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+            base_model_obj = AutoModelForCausalLM.from_pretrained(
+                base_model_id,
+                dtype=torch.float16,
+                device_map="cuda:0",
+            )
+            base_model_obj.eval()
+            print("  Base model loaded")
+
+            def predict_base(query, ctx_str):
+                return predict_finetuned(base_model_obj, base_tokenizer, query, ctx_str)
+
             all_results["Qwen3-0.6B BASE"] = evaluate_system(
-                "Qwen3-0.6B BASE", predict_base_model, test_rows
+                "Qwen3-0.6B BASE", predict_base, test_rows
             )
             print(f"  Overall: {all_results['Qwen3-0.6B BASE']['overall']}")
         except Exception as e:

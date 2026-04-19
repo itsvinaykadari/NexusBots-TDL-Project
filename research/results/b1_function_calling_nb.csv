@@ -1,0 +1,3 @@
+system,tool_acc,arg_f1,p50_ms,count
+Qwen3-0.6B-FC (ours),0.44,0.3283,12527.1,100
+Qwen3-0.6B BASE,0.65,0.4733,8800.8,100
