@@ -1,0 +1,2354 @@
+{
+  "model": "Qwen/Qwen3-0.6B",
+  "total": 75,
+  "tool_accuracy": 0.68,
+  "args_accuracy": 0.4933,
+  "guide_accuracy": 0.3067,
+  "full_match_accuracy": 0.16,
+  "parse_rate": 0.8667,
+  "by_lang": {
+    "en": {
+      "total": 32,
+      "tool_ok": 21,
+      "full_match": 5
+    },
+    "hi": {
+      "total": 24,
+      "tool_ok": 17,
+      "full_match": 5
+    },
+    "te": {
+      "total": 19,
+      "tool_ok": 13,
+      "full_match": 2
+    }
+  },
+  "by_tool": {
+    "add_to_cart": {
+      "total": 8,
+      "tool_ok": 6,
+      "full_match": 0
+    },
+    "compare_products": {
+      "total": 9,
+      "tool_ok": 8,
+      "full_match": 5
+    },
+    "get_product": {
+      "total": 10,
+      "tool_ok": 6,
+      "full_match": 0
+    },
+    "navigate_to": {
+      "total": 25,
+      "tool_ok": 15,
+      "full_match": 0
+    },
+    "recommend": {
+      "total": 12,
+      "tool_ok": 8,
+      "full_match": 1
+    },
+    "search_products": {
+      "total": 11,
+      "tool_ok": 8,
+      "full_match": 6
+    }
+  },
+  "results": [
+    {
+      "id": "B2_001",
+      "lang": "en",
+      "level": "simple",
+      "intent": "browse_category",
+      "user_query": "show me all kitchen robots",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kitchen robots",
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1727
+    },
+    {
+      "id": "B2_002",
+      "lang": "en",
+      "level": "simple",
+      "intent": "browse_category",
+      "user_query": "list all drone robots",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "drone robots",
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "drone",
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1258
+    },
+    {
+      "id": "B2_003",
+      "lang": "en",
+      "level": "medium",
+      "intent": "search_by_name",
+      "user_query": "show me robots that can clean windows",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "window cleaning robot",
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "clean windows",
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1280
+    },
+    {
+      "id": "B2_004",
+      "lang": "en",
+      "level": "medium",
+      "intent": "browse_category",
+      "user_query": "I want a robot for kids, what do you have?",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kids robot",
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "robot for kids",
+          "budget": 200,
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1531
+    },
+    {
+      "id": "B2_005",
+      "lang": "en",
+      "level": "complex",
+      "intent": "browse_category",
+      "user_query": "what home cleaning robots do you sell that auto-empty?",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "self-emptying vacuum robot",
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "auto-empty",
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1295
+    },
+    {
+      "id": "B2_006",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "browse_category",
+      "user_query": "kitchen robots dikhao",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kitchen robots",
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kitchen",
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1276
+    },
+    {
+      "id": "B2_007",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "browse_category",
+      "user_query": "humanoid robots list karo",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "humanoid robots",
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Humanoid"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 916
+    },
+    {
+      "id": "B2_008",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "browse_category",
+      "user_query": "window cleaning robot chahiye",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "window cleaning robot",
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "chahiye",
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1169
+    },
+    {
+      "id": "B2_009",
+      "lang": "te",
+      "level": "simple",
+      "intent": "browse_category",
+      "user_query": "drone robots chupinchandi",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "drone robots",
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "drone"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1037
+    },
+    {
+      "id": "B2_010",
+      "lang": "te",
+      "level": "medium",
+      "intent": "browse_category",
+      "user_query": "kitchen robots list cheyyi",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kitchen robots",
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "cheyyi",
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1258
+    },
+    {
+      "id": "B2_011",
+      "lang": "en",
+      "level": "simple",
+      "intent": "get_product",
+      "user_query": "tell me about DJI Matrice 30T",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 8
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "DJI Matrice 30T"
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1199
+    },
+    {
+      "id": "B2_012",
+      "lang": "en",
+      "level": "simple",
+      "intent": "get_product",
+      "user_query": "what is Miko 3?",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 938
+    },
+    {
+      "id": "B2_013",
+      "lang": "en",
+      "level": "medium",
+      "intent": "get_product",
+      "user_query": "give me the full specs of Roborock S8 MaxV Ultra",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 5
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 5
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 853
+    },
+    {
+      "id": "B2_014",
+      "lang": "en",
+      "level": "complex",
+      "intent": "get_product",
+      "user_query": "what is the specification of this robot",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 8
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 7
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 879
+    },
+    {
+      "id": "B2_015",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "get_product",
+      "user_query": "DJI Matrice 30T ke baare mein batao",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 8
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "DJI Matrice 30T",
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1304
+    },
+    {
+      "id": "B2_016",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "get_product",
+      "user_query": "Samsung Ballie ke details do",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 2
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 2
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 888
+    },
+    {
+      "id": "B2_017",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "get_product",
+      "user_query": "Wonder Workshop Dash ke baare mein batao",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 11
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Humanoid"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 921
+    },
+    {
+      "id": "B2_018",
+      "lang": "te",
+      "level": "simple",
+      "intent": "get_product",
+      "user_query": "Miko 3 gurinchi cheppu",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1058
+    },
+    {
+      "id": "B2_019",
+      "lang": "te",
+      "level": "simple",
+      "intent": "get_product",
+      "user_query": "Amazon Astro details ivvu",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 1
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 1
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 896
+    },
+    {
+      "id": "B2_020",
+      "lang": "te",
+      "level": "medium",
+      "intent": "get_product",
+      "user_query": "DJI Matrice 30T gurinchi cheppu",
+      "expected": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 8
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "DJI Matrice 30T gurinchi cheppu",
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1536
+    },
+    {
+      "id": "B2_021",
+      "lang": "en",
+      "level": "simple",
+      "intent": "compare",
+      "user_query": "compare Roomba and Roborock on suction",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 4,
+          "product_id_2": 5,
+          "focus": "suction"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 4,
+          "product_id_2": 5,
+          "focus": "suction"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1425
+    },
+    {
+      "id": "B2_022",
+      "lang": "en",
+      "level": "simple",
+      "intent": "compare",
+      "user_query": "DJI Matrice vs Ring Always Home Cam on camera quality",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 8,
+          "product_id_2": 7,
+          "focus": "camera"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 7,
+          "product_id_2": 8,
+          "focus": "camera"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1439
+    },
+    {
+      "id": "B2_023",
+      "lang": "en",
+      "level": "medium",
+      "intent": "compare",
+      "user_query": "what is the difference between Amazon Astro and Samsung Ballie in terms of price?",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 1,
+          "product_id_2": 2,
+          "focus": "price"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 1,
+          "product_id_2": 2,
+          "focus": "price"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1475
+    },
+    {
+      "id": "B2_024",
+      "lang": "en",
+      "level": "complex",
+      "intent": "compare",
+      "user_query": "help me choose between Miko 3 and Wonder Workshop Dash for my 8-year-old",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 10,
+          "product_id_2": 11,
+          "focus": "specs"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "choosing between Miko 3 and Wonder Workshop Dash for a 8-year-old",
+          "budget": 200,
+          "category": "Humanoid"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1943
+    },
+    {
+      "id": "B2_025",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "compare",
+      "user_query": "Roomba aur Roborock compare karo suction mein",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 4,
+          "product_id_2": 5,
+          "focus": "suction"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 4,
+          "product_id_2": 5,
+          "focus": "suction"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1427
+    },
+    {
+      "id": "B2_026",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "compare",
+      "user_query": "Amazon Astro aur Samsung Ballie mein kya fark hai price mein",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 1,
+          "product_id_2": 2,
+          "focus": "price"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 1,
+          "product_id_2": 2,
+          "focus": "price"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1386
+    },
+    {
+      "id": "B2_027",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "compare",
+      "user_query": "DJI Matrice aur Ring Cam camera pe compare karo",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 8,
+          "product_id_2": 7,
+          "focus": "camera"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 7,
+          "product_id_2": 8,
+          "focus": "camera"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1853
+    },
+    {
+      "id": "B2_028",
+      "lang": "te",
+      "level": "simple",
+      "intent": "compare",
+      "user_query": "Roomba mariyu Roborock ni suction meeda compare cheyyi",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 4,
+          "product_id_2": 5,
+          "focus": "suction"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 4,
+          "product_id_2": 5,
+          "focus": "suction"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1925
+    },
+    {
+      "id": "B2_029",
+      "lang": "te",
+      "level": "medium",
+      "intent": "compare",
+      "user_query": "Miko 3 mariyu Wonder Workshop Dash ni safety meeda compare cheyyi",
+      "expected": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 10,
+          "product_id_2": 11,
+          "focus": "safety"
+        },
+        "ui_guide": "compare_products"
+      },
+      "predicted": {
+        "tool": "compare_products",
+        "arguments": {
+          "product_id_1": 10,
+          "product_id_2": 9,
+          "focus": "safety"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1459
+    },
+    {
+      "id": "B2_030",
+      "lang": "en",
+      "level": "simple",
+      "intent": "recommend",
+      "user_query": "what is the cheapest robot you have?",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "most affordable robot",
+          "budget": 200
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "cheapest",
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1239
+    },
+    {
+      "id": "B2_031",
+      "lang": "en",
+      "level": "simple",
+      "intent": "recommend",
+      "user_query": "recommend me a security drone under $500",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "home security patrol",
+          "budget": 500,
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "security drone",
+          "budget": 500,
+          "category": "Drone"
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1555
+    },
+    {
+      "id": "B2_032",
+      "lang": "en",
+      "level": "medium",
+      "intent": "recommend",
+      "user_query": "I want a kitchen robot under $1000",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "cooking assistance",
+          "budget": 1000,
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kitchen",
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1196
+    },
+    {
+      "id": "B2_033",
+      "lang": "en",
+      "level": "medium",
+      "intent": "recommend",
+      "user_query": "best humanoid robot for classroom use",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "classroom learning",
+          "budget": 1000,
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "best humanoid robot for classroom use",
+          "budget": 300,
+          "category": "Humanoid"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1552
+    },
+    {
+      "id": "B2_034",
+      "lang": "en",
+      "level": "complex",
+      "intent": "recommend",
+      "user_query": "which robot should I buy for my 7 year old son who loves coding?",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "kids coding practice",
+          "budget": 500,
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "robot for a 7-year-old who loves coding",
+          "budget": 50,
+          "category": "Humanoid"
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1789
+    },
+    {
+      "id": "B2_035",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "recommend",
+      "user_query": "sasta drone dikhao",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "affordable drone",
+          "budget": 500,
+          "category": "Drone"
+        },
+        "ui_guide": "find_drone"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {
+            "check_orders": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 914
+    },
+    {
+      "id": "B2_036",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "recommend",
+      "user_query": "$500 ke andar vacuum robot suggest karo",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "daily floor cleaning",
+          "budget": 500,
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "$500 ke andar vacuum robot suggest karo",
+          "budget": 500,
+          "category": "Humanoid"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1711
+    },
+    {
+      "id": "B2_037",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "recommend",
+      "user_query": "bacchon ke liye robot suggest karo",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "kids companion",
+          "budget": 500,
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "bacchon ke liye robot",
+          "budget": 5000,
+          "category": "Humanoid"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1644
+    },
+    {
+      "id": "B2_038",
+      "lang": "hi",
+      "level": "complex",
+      "intent": "recommend",
+      "user_query": "best kitchen robot $1500 mein kaunsa le sakte hain?",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "cooking assistance",
+          "budget": 1500,
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "best kitchen robot $1500",
+          "budget": 1500,
+          "category": "Kitchen"
+        },
+        "ui_guide": "find_kitchen"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": true,
+        "full_match": true,
+        "parsed_ok": true
+      },
+      "latency_ms": 1664
+    },
+    {
+      "id": "B2_039",
+      "lang": "te",
+      "level": "simple",
+      "intent": "recommend",
+      "user_query": "pillalaki robot suggest cheyyi",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "kids companion",
+          "budget": 500,
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "pillalaki robot",
+          "budget": 5000,
+          "category": "Humanoid"
+        },
+        "ui_guide": "compare_products"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1402
+    },
+    {
+      "id": "B2_040",
+      "lang": "te",
+      "level": "medium",
+      "intent": "recommend",
+      "user_query": "$500 lopu vacuum robot kavali",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "daily floor cleaning",
+          "budget": 500,
+          "category": "Home Cleaner"
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "kavali",
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1141
+    },
+    {
+      "id": "B2_041",
+      "lang": "te",
+      "level": "medium",
+      "intent": "recommend",
+      "user_query": "cheapest humanoid robot cheppu",
+      "expected": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "most affordable humanoid",
+          "budget": 200,
+          "category": "Humanoid"
+        },
+        "ui_guide": "find_humanoid"
+      },
+      "predicted": {
+        "tool": "recommend",
+        "arguments": {
+          "need": "cheapest humanoid robot cheppu",
+          "budget": 20000,
+          "category": "Humanoid"
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1784
+    },
+    {
+      "id": "B2_042",
+      "lang": "en",
+      "level": "simple",
+      "intent": "add_to_cart",
+      "user_query": "add Miko 3 to my cart",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": "update_cart"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 917
+    },
+    {
+      "id": "B2_043",
+      "lang": "en",
+      "level": "simple",
+      "intent": "add_to_cart",
+      "user_query": "add LEGO Spike Prime to cart",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 12
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 12
+        },
+        "ui_guide": "update_cart"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 910
+    },
+    {
+      "id": "B2_044",
+      "lang": "en",
+      "level": "medium",
+      "intent": "add_to_cart",
+      "user_query": "I want to buy iRobot Roomba j9+",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 4
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "get_product",
+        "arguments": {
+          "product_id": 4
+        },
+        "ui_guide": "find_home_cleaner"
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1040
+    },
+    {
+      "id": "B2_045",
+      "lang": "en",
+      "level": "complex",
+      "intent": "add_to_cart",
+      "user_query": "add the DJI drone to my cart",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 8
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 7
+        },
+        "ui_guide": "update_cart"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 888
+    },
+    {
+      "id": "B2_046",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "add_to_cart",
+      "user_query": "Miko 3 cart mein add karo",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 10
+        },
+        "ui_guide": "update_cart"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 911
+    },
+    {
+      "id": "B2_047",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "add_to_cart",
+      "user_query": "Enabot EBO X ko cart mein daal do",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 3
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 3
+        },
+        "ui_guide": "update_cart"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 892
+    },
+    {
+      "id": "B2_048",
+      "lang": "te",
+      "level": "simple",
+      "intent": "add_to_cart",
+      "user_query": "Roborock cart lo add cheyyi",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 5
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 5
+        },
+        "ui_guide": "update_cart"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 891
+    },
+    {
+      "id": "B2_049",
+      "lang": "te",
+      "level": "simple",
+      "intent": "add_to_cart",
+      "user_query": "LEGO Spike Prime cart lo pettu",
+      "expected": {
+        "tool": "add_to_cart",
+        "arguments": {
+          "product_id": 12
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {
+            "update_cart": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 911
+    },
+    {
+      "id": "B2_050",
+      "lang": "en",
+      "level": "simple",
+      "intent": "nav_orders",
+      "user_query": "where are my orders?",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "check_orders"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 667
+    },
+    {
+      "id": "B2_051",
+      "lang": "en",
+      "level": "simple",
+      "intent": "nav_support",
+      "user_query": "I need help with my robot, open support",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "open_support"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 754
+    },
+    {
+      "id": "B2_052",
+      "lang": "en",
+      "level": "simple",
+      "intent": "nav_new_ticket",
+      "user_query": "I want to raise a ticket, my robot is broken",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "new_ticket"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1150
+    },
+    {
+      "id": "B2_053",
+      "lang": "en",
+      "level": "simple",
+      "intent": "nav_view_tickets",
+      "user_query": "show me my previous tickets",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "view_tickets"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1059
+    },
+    {
+      "id": "B2_054",
+      "lang": "en",
+      "level": "medium",
+      "intent": "nav_new_ticket",
+      "user_query": "file a complaint about my order",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "new_ticket"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1140
+    },
+    {
+      "id": "B2_055",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "nav_orders",
+      "user_query": "mera order kahan hai",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "check_orders"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Humanoid"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1017
+    },
+    {
+      "id": "B2_056",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "nav_support",
+      "user_query": "mujhe support chahiye",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "open_support"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1264
+    },
+    {
+      "id": "B2_057",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "nav_new_ticket",
+      "user_query": "complaint file karni hai",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "new_ticket"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1289
+    },
+    {
+      "id": "B2_058",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "nav_view_tickets",
+      "user_query": "mere purane tickets dikhao",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "view_tickets"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1202
+    },
+    {
+      "id": "B2_059",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "nav_new_ticket",
+      "user_query": "robot kharaab hai, ticket banao",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "new_ticket"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {
+            "check_orders": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 938
+    },
+    {
+      "id": "B2_060",
+      "lang": "te",
+      "level": "simple",
+      "intent": "nav_orders",
+      "user_query": "naa order ekkada undi?",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "check_orders"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {
+            "check_orders": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 962
+    },
+    {
+      "id": "B2_061",
+      "lang": "te",
+      "level": "simple",
+      "intent": "nav_support",
+      "user_query": "support kavali",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "open_support"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1001
+    },
+    {
+      "id": "B2_062",
+      "lang": "te",
+      "level": "simple",
+      "intent": "nav_new_ticket",
+      "user_query": "robot pani cheyyatledu, ticket create cheyyi",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "new_ticket"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {
+            "check_orders": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 933
+    },
+    {
+      "id": "B2_063",
+      "lang": "te",
+      "level": "simple",
+      "intent": "nav_view_tickets",
+      "user_query": "naa tickets chupinchu",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "orders",
+          "params": {}
+        },
+        "ui_guide": "view_tickets"
+      },
+      "predicted": null,
+      "scores": {
+        "tool_ok": false,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": false
+      },
+      "latency_ms": 1000
+    },
+    {
+      "id": "B2_064",
+      "lang": "en",
+      "level": "simple",
+      "intent": "nav_location",
+      "user_query": "where is Aiper Surfer S1?",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "drone",
+            "product_id": 9
+          }
+        },
+        "ui_guide": "locate_path:drone:9"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Humanoid"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 962
+    },
+    {
+      "id": "B2_065",
+      "lang": "en",
+      "level": "medium",
+      "intent": "nav_location",
+      "user_query": "where can I find pool cleaning drones?",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "drone",
+            "product_id": 9
+          }
+        },
+        "ui_guide": "locate_path:drone:9"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Drone"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 960
+    },
+    {
+      "id": "B2_066",
+      "lang": "en",
+      "level": "simple",
+      "intent": "nav_cart",
+      "user_query": "go to cart",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {}
+        },
+        "ui_guide": "update_cart"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {
+            "update_cart": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 949
+    },
+    {
+      "id": "B2_067",
+      "lang": "en",
+      "level": "simple",
+      "intent": "nav_home",
+      "user_query": "take me home",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "home",
+          "params": {}
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Humanoid"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 959
+    },
+    {
+      "id": "B2_068",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "nav_location",
+      "user_query": "drone kahan milega?",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "drone",
+            "product_id": 7
+          }
+        },
+        "ui_guide": "locate_path:drone:7"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "drone"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1095
+    },
+    {
+      "id": "B2_069",
+      "lang": "hi",
+      "level": "medium",
+      "intent": "nav_location",
+      "user_query": "LEGO Spike Prime kahan milega?",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "humanoid",
+            "product_id": 12
+          }
+        },
+        "ui_guide": "locate_path:humanoid:12"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {
+            "update_cart": "LEGO Education Spike Prime"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 1080
+    },
+    {
+      "id": "B2_070",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "nav_cart",
+      "user_query": "mera cart dikhao",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {}
+        },
+        "ui_guide": "update_cart"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {
+            "update_cart": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 939
+    },
+    {
+      "id": "B2_071",
+      "lang": "hi",
+      "level": "simple",
+      "intent": "nav_home",
+      "user_query": "home page pe le chalo",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "home",
+          "params": {}
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Drone"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": false,
+        "guide_ok": true,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 935
+    },
+    {
+      "id": "B2_072",
+      "lang": "te",
+      "level": "simple",
+      "intent": "nav_location",
+      "user_query": "drone ekkada dorikutundi",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "drone",
+            "product_id": 7
+          }
+        },
+        "ui_guide": "locate_path:drone:7"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "drone"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 949
+    },
+    {
+      "id": "B2_073",
+      "lang": "te",
+      "level": "medium",
+      "intent": "nav_location",
+      "user_query": "Wonder Workshop Dash ekkada undi?",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "humanoid",
+            "product_id": 11
+          }
+        },
+        "ui_guide": "locate_path:humanoid:11"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "catalog",
+          "params": {
+            "category": "Humanoid"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 994
+    },
+    {
+      "id": "B2_074",
+      "lang": "te",
+      "level": "simple",
+      "intent": "nav_cart",
+      "user_query": "naa cart chupinchu",
+      "expected": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {}
+        },
+        "ui_guide": "update_cart"
+      },
+      "predicted": {
+        "tool": "navigate_to",
+        "arguments": {
+          "page": "cart",
+          "params": {
+            "update_cart": "true"
+          }
+        }
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 990
+    },
+    {
+      "id": "B2_075",
+      "lang": "en",
+      "level": "edge",
+      "intent": "out_of_scope",
+      "user_query": "what is the weather today?",
+      "expected": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "robot",
+          "category": null
+        },
+        "ui_guide": null
+      },
+      "predicted": {
+        "tool": "search_products",
+        "arguments": {
+          "query": "weather today"
+        },
+        "ui_guide": "find_drone"
+      },
+      "scores": {
+        "tool_ok": true,
+        "args_ok": true,
+        "guide_ok": false,
+        "full_match": false,
+        "parsed_ok": true
+      },
+      "latency_ms": 952
+    }
+  ]
+}

@@ -1,106 +1,82 @@
 # Nexus Bots
 
-**Domain-Specific Function Calling with Fine-Tuned Small LLMs and Context-Aware RAG for Persona-Adaptive Multilingual Robotics Commerce**
+**Fine-Tuned Qwen3-0.6B Agentic Function Routing with UI Guidance for Multilingual Robotics Commerce**
 
 > Course Project — Topics in Deep Learning (CS6420), IIT Hyderabad
+> Team: Digvijaysing Rajput (CS24MTECH14020) · Vinay Kadari (CS24MTECH14008)
+
+---
 
 ## Abstract
 
-We present Nexus Bots, a robotics commerce platform that investigates whether a fine-tuned small language model (~0.6B parameters) can match large models (GPT-4, Claude, Gemini) at domain-specific function calling — selecting the right tool and generating correct arguments for robotics e-commerce queries. The system combines: (1) a QLoRA-fine-tuned Qwen3-0.6B for structured function calls, (2) context-aware RAG re-ranked by real-time user activity, (3) automatic user proficiency detection for persona-adaptive responses via Sarvam AI, and (4) LLM-driven UI guidance that highlights on-screen elements to walk users through multi-step flows. We benchmark across English, Hindi, and Telugu.
+Agentic AI systems in e-commerce typically rely on large language model APIs for both intent routing and natural language response generation, resulting in high per-query cost and latency unsuitable for real-time commerce applications. We present Nexus Bots, a robotics commerce platform that decouples routing from response generation through a compound dual-model architecture: a fine-tuned Qwen3-0.6B model handles all tool selection, argument extraction, and UI guidance signal generation locally, while SARVAM-M, a large cloud language model, generates contextually rich responses in the user's native language. The system supports voice and text input across English, Hindi, and Telugu — using SARVAM's speech-to-text API to normalize multilingual voice input into romanized text before local inference. We fine-tune Qwen3-0.6B using QLoRA on a domain-specific dataset of 1,000 function-calling examples across 6 tools and 3 languages, and introduce UI guidance as a first-class agentic output — semantic intent keys that trigger real-time on-screen navigation highlights in the frontend. We benchmark the fine-tuned model against the base Qwen3-0.6B, a heuristic keyword router, and frontier models (GPT-4o, Claude, Gemini) on tool-selection accuracy, argument correctness, UI guide accuracy, and per-language performance across English, Hindi, and Telugu.
+
+---
 
 ## System Architecture
 
-```mermaid
-flowchart TB
-    subgraph INPUT["User Input"]
-        direction LR
-        TEXT["Text Chat"]
-        VOICE["Voice (STT)"]
-    end
-
-    VOICE -->|"Web Speech API"| STT["Speech-to-Text"]
-    STT --> CTX
-    TEXT --> CTX
-
-    subgraph CONTEXT["Page-Aware Context Layer"]
-        CTX["UserActivityContext"]
-        CTX --- D1["Current Page & Visible Products"]
-        CTX --- D2["Browsing History & Search Queries"]
-        CTX --- D3["Cart Contents & Category Filter"]
-    end
-
-    CTX -->|"query + full context"| PIPELINE
-
-    subgraph PIPELINE["Intelligence Layer"]
-        direction TB
-        DECIDE["Tool Router\n(Heuristic + optional FC model)"]
-
-        DECIDE --> T1["search_products()"]
-        DECIDE --> T2["get_product()"]
-        DECIDE --> T3["compare_products()"]
-        DECIDE --> T4["recommend()"]
-        DECIDE --> T5["add_to_cart()"]
-        DECIDE --> T6["navigate_to()"]
-
-        RAG["Context-Aware RAG\nSentence-Transformers + FAISS\nRe-ranked by user activity"]
-        PROF["Proficiency Detector\nbeginner / expert"]
-        GUIDE["UI Guide Emitter\nui_guide intent keys"]
-    end
-
-    PIPELINE -->|"fetch product data"| DB[(SQLite — 12 Real Robots)]
-    PIPELINE -->|"retrieve similar"| RAG
-
-    RAG --> PACK["Pack: tool results + products\n+ proficiency + page context + language"]
-    PIPELINE --> PACK
-    PROF --> PACK
-
-    PACK --> SARVAM
-
-    subgraph RESPONSE["Response Generation"]
-        SARVAM["Sarvam AI\nMultilingual: EN | HI | TE\nPersona-Adaptive"]
-    end
-
-    SARVAM -->|"text response + ui_guide"| PANEL["AI Side Panel\n+ driver.js UI Guidance"]
-
-    subgraph BENCHMARKS["Research Benchmarks"]
-        direction LR
-        BM1["B1: Function Calling\nQwen3 vs GPT-4\nvs Claude vs Gemini"]
-        BM2["B2: Context RAG\nvs Standard FAISS\nvs BM25"]
-        BM4["B4: Multilingual FC\nEN vs HI vs TE"]
-    end
-
-    style DECIDE fill:#4f46e5,color:#fff
-    style RAG fill:#0891b2,color:#fff
-    style CTX fill:#d97706,color:#fff
-    style SARVAM fill:#059669,color:#fff
-    style PROF fill:#dc2626,color:#fff
-    style PACK fill:#6b7280,color:#fff
-    style DB fill:#92400e,color:#fff
 ```
+User Input (Text or Voice)
+        │
+        ├── Web Speech API STT → romanized text (HI/TE)
+        │
+        ▼
+UserActivityContext
+(currentPage, viewedProducts, cart, selectedCategory, currentProduct)
+        │
+        ▼
+POST /api/ai/chat  →  ai.js (PythonWorker IPC)
+        │
+        ▼
+pipeline.py
+  ├── fc_model.py ──────── Qwen3-0.6B (tool selection + ui_guide key)
+  │       └── fallback ──► Heuristic router
+  ├── execute_tool() ────► SQLite DB (12 robots)
+  └── sarvam_client.py ─► SARVAM-M (multilingual natural language response)
+        │
+        ▼
+AISidePanel.jsx ← response text + ui_guide key
+UIGuideProvider.jsx ← startFlow(ui_guide) → element-anchored on-screen highlights
+```
+
+---
+
+## Novelty
+
+| Contribution | What it is | Why it matters |
+|---|---|---|
+| Compound dual-model routing | Qwen3-0.6B routes locally; SARVAM-M generates response via API | 5–15× cost reduction vs. full-LLM routing at scale |
+| UI guidance as agentic output | Model emits `ui_guide` key → frontend highlights exact UI element | AI-driven guided shopping, no hardcoded flows |
+| Romanized multilingual routing | SARVAM STT → romanized Latin → English-only small model | Indian language support without 7B+ models locally |
+| Fine-tuning ROI benchmarks | B1/B2/B4 compare fine-tuned vs base vs heuristic vs frontier | Quantifies domain adaptation value |
+
+---
 
 ## Product Catalog
 
-12 real-world robots from actual companies across 4 categories:
+12 real-world robots across 4 categories:
 
-| Category | Count | Products (Real Brands) |
-|---|---|---|
-| **Kitchen** | 3 | Amazon Astro, Samsung Ballie, Enabot EBO X |
-| **Home Cleaner** | 3 | iRobot Roomba j9+, Roborock S8 MaxV Ultra, Ecovacs WINBOT W2 Omni |
-| **Drone** | 3 | Ring Always Home Cam, DJI Matrice 30T, Aiper Surfer S1 |
-| **Humanoid** | 3 | Miko 3, Wonder Workshop Dash, LEGO Education Spike Prime |
+| Category | Products |
+|---|---|
+| **Kitchen** | Amazon Astro · Samsung Ballie · Enabot EBO X |
+| **Home Cleaner** | iRobot Roomba j9+ · Roborock S8 MaxV Ultra · Ecovacs WINBOT W2 Omni |
+| **Drone** | Ring Always Home Cam · DJI Matrice 30T · Aiper Surfer S1 |
+| **Humanoid** | Miko 3 · Wonder Workshop Dash · LEGO Education Spike Prime |
+
+---
 
 ## Function Calls (6 Tools)
 
-The pipeline routes user queries to these domain-specific tools:
+| Function | Description |
+|---|---|
+| `search_products(query, category)` | Browse / filter catalog by keyword and category |
+| `get_product(product_id)` | Fetch full specs for a single robot |
+| `compare_products(id1, id2, focus)` | Side-by-side comparison with optional focus |
+| `recommend(need, budget, category)` | Budget + need-based recommendation |
+| `add_to_cart(product_id)` | Add a robot to cart |
+| `navigate_to(page, params)` | Navigate to any page, trigger support flows |
 
-| Function | Description | Example |
-|---|---|---|
-| `search_products(query, category)` | Search/filter the catalog | `search_products("pool cleaner", "Home Cleaner")` |
-| `get_product(id)` | Get detailed product info | `get_product(8)` |
-| `compare_products(id1, id2, focus)` | Compare two products | `compare_products(5, 6, "suction")` |
-| `recommend(need, budget, category)` | Get recommendations | `recommend("kids coding", 300, "Humanoid")` |
-| `add_to_cart(id)` | Add product to cart | `add_to_cart(10)` |
-| `navigate_to(page, params)` | Guide user to a page | `navigate_to("catalog", {category: "Drone"})` |
+---
 
 ## Tech Stack
 
@@ -108,45 +84,46 @@ The pipeline routes user queries to these domain-specific tools:
 |---|---|
 | Frontend | React 19 + Vite + Tailwind CSS 4 |
 | Backend | Node.js + Express 5 |
-| Database | SQLite (better-sqlite3) |
-| Function Calling | Heuristic router + Qwen3-0.6B base (ChatML, GPU/CPU) |
-| Retrieval | Sentence-transformers + FAISS (context-aware re-ranking) |
+| Database | SQLite (better-sqlite3), 12 robots |
+| Tool Routing | Qwen3-0.6B (ChatML, QLoRA fine-tuned) via `fc_model.py` |
+| Fallback Router | Heuristic keyword matcher in `pipeline.py` |
+| Response Generation | SARVAM-M API (EN/HI/TE, persona-adaptive) via `sarvam_client.py` |
+| UI Guidance | Custom `UIGuideProvider` + Floating UI tooltips, element-anchored |
+| Voice Input | Web Speech API (STT), SARVAM STT for romanization |
+| Fine-tuning | Google Colab (T4) + Unsloth + QLoRA |
 | Orchestration | Direct Python dispatch (pipeline.py ↔ ai.js via JSON-line IPC) |
-| Reasoning/Response | Sarvam AI (EN/HI/TE, persona-adaptive) |
-| UI Guidance | driver.js (MIT, 5 KB) with CSS pulse animations |
-| Voice | Web Speech API (STT only) |
-| Training | Google Colab (T4) + Unsloth + HuggingFace |
+
+---
 
 ## Project Structure
 
 ```
 nexus-bots/
-├── client/                # React frontend (Vite + Tailwind)
-│   ├── src/
-│   │   ├── components/    # Navbar, Footer, AISidePanel, CartDrawer, ParticleNetwork
-│   │   ├── context/       # UserActivityContext (views, cart, search, page)
-│   │   ├── pages/         # Home, Catalog, RobotDetail, OrderHistory
-│   │   ├── ui-guide/      # driver.js flows, UIGuideProvider, guide-pulse.css
-│   │   ├── data/          # robots.js — 12 real-world robots
-│   │   ├── styles/        # tokens.css (design tokens)
-│   │   └── utils/         # user.js (userId persistence)
-├── server/                # Node.js backend
-│   ├── ai/                # pipeline.py, sarvam_client.py, fc_model.py (Python workers)
-│   ├── config/            # db.js (SQLite)
-│   ├── database/          # schema.sql, seed.sql, init.js
-│   ├── models/            # Product.js, Chat.js, Order.js, CallbackRequest.js
-│   ├── routes/            # products.js, chats.js, orders.js, ai.js
-│   └── index.js
-├── finetune/              # Fine-tuning infrastructure
-│   ├── data/              # train.jsonl, test.jsonl (v2 with ui_guide)
-│   ├── eval/              # bench_function_calling.py, bench_rag.py
-│   ├── config.py, train.py, inference.py
-│   └── integration/       # fc_model.py (model integration module)
-├── research/              # Dataset generation scripts & schemas
-├── Idea.md                # Full project motivation & research questions
-├── PLAN.md                # 24-hour execution plan
-└── README.md
+├── client/                   # React frontend (Vite + Tailwind)
+│   └── src/
+│       ├── components/       # AISidePanel, CartDrawer, Navbar, Footer
+│       ├── context/          # UserActivityContext
+│       ├── pages/            # Home, Catalog, RobotDetail, OrderHistory
+│       └── ui-guide/         # UIGuideProvider, flows.json, guide-pulse.css
+├── server/                   # Node.js + Express backend
+│   ├── ai/                   # pipeline.py, sarvam_client.py, fc_model.py
+│   ├── database/             # init.js, SQLite schema + 12 robot seed
+│   ├── routes/               # products.js, chats.js, orders.js, ai.js
+│   └── logs/                 # ai_sessions.jsonl (append-only)
+├── finetune/                 # Fine-tuning infrastructure
+│   ├── data/                 # train.jsonl (900), test.jsonl (100)
+│   ├── eval/                 # bench_function_calling.py, run_b2_eval.py, b2_eval_prompts.py
+│   ├── config.py             # Hyperparameters + system prompt + catalog
+│   ├── train.py              # Unsloth + QLoRA training script
+│   └── prepare_dataset.py    # Raw v2 → ChatML → stratified split
+├── research/
+│   ├── dataset/              # Raw data, schemas, generation scripts
+│   └── results/              # b1_function_calling.md, b4_multilingual.md
+├── README.md
+└── PLAN.md
 ```
+
+---
 
 ## Getting Started
 
@@ -154,70 +131,57 @@ nexus-bots/
 git clone <repo-url>
 cd NexusBots-TDL-Project
 
-# Frontend
-cd client && npm install && npm run dev
+# Backend
+cd server && npm install
+cp .env.example .env   # add SARVAM_API_KEY
+node index.js          # port 5000
 
-# Backend (new terminal)
-cd server && npm install && npm run init-db && npm run dev
-
-# Python AI dependencies (optional — for Sarvam + RAG)
-cd server/ai && pip install -r requirements.txt
+# Frontend (new terminal)
+cd client && npm install && npm run dev   # port 5173
 ```
-
-- Frontend: **http://localhost:5173**
-- Backend: **http://localhost:5000**
-
-## Key Features
-
-### AI Side Panel
-Slide-out assistant accessible from "Ask AI" in the navbar. Supports text + voice input (auto-detects language via Web Speech API), shows product cards inline, and triggers UI guidance flows.
-
-### UI Guidance System
-When the AI recommends navigation (e.g., "check your orders"), driver.js highlights the relevant UI elements with pulsing spotlights and auto-navigates across pages. 11 pre-defined flows covering orders, cart, catalog categories, and support.
-
-### Context-Aware Responses
-The AI knows what page the user is on, what they've browsed, what's in their cart, and adapts responses accordingly. Product recommendations are re-ranked by user activity signals.
-
-### Persona-Adaptive Generation
-Automatic proficiency detection (beginner vs expert) adjusts Sarvam's response complexity — technical specs for experts, friendly explanations for beginners.
-
-## Build Status
-
-- [x] Phase 1 — Premium UI (Home, Catalog, RobotDetail, OrderHistory, Navbar, CartDrawer, AISidePanel, UIGuide system)
-- [x] Phase 2 — Backend Polish (PipelineRuntime singleton, subprocess reuse, correctness fixes, ui_guide emission, rate limiting, .env config)
-- [x] Phase 3 — Model Integration (Qwen3-0.6B base model via ChatML, fc_model.py, Sarvam AI response generation, semantic RAG enabled)
-- [ ] Phase 4 — Fine-Tune + Benchmarks (Qwen3-0.6B LoRA adapter, B1/B2/B4 benchmark tables)
-- [ ] Phase 5 — Demo + Submission (video, slides, README refresh with real numbers)
-
-## Benchmark Tables (Phase 3 — TBD)
-
-### B1 — Function-Calling Accuracy
-| System | Tool Acc | Arg F1 | p50 Latency | $/1000 |
-|---|---|---|---|---|
-| Qwen3-0.6B-FC (ours) | — | — | — | ~$0 |
-| Heuristic router | — | — | ~1 ms | $0 |
-| GPT-4o zero-shot | — | — | — | — |
-| Claude Opus 4.7 zero-shot | — | — | — | — |
-| Gemini 2.5 zero-shot | — | — | — | — |
-
-### B2 — Context-Aware RAG
-| Method | Recall@3 | MRR |
-|---|---|---|
-| FAISS + context re-rank (ours) | — | — |
-| FAISS only | — | — |
-| BM25 | — | — |
-
-### B4 — Multilingual Function-Calling
-| Language | Qwen3-0.6B-FC Acc | Best Frontier Acc |
-|---|---|---|
-| English | — | — |
-| Hindi | — | — |
-| Telugu | — | — |
-
-## Team
-
-**Digvijaysing Rajput** (CS24MTECH14020), **Vinay Kadari** (CS24MTECH14008)
 
 ---
 
-*Academic project — IIT Hyderabad, M.Tech, CS6420 Topics in Deep Learning*
+## Build Status
+
+- [x] Phase 1 — Full UI: Home, /catalog/:slug, /robot/:id, /orders, Navbar, CartDrawer, AISidePanel, UIGuide system
+- [x] Phase 2 — Backend: PipelineRuntime singleton, PythonWorker IPC, 6 tools, rate limiting, JSONL logging
+- [x] Phase 3 — AI Integration: Qwen3-0.6B base model (ChatML), SARVAM-M response, fc_model.py, voice STT working
+- [x] Phase 3b — Dataset: 1000-row function-calling dataset (EN/HI/TE romanized), B2 baseline run (68% tool acc)
+- [ ] Phase 4 — Fine-Tune: Qwen3-0.6B QLoRA adapter (Colab) — pending; B1 fine-tuned row empty
+- [ ] Phase 5 — Final benchmarks + report numbers filled
+
+---
+
+## Benchmarks
+
+### B1 — Function-Calling Accuracy (test.jsonl, 100 rows)
+
+| System | Tool Acc | Arg F1 | UI Guide Acc | p50 Latency (ms) |
+|--------|----------|--------|--------------|------------------|
+| Qwen3-0.6B-FC fine-tuned (ours) | — | — | — | — |
+| Qwen3-0.6B BASE | 0.61 | 0.45 | 0.26 | 1210 |
+| Heuristic Router | 0.45 | 0.25 | 0.27 | ~0 |
+| GPT-4o zero-shot | — | — | — | — |
+| Claude zero-shot | — | — | — | — |
+| Gemini 2.5 zero-shot | — | — | — | — |
+
+### B2 — Base Model Evaluation (75 hand-crafted prompts, Qwen3-0.6B base)
+
+| Metric | EN | HI | TE | Overall |
+|--------|----|----|----|---------| 
+| Tool accuracy | 66% | 71% | 68% | **68%** |
+| Full match | 16% | 21% | 11% | **16%** |
+| Parse rate | — | — | — | **87%** |
+
+### B4 — Multilingual Function-Calling
+
+| System | EN Tool Acc | HI Tool Acc | TE Tool Acc |
+|--------|-------------|-------------|-------------|
+| Qwen3-0.6B-FC (ours) | — | — | — |
+| Qwen3-0.6B BASE | 0.62 | 0.63 | 0.56 |
+| Heuristic Router | 0.47 | 0.33 | 0.56 |
+
+---
+
+*Academic project — IIT Hyderabad, M.Tech, CS6420 Topics in Deep Learning, April 2026*

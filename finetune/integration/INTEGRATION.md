@@ -1,101 +1,89 @@
-# Phase 3 → Phase 2 Integration Guide
+# Fine-Tuned Model Integration Guide
 
-## What Phase 3 Produces
+## What the Fine-Tuned Model Produces
 
-A fine-tuned Qwen3-0.6B model that, given a user query + page context, outputs:
+Given a user query + page context, Qwen3-0.6B-FC outputs:
 ```json
 {"tool": "search_products", "arguments": {"query": "kitchen robots", "category": "Kitchen"}, "ui_guide": "find_kitchen"}
 ```
 
-The pipeline only needs `tool` + `arguments`. The `ui_guide` field is extra — use it or ignore it.
+The pipeline uses `tool` + `arguments` for execution. The `ui_guide` field flows to the frontend to trigger element-anchored navigation highlights.
 
-## How to Integrate (3 changes)
+## Current Integration Status
 
-### 1. Copy the model integration module
+`fc_model.py` is already deployed at `server/ai/fc_model.py` and wired into `pipeline.py`. The base `Qwen/Qwen3-0.6B` model is loading correctly.
 
+**Pending:** Replace base model with the fine-tuned LoRA adapter after Colab training completes.
+
+## How to Switch to the Fine-Tuned Adapter
+
+### 1. After Colab training, download the adapter to:
+```
+finetune/output/qwen3-0_6b-fc-v1/          ← LoRA adapter
+finetune/output/qwen3-0_6b-fc-v1-merged/   ← merged (preferred)
+```
+
+### 2. Set in `server/.env`:
 ```bash
-cp finetune/integration/fc_model.py server/ai/fc_model.py
+ENABLE_FC_MODEL=1
+FC_MODEL_PATH=/absolute/path/to/finetune/output/qwen3-0_6b-fc-v1-merged
 ```
 
-### 2. Update pipeline.py `_model_tool_call()`
-
-Replace the current method (which uses raw text prompting) with a call to `fc_model`:
-
-```python
-# In pipeline.py, replace _model_tool_call() body:
-
-def _model_tool_call(self, message, language, context):
-    from fc_model import predict_tool_call
-    return predict_tool_call(message, language, context)
-```
-
-This correctly uses ChatML format (`tokenizer.apply_chat_template()`) instead of raw text prompting, which is what the model was trained with.
-
-### 3. Set environment variables
-
+### 3. Restart the server:
 ```bash
-# Point to the merged model directory (after training):
-export ENABLE_FC_MODEL=1
-export FC_MODEL_PATH=/path/to/qwen3-0_6b-fc-v1-merged
-
-# OR use HuggingFace model ID:
-export ENABLE_FC_MODEL=1
-export FC_MODEL_ID=nexus-bots/qwen3-0_6b-fc-v1
+node server/index.js
 ```
 
-## What Still Works Without Integration
+The `fc_model.py` `load_model()` function reads `FC_MODEL_PATH` first, `FC_MODEL_ID` second. With `FC_MODEL_PATH` set, it uses `local_files_only=True` and skips HuggingFace Hub.
 
-Even without these changes, the pipeline works via heuristic fallback. The fine-tuned model improves accuracy on:
-- Multilingual queries (Hindi, Telugu)
-- Ambiguous intents
-- Complex tool argument extraction (budget parsing, category detection)
-- Edge cases the heuristic misses
-
-## Optional: ui_guide Support
-
-If you want the frontend to highlight relevant UI elements:
-
-### In pipeline.py `run_pipeline()`:
-```python
-# After line: tool_result = runtime.execute_tool(...)
-# Add ui_guide extraction:
-ui_guide = selected_tool.get("ui_guide")  # from model output, may be None
+### 4. Verify integration:
+```bash
+curl -X POST http://localhost:5000/api/ai/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"drone kahan milega","language":"hi","context":{"currentPage":"home","viewedProducts":[],"cart":[]}}'
 ```
+Expected response should contain `"toolSource":"model"` and a valid `ui_guide`.
 
-Then include it in the return dict:
-```python
-return {
-    ...existing fields...,
-    "uiGuide": ui_guide,  # new field
-}
-```
+---
 
-### In routes/ai.js response:
-```javascript
-// Add to the response object:
-uiGuide: pipelineResult.uiGuide || null,
-```
+## System Prompt Sync
 
-### In frontend (ChatWidget / AIAssistant):
-Use `data.uiGuide` to highlight buttons, scroll to sections, or trigger navigation.
+The system prompt in `fc_model.py` (`SYSTEM_PROMPT`) and `finetune/config.py` (`SYSTEM_PROMPT`) must stay **identical**. Both include:
+1. Product catalog (12 robots, IDs 1-12, prices)
+2. App structure (/catalog/:slug, /robot/:id, /orders, cart drawer)
+3. Tool schemas (6 tools)
+4. UI guide rules and valid keys
+5. Romanized HI/TE language handling rule
+
+---
 
 ## Compatibility Matrix
 
-| Aspect | Matches pipeline.py? | Evidence |
-|--------|---------------------|----------|
-| Tool names (6) | ✅ YES | search_products, get_product, compare_products, recommend, add_to_cart, navigate_to |
-| `"arguments"` key | ✅ YES | pipeline.py line 652: `parsed.get("arguments")` |
-| Argument schemas | ✅ YES | All fields match `_sanitize_tool_call()` validation |
-| Product IDs 1-12 | ✅ YES | Match database + frontend data |
-| Categories (4) | ✅ YES | Kitchen, Home Cleaner, Drone, Humanoid |
-| Pages (6) | ✅ YES | home, catalog, assistant, product, cart, orders |
-| Focus options (10) | ✅ YES | Match `ALLOWED_FOCUS` set |
-| Language codes | ✅ YES | en, hi, te |
+| Aspect | Status |
+|--------|--------|
+| Tool names (6) | ✅ Matches pipeline.py |
+| `"arguments"` key | ✅ Matches `_sanitize_tool_call()` |
+| Product IDs 1–12 | ✅ Matches DB + frontend |
+| Categories (4) | ✅ Kitchen, Home Cleaner, Drone, Humanoid |
+| Pages (6) | ✅ home, catalog, assistant, product, cart, orders |
+| Language codes | ✅ en, hi, te |
+| ui_guide keys (11) | ✅ Matches `flows.json` in frontend |
 
-## Known Gaps (Phase 2 side)
+---
 
-| Gap | What's needed | Priority |
-|-----|--------------|----------|
-| `navigate_to` not consumed by frontend | Frontend needs to process `toolCalled: "navigate_to"` and actually navigate | HIGH |
-| `cart` has no route | Cart is a drawer, not a page. `navigate_to(page="cart")` should open the drawer | MEDIUM |
-| Frontend page tracks "robot" not "product" | Context sends `currentPage: "robot"` but pipeline/model expects "product" | LOW (pipeline handles both) |
+## ui_guide → Frontend Flow
+
+```
+fc_model.predict_tool_call()
+    └── returns {"tool": ..., "arguments": ..., "ui_guide": "find_drone"}
+            │
+pipeline.py → includes ui_guide in response JSON
+            │
+ai.js → passes uiGuide field in HTTP response
+            │
+AISidePanel.jsx → calls UIGuideProvider.startFlow("find_drone")
+            │
+UIGuideProvider → reads flows.json, element-anchors tooltip, auto-navigates
+```
+
+All 11 guide keys are wired: `check_orders`, `track_delivery`, `update_cart`, `find_kitchen`, `find_drone`, `find_home_cleaner`, `find_humanoid`, `compare_products`, `open_support`, `new_ticket`, `view_tickets`.

@@ -1,15 +1,30 @@
 # Nexus Bots — Qwen3-0.6B Fine-Tuning for Domain-Specific Function Calling
 
+## Agentic Architecture
+
+NexusBots uses a **dual-model agentic pipeline**:
+
+| Role | Model | Where |
+|------|-------|--------|
+| Tool/intent routing (small) | **Qwen3-0.6B** (local, fine-tuned) | `server/ai/fc_model.py` |
+| Natural language response (large) | **SARVAM-M** (API) | `server/ai/sarvam_client.py` |
+
+**Flow:** User query → Qwen3-0.6B selects tool + ui_guide → tool executes → SARVAM-M generates response in user's language.
+
+**UI Guidance** (`ui_guide` key) is a first-class agentic output — every applicable tool call must emit the correct guide key to trigger on-screen highlights in the frontend.
+
 ## Overview
 
-Fine-tune **Qwen3-0.6B** (released 2026-03-02, 119 languages incl. HI/TE) using **QLoRA via Unsloth** for domain-specific function calling in robotics e-commerce.
+Fine-tune **Qwen3-0.6B** using **QLoRA via Unsloth** for domain-specific function calling in robotics e-commerce.
 
 The model learns to:
 1. Select the correct tool (6 tools) from user query + page context
 2. Generate valid arguments (product IDs, categories, budgets, etc.)
 3. Emit `ui_guide` intent keys for on-screen step-by-step highlights
-4. Work across English, Hindi, and Telugu queries
+4. Work on English and romanized Hindi/Telugu queries
 5. Adapt to user proficiency (beginner/expert)
+
+> **Note:** Qwen3-0.6B is English-only at inference time. Hindi and Telugu voice input is converted to **romanized Latin text** via the SARVAM STT API before reaching this model. SARVAM-M handles the final multilingual response generation.
 
 ## Directory Structure
 
@@ -37,7 +52,7 @@ finetune/
 cd finetune
 python prepare_dataset.py
 ```
-This reads `research/dataset/final/function_calling_v1.jsonl`, adds `ui_guide` fields, formats for Qwen3.5 chat template, and splits into train/test.
+This reads `research/dataset/final/function_calling_v1.jsonl`, adds `ui_guide` fields, formats for Qwen3 chat template, and splits into train/test.
 
 ### 2. Train (Local with GPU)
 ```bash
@@ -78,7 +93,7 @@ python eval/bench_rag.py                # B2
 
 ## Dataset Format (v2 with ui_guide)
 
-Each training example follows Qwen3.5 ChatML format:
+Each training example follows Qwen3 ChatML format:
 
 **System prompt**: Tool schemas + instruction to output JSON with `tool`, `arguments`, `ui_guide`
 
@@ -105,10 +120,26 @@ Each training example follows Qwen3.5 ChatML format:
 ## Benchmarks
 
 ### B1 — Function-Calling Accuracy
-Compare: Fine-tuned Qwen3-0.6B vs Heuristic vs GPT-4o vs Claude vs Gemini
+Compare: Fine-tuned Qwen3-0.6B vs Heuristic Router vs Base Qwen3-0.6B vs GPT-4o vs Claude vs Gemini
 
-### B2 — Context-Aware RAG
-Compare: FAISS + context re-rank vs FAISS-only vs BM25
+```bash
+python eval/bench_function_calling.py              # local models only
+python eval/bench_function_calling.py --all-models # include frontier models
+```
+
+Output → `research/results/b1_function_calling.{csv,md}`
+
+### B2 — Base-Model Evaluation (75 hand-crafted prompts)
+Evaluate base Qwen3-0.6B across all 6 tools × 3 languages at multiple complexity levels.
+
+```bash
+FC_MODEL_ID=Qwen/Qwen3-0.6B python3 eval/run_b2_eval.py
+```
+
+Output → `eval/b2_results.{json,md}`  
+Last result (base model): **tool_acc=68%, full_match=16%**
 
 ### B4 — Multilingual Function-Calling
-Per-language (EN/HI/TE) accuracy slices
+Per-language (EN/HI/TE) accuracy slices — produced alongside B1.
+
+Output → `research/results/b4_multilingual.{csv,md}`

@@ -1,10 +1,11 @@
 """
-Nexus Bots — Qwen3-0.6B fine-tuning with Unsloth + QLoRA.
+Nexus Bots — Qwen3-0.6B fine-tuning with HF-native PEFT + QLoRA (bitsandbytes).
 
 Usage:
     python train.py                          # Local GPU
     python train.py --colab                  # Colab mode (Drive checkpoints)
     python train.py --push-to-hub            # Push adapter to HF Hub after training
+    python train.py --merge                  # Also save merged fp16 model after training
 """
 
 import argparse
@@ -39,8 +40,8 @@ from config import (
     TARGET_MODULES,
     TRAIN_PATH,
     TEST_PATH,
-    UNSLOTH_MODEL,
     WARMUP_RATIO,
+    WARMUP_STEPS,
     WEIGHT_DECAY,
 )
 
@@ -83,34 +84,51 @@ def main():
     print("Nexus Bots — Qwen3-0.6B Fine-Tuning")
     print("=" * 60)
 
-    # ── Load model via Unsloth ───────────────────────────────────────────
-    from unsloth import FastLanguageModel
+    # ── Load model via HF (4-bit QLoRA via bitsandbytes) ────────────────
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+    from peft import LoraConfig, get_peft_model, TaskType
 
-    model_id = UNSLOTH_MODEL if not os.getenv("USE_BASE_MODEL") else BASE_MODEL
+    model_id = BASE_MODEL
     print(f"\nLoading model: {model_id}")
     print(f"Max seq length: {MAX_SEQ_LENGTH}")
 
-    model, tokenizer = FastLanguageModel.get_model(
-        model_name=model_id,
-        max_seq_length=MAX_SEQ_LENGTH,
-        dtype=None,  # auto-detect
+    bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.bfloat16 if BF16 else torch.float16,
+        bnb_4bit_use_double_quant=True,
     )
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.model_max_length = MAX_SEQ_LENGTH
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        quantization_config=bnb_config,
+        device_map="auto",
+        dtype=torch.bfloat16 if BF16 else torch.float16,
+    )
+    model.config.use_cache = False
+    model.enable_input_require_grads()
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
 
     # ── Apply QLoRA adapters ─────────────────────────────────────────────
     print(f"\nApplying QLoRA: r={LORA_R}, alpha={LORA_ALPHA}")
     print(f"Target modules: {TARGET_MODULES}")
 
-    model = FastLanguageModel.get_peft_model(
-        model,
+    lora_config = LoraConfig(
         r=LORA_R,
         lora_alpha=LORA_ALPHA,
         lora_dropout=LORA_DROPOUT,
         target_modules=TARGET_MODULES,
         bias="none",
-        use_gradient_checkpointing="unsloth",
-        random_state=42,
+        task_type=TaskType.CAUSAL_LM,
     )
+    model = get_peft_model(model, lora_config)
+    model.print_trainable_parameters()
 
     # ── Load dataset ─────────────────────────────────────────────────────
     from datasets import Dataset
@@ -146,7 +164,7 @@ def main():
         per_device_train_batch_size=PER_DEVICE_BATCH_SIZE,
         gradient_accumulation_steps=GRADIENT_ACCUMULATION_STEPS,
         learning_rate=LEARNING_RATE,
-        warmup_ratio=WARMUP_RATIO,
+        warmup_steps=WARMUP_STEPS,
         lr_scheduler_type=LR_SCHEDULER,
         weight_decay=WEIGHT_DECAY,
         fp16=FP16,
@@ -156,7 +174,6 @@ def main():
         save_total_limit=3,
         eval_strategy="steps" if eval_dataset else "no",
         eval_steps=SAVE_STEPS if eval_dataset else None,
-        max_seq_length=MAX_SEQ_LENGTH,
         seed=42,
         report_to="none",
         remove_unused_columns=False,
@@ -165,7 +182,7 @@ def main():
     # ── Trainer ──────────────────────────────────────────────────────────
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         args=training_args,
@@ -194,15 +211,16 @@ def main():
     if args.merge:
         print(f"\nMerging to fp16 → {MERGED_DIR}")
         os.makedirs(str(MERGED_DIR), exist_ok=True)
-        model.save_pretrained_merged(str(MERGED_DIR), tokenizer, save_method="merged_16bit")
+        merged = model.merge_and_unload()
+        merged.save_pretrained(str(MERGED_DIR))
+        tokenizer.save_pretrained(str(MERGED_DIR))
+        print(f"  Merged model saved → {MERGED_DIR}")
 
     # ── Push to Hub (optional) ───────────────────────────────────────────
     if args.push_to_hub:
         print(f"\nPushing adapter to HF Hub → {HF_REPO_ID}")
         model.push_to_hub(HF_REPO_ID, token=os.getenv("HF_TOKEN"))
         tokenizer.push_to_hub(HF_REPO_ID, token=os.getenv("HF_TOKEN"))
-
-    print("\n✓ Training complete!")
 
     # ── Print training stats ─────────────────────────────────────────────
     metrics = trainer.state.log_history

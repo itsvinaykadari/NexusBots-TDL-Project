@@ -1,0 +1,1115 @@
+[FC_MODEL] Loading model: '/data1/cs24mtech14020/.cache/huggingface/hub/models--Qwen--Qwen3-0.6B/snapshots/c1899de289a04d12100db370d81485cdf75e47ca'
+[FC_MODEL] ENABLE_FC_MODEL='(not set)'
+[FC_MODEL] torch 2.6.0+cu124 | CUDA available: True
+[FC_MODEL]   GPU 0: NVIDIA RTX A6000 | 47.5 GB VRAM
+[FC_MODEL] local_files_only=True | loading tokenizer...
+[FC_MODEL] Tokenizer loaded: vocab_size=151643
+[FC_MODEL] Loading model onto device='cuda' dtype=torch.float16 ...
+Loaded 100 test rows
+
+=== Evaluating: Heuristic Router ===
+  Overall: {'tool_acc': 0.45, 'arg_f1': 0.17, 'ui_guide_acc': 0.27, 'p50_latency_ms': 0.0, 'count': 100}
+
+=== Evaluating: Qwen3-0.6B BASE (no fine-tune) ===
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:  75%|███████▍  | 232/311 [00:00<00:00, 2309.70it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 2460.95it/s]
+[FC_MODEL] Model ready: 596M params on cuda | load took 8.9s
+[FC_MODEL] VRAM after load: allocated=1.11 GB | reserved=1.13 GB
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Looking for interactive learning robot'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [10, 1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[FC_MODEL]   output tokens: 46 | latency: 2216ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "interactive learning robot", "budget": 5000, "category": "Humanoid"}, "ui_guide": "open_support/new_ticket/view_tickets"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'interactive learning robot', 'budget': 5000, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Aiper Surfer S1 ke details do'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Drone", "lastSearch": "home patrol drone", "viewedProducts": [9, 8], "cart"
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 966ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 9}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 9} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Where is my order?'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Drone", "lastSearch": "enterprise inspection drone", "viewedProducts": [7, 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 1015ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Home Cleaner category mein top models search karo'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1319 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 25 | latency: 882ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Home Cleaner", "category": "Home Cleaner"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Home Cleaner', 'category': 'Home Cleaner'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Query for smart kitchen robots in Kitchen'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [3, 2], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 25 | latency: 869ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "smart kitchen robots", "category": "Kitchen"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'smart kitchen robots', 'category': 'Kitchen'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Give me details of Amazon Astro'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [1, 2], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 956ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 1}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 1} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Check my order status'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "automatic floor cleaner", "viewedProducts"
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1312 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 1008ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Which robot should I buy?'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "cooking helper robot", "viewedProducts": [2, 3]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1312 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 43 | latency: 1479ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "cooking helper robot", "budget": 1000, "category": "Kitchen"}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'cooking helper robot', 'budget': 1000, 'category': 'Kitchen'} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Stage Ecovacs WINBOT W2 Omni for purchase'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 42 | latency: 1428ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Stage Ecovacs WINBOT W2 Omni", "category": "Home Cleaner"}, "ui_guide": "find_home_cleaner"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Stage Ecovacs WINBOT W2 Omni', 'category': 'Home Cleaner'} ui_guide='find_home_cleaner'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Kitchen lo emunnayi?'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "kitchen assistant robots", "viewedProducts": [2
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 921ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 2}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 2} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'which categories of robot do you have'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "searchQuery": "", "viewedProducts": [], "cart": [], "cur
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1305 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 970ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "catalog", "params": {"category": "Home Cleaner"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'catalog', 'params': {'category': 'Home Cleaner'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'File a new support ticket'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "STEM education robot", "viewedProducts": [10, 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1318 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 35 | latency: 1407ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"new_ticket": "support ticket for humanoid robot"}, "ui_guide": "open_support/new_ticket/view_tickets"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Ring Always Home Cam aur Aiper Surfer S1 ko camera pe compare karo'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "lastSearch": "home patrol drone", "viewedProducts": [7, 9], "ca
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1325 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 35 | latency: 1223ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 7, "product_id_2": 9, "focus": "camera"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 7, 'product_id_2': 9, 'focus': 'camera'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Naaku complaint file cheyali'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Drone", "lastSearch": "home patrol drone", "viewedProducts": [7, 9], "cart"
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 912ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"page": "orders", "ui_guide": "open_support/new_ticket"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Support section ki navigate cheyyi'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Drone", "lastSearch": "indoor security drone", "viewedProducts": [7, 9],
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 932ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Cheapest Home Cleaner robot you have'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Home Cleaner", "lastSearch": "automatic floor cleaner", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 25 | latency: 844ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "cheapest", "category": "Home Cleaner"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'cheapest', 'category': 'Home Cleaner'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Cheapest Home Cleaner robot you have'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "self-emptying vacuum", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 25 | latency: 837ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "cheapest", "category": "Home Cleaner"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'cheapest', 'category': 'Home Cleaner'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'I have an issue, raise a ticket'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "robot vacuum cleaner", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1318 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 29 | latency: 965ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"page": "orders", "ui_guide": "open_support/new_ticket/view_tickets"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Show Drone product range'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "lastSearch": "thermal camera drone", "viewedProducts": [8, 7], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 34 | latency: 1165ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "drone", "category": "Drone"}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'drone', 'category': 'Drone'} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Store mein Aiper Surfer S1 locate karo'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Drone", "lastSearch": "thermal camera drone", "viewedProducts": [9, 7], "ca
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1319 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 937ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "catalog", "params": {"category": "Drone"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'catalog', 'params': {'category': 'Drone'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Humanoid recommendation: programming lessons use-case, $300 limit'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Humanoid", "lastSearch": "programming robot", "viewedProducts": [11, 12], "
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1324 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 45 | latency: 1503ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Humanoid recommendation: programming lessons use-case", "budget": 300, "category": "Humanoid"}, "ui_guide": "recommend"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Humanoid recommendation: programming lessons use-case', 'budget': 300, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'What can you tell me about Roborock S8 MaxV Ultra?'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "robot vacuum cleaner", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1322 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 26 | latency: 872ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 5}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 5} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'robot vacuum cleaner listings fetch karo'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "robot vacuum cleaner", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 26 | latency: 861ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "robot vacuum cleaner", "category": "Home Cleaner"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'robot vacuum cleaner', 'category': 'Home Cleaner'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Roborock S8 MaxV Ultra le lena hai'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "robot vacuum cleaner", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1322 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 26 | latency: 861ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 5}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 5} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Best value pick here'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "interactive learning robot", "viewedProducts":
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1313 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 34 | latency: 1149ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Best value pick here", "budget": 500, "category": "Humanoid"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Best value pick here', 'budget': 500, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Filter Kitchen inventory by available units'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "cooking helper robot", "viewedProducts": [2, 1], "
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 33 | latency: 1099ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Kitchen inventory", "category": "Kitchen"}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Kitchen inventory', 'category': 'Kitchen'} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Pasta recipe cheppu'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [3, 1], "ca
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1314 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 922ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Pasta recipe cheppu", "category": "Kitchen"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Pasta recipe cheppu', 'category': 'Kitchen'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Show me all of them'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "mop robot", "viewedProducts": [5, 4], "car
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1312 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 24 | latency: 796ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "all", "category": "Home Cleaner"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'all', 'category': 'Home Cleaner'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Tell me about Wonder Workshop Dash'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "kids coding robot", "viewedProducts": [11, 12]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1319 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 923ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 11}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 11} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Stage DJI Matrice 30T for purchase'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Drone", "lastSearch": "enterprise inspection drone", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1319 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 40 | latency: 1347ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "DJI Matrice 30T", "category": "Drone"}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'DJI Matrice 30T', 'category': 'Drone'} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'I want to see my orders'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "STEM education robot", "viewedProducts": [12, 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 936ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Enabot EBO X teesukuntanu, add cheyyi'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Kitchen", "lastSearch": "smart kitchen robots", "viewedProducts": [3, 2]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1326 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 907ms
+[FC_MODEL]   raw output   : '{"tool": "add_to_cart", "arguments": {"product_id": 3}, "ui_guide": "update_cart"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='add_to_cart' args={'product_id': 3} ui_guide='update_cart'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Browse Humanoid robots'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "kids coding robot", "viewedProducts": [12, 10]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 41 | latency: 1359ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Humanoid robots", "budget": 300, "category": "Humanoid"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Humanoid robots', 'budget': 300, 'category': 'Humanoid'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Koi ek suggest karo yahan se'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [12, 1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1319 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 50 | latency: 1663ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Koi ek suggest karo yahan se", "budget": 5000, "category": "Humanoid"}, "ui_guide": "open_support/new_ticket"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Koi ek suggest karo yahan se', 'budget': 5000, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'recommend me a security drone under $500'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "", "searchQuery": "", "viewedProducts": [], "cart": [], "currentProduct": n
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1305 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 42 | latency: 1395ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "security drone", "budget": 500, "category": "Drone"}, "ui_guide": "open_support/new_ticket"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'security drone', 'budget': 500, 'category': 'Drone'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'List all filed complaints'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Home Cleaner", "lastSearch": "robot vacuum cleaner", "viewedProducts": [6, 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1312 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 23 | latency: 767ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"ui_guide": "open_support/new_ticket/view_tickets"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Kotta ticket create cheyyi'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "mop robot", "viewedProducts": [6, 4], "car
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 929ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Humanoid robots show karo please'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "kids coding robot", "viewedProducts": [11, 10]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1318 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 49 | latency: 1640ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Humanoid robots show karo please", "budget": 20000, "category": "Humanoid"}, "ui_guide": "open_support/new_ticket"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Humanoid robots show karo please', 'budget': 20000, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Wonder Workshop Dash aur Miko 3 ka safety evaluation chahiye'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "STEM education robot", "viewedProducts": [11, 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1327 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 45 | latency: 1585ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "safety evaluation", "budget": 20000, "category": "Humanoid"}, "ui_guide": "open_support/new_ticket"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'safety evaluation', 'budget': 20000, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Current product ko cart mein add karo'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [12, 1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1320 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 977ms
+[FC_MODEL]   raw output   : '{"tool": "add_to_cart", "arguments": {"product_id": 12}, "ui_guide": "update_cart"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='add_to_cart' args={'product_id': 12} ui_guide='update_cart'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Sabse sasta Home Cleaner robot kaun sa hai?'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "automatic floor cleaner", "viewedProducts"
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 35 | latency: 1208ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Home Cleaner", "category": "Home Cleaner"}, "ui_guide": "find_home_cleaner"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Home Cleaner', 'category': 'Home Cleaner'} ui_guide='find_home_cleaner'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Kitchen inventory filter karo, available models only'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "voice controlled kitchen robot", "viewedProducts":
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 36 | latency: 1208ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Kitchen inventory filter karo", "category": "Kitchen"}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Kitchen inventory filter karo', 'category': 'Kitchen'} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Show Humanoid product range'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [11, 1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1320 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 44 | latency: 1473ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Humanoid product range", "budget": 20000, "category": "Humanoid"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Humanoid product range', 'budget': 20000, 'category': 'Humanoid'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'pet hair removal use-case ke liye Home Cleaner recommend karo, max $1750'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Home Cleaner", "lastSearch": "robot vacuum cleaner", "viewedProducts": [4, 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1328 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 44 | latency: 1516ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "pet hair removal use-case", "budget": 1750, "category": "Home Cleaner"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'pet hair removal use-case', 'budget': 1750, 'category': 'Home Cleaner'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'DJI Matrice 30T ke baare mein batao'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "searchQuery": "drone", "viewedProducts": [], "cart": [], "curre
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 34 | latency: 1139ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "drone", "category": "Drone"}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'drone', 'category': 'Drone'} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Cart view open cheyyi'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "self-emptying vacuum", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 942ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "cart", "params": {"update_cart": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'cart', 'params': {'update_cart': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : "What's the difference between Miko 3 and LEGO Education Spike Prime in warranty?"
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Humanoid", "lastSearch": "kids coding robot", "viewedProducts": [10, 12], "
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1329 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 41 | latency: 1365ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "warranty", "budget": 5000, "category": "Humanoid"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'warranty', 'budget': 5000, 'category': 'Humanoid'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Access customer support portal'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "kids coding robot", "viewedProducts": [11, 12]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 29 | latency: 965ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"page": "orders", "ui_guide": "open_support/new_ticket/view_tickets"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Take me to Humanoid section'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [10, 1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1318 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 30 | latency: 1004ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "humanoid", "params": {"selectedCategory": "Humanoid"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'humanoid', 'params': {'selectedCategory': 'Humanoid'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : "What's the difference between iRobot Roomba j9+ and Ecovacs WINBOT W2 Omni in specs?"
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1333 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 35 | latency: 1161ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 4, "product_id_2": 6, "focus": "specs"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 4, 'product_id_2': 6, 'focus': 'specs'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Show full product data for iRobot Roomba j9+'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "mop robot", "viewedProducts": [4, 6], "car
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1319 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 926ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 4}, "ui_guide": "find_home_cleaner"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 4} ui_guide='find_home_cleaner'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Open support ticket interface'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Drone", "lastSearch": "indoor security drone", "viewedProducts": [8, 9], "c
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1313 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 29 | latency: 961ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"page": "orders", "ui_guide": "open_support/new_ticket/view_tickets"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Check my order status'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [1, 2], "ca
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1311 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 935ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Filed complaints list karo'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "automatic floor cleaner", "viewedProducts"
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 941ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Cart: add Ecovacs WINBOT W2 Omni'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "mop robot", "viewedProducts": [6, 4], "car
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 895ms
+[FC_MODEL]   raw output   : '{"tool": "add_to_cart", "arguments": {"product_id": 6}, "ui_guide": "update_cart"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='add_to_cart' args={'product_id': 6} ui_guide='update_cart'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Queue Ring Always Home Cam in cart'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "lastSearch": "indoor security drone", "viewedProducts": [7, 9],
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 903ms
+[FC_MODEL]   raw output   : '{"tool": "add_to_cart", "arguments": {"product_id": 7}, "ui_guide": "update_cart"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='add_to_cart' args={'product_id': 7} ui_guide='update_cart'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Add this robot to cart'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "interactive learning robot", "viewedProducts":
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 938ms
+[FC_MODEL]   raw output   : '{"tool": "add_to_cart", "arguments": {"product_id": 11}, "ui_guide": "update_cart"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='add_to_cart' args={'product_id': 11} ui_guide='update_cart'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Cart: add Samsung Ballie'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Kitchen", "lastSearch": "smart kitchen robots", "viewedProducts": [2, 3]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1313 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 914ms
+[FC_MODEL]   raw output   : '{"tool": "add_to_cart", "arguments": {"product_id": 2}, "ui_guide": "update_cart"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='add_to_cart' args={'product_id': 2} ui_guide='update_cart'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Ecovacs WINBOT W2 Omni enti?'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Home Cleaner", "lastSearch": "mop robot", "viewedProducts": [6, 4], "cart":
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 33 | latency: 1268ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Ecovacs WINBOT W2 Omni enti", "category": "Home Cleaner"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Ecovacs WINBOT W2 Omni enti', 'category': 'Home Cleaner'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'pet hair removal requirement ke liye Home Cleaner shortlist do under $1050'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "automatic floor cleaner", "viewedProducts"
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1328 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 37 | latency: 1808ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "pet hair removal requirement", "category": "Home Cleaner"}, "ui_guide": "find_home_cleaner"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'pet hair removal requirement', 'category': 'Home Cleaner'} ui_guide='find_home_cleaner'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Take me home'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Humanoid", "lastSearch": "STEM education robot", "viewedProducts": [11, 12]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1314 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 1180ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "home", "params": {"category": "Humanoid"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'home', 'params': {'category': 'Humanoid'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Find Wonder Workshop Dash in inventory'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "interactive learning robot", "viewedProducts":
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1320 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 938ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "catalog", "params": {"category": "Humanoid"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'catalog', 'params': {'category': 'Humanoid'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Cart pe navigate karo'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "mop robot", "viewedProducts": [6, 5], "car
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1313 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 953ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "cart", "params": {"update_cart": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'cart', 'params': {'update_cart': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Drone robot kavali aerial inspection kosam, $13650 limit lo'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Drone", "lastSearch": "thermal camera drone", "viewedProducts": [7, 8], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1326 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 39 | latency: 1325ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "kavali aerial inspection kosam", "category": "Drone"}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'kavali aerial inspection kosam', 'category': 'Drone'} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Wonder Workshop Dash cart queue lo pettu'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [11, 1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1322 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 968ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "cart", "params": {"update_cart": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'cart', 'params': {'update_cart': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Run specs-based side-by-side: Wonder Workshop Dash vs Miko 3'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "programming robot", "viewedProducts": [11, 10]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1327 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 37 | latency: 1240ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 11, "product_id_2": 10, "focus": "specs"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 11, 'product_id_2': 10, 'focus': 'specs'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Sab kuch list karo'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "self-emptying vacuum", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1314 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 29 | latency: 991ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Sab kuch list karo", "category": "Home Cleaner"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Sab kuch list karo', 'category': 'Home Cleaner'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Suggest a Drone robot for home security patrol, budget $9700'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Drone", "lastSearch": "enterprise inspection drone", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1324 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 34 | latency: 1157ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "drone", "category": "Drone"}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'drone', 'category': 'Drone'} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Humanoid robots chupinchandi'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [10, 12],
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 49 | latency: 1698ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Humanoid robots chupinchandi", "budget": 20000, "category": "Humanoid"}, "ui_guide": "open_support/new_ticket"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Humanoid robots chupinchandi', 'budget': 20000, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Customer support portal access karo'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Drone", "lastSearch": "pool cleaning drone", "viewedProducts": [9, 7], "car
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1314 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 29 | latency: 968ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"page": "orders", "ui_guide": "open_support/new_ticket/view_tickets"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Humanoid robots kahan milenge?'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "kids coding robot", "viewedProducts": [12, 10]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1318 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 47 | latency: 1564ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Humanoid robots kahan milenge", "budget": 20000, "category": "Humanoid"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Humanoid robots kahan milenge', 'budget': 20000, 'category': 'Humanoid'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Amazon Astro details ivvu'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [1, 3], "ca
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1312 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 18 | latency: 612ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 1}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 1} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Enabot EBO X vs Amazon Astro ka camera based comparison do'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [3, 1], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1323 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 35 | latency: 1154ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 3, "product_id_2": 1, "focus": "camera"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 3, 'product_id_2': 1, 'focus': 'camera'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Kitchen category mein top models search karo'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "kitchen assistant robots", "viewedProducts": [3, 1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 32 | latency: 1085ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Kitchen", "category": "Kitchen"}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Kitchen', 'category': 'Kitchen'} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Tell me a recipe for pasta'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Kitchen", "lastSearch": "kitchen assistant robots", "viewedProducts": [1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 24 | latency: 797ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "pasta", "category": "Kitchen"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'pasta', 'category': 'Kitchen'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Ikkada best edi?'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "voice controlled kitchen robot", "viewedProduct
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1315 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 44 | latency: 1454ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Ikkada best edi", "budget": 1000, "category": "Kitchen"}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Ikkada best edi', 'budget': 1000, 'category': 'Kitchen'} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Support ticket interface open karo'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "lastSearch": "enterprise inspection drone", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1314 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 35 | latency: 1169ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"new_ticket": "Support ticket interface open karo"}, "ui_guide": "open_support/new_ticket/view_tickets"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'battery comparison of Wonder Workshop Dash vs Miko 3'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "programming robot", "viewedProducts": [11, 10]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 37 | latency: 1251ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 11, "product_id_2": 10, "focus": "battery"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 11, 'product_id_2': 10, 'focus': 'battery'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Enabot EBO X vs Samsung Ballie on price'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "smart kitchen robots", "viewedProducts": [3, 2], "
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 43 | latency: 1427ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 3, "product_id_2": 2, "focus": "price"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 3, 'product_id_2': 2, 'focus': 'price'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'what is the best robot for kids?'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "", "searchQuery": "", "viewedProducts": [], "cart": [], "currentProduct": n
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1302 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 41 | latency: 1354ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "robot", "budget": 200, "category": "Humanoid"}, "ui_guide": "open_support/new_ticket"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'robot', 'budget': 200, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Kya aap Kitchen category dikhao?'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "kitchen assistant robots", "viewedProducts": [1
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 909ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 1}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 1} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Wonder Workshop Dash purchase cart mein insert karo'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Humanoid", "lastSearch": "STEM education robot", "viewedProducts": [11, 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1320 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 928ms
+[FC_MODEL]   raw output   : '{"tool": "add_to_cart", "arguments": {"product_id": 11}, "ui_guide": "update_cart"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='add_to_cart' args={'product_id': 11} ui_guide='update_cart'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Show me my orders'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": [6,
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1312 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 938ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'complaint file cheyali'
+[FC_MODEL]   context  : {"currentPage": "orders", "selectedCategory": "", "searchQuery": "", "viewedProducts": [], "cart": [], "currentProduct":
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1300 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 21 | latency: 710ms
+[FC_MODEL]   raw output   : '{"tool": "open_support", "arguments": {"ui_guide": "open_support/new_ticket"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   INVALID TOOL: 'open_support' not in allowed set → returning None
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Amazon Astro mariyu Samsung Ballie ni specs meeda compare cheyyi'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Kitchen", "lastSearch": "voice controlled kitchen robot", "viewedProducts":
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1323 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 43 | latency: 1424ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 1, "product_id_2": 2, "focus": "specs"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 1, 'product_id_2': 2, 'focus': 'specs'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Route to Drone category with DJI Matrice 30T'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "lastSearch": "enterprise inspection drone", "viewedProducts": [
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1323 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 40 | latency: 1339ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "DJI Matrice 30T", "category": "Drone"}, "ui_guide": "find_drone"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'DJI Matrice 30T', 'category': 'Drone'} ui_guide='find_drone'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'I want to see Drone robots'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "lastSearch": "thermal camera drone", "viewedProducts": [8, 9], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1314 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 928ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "catalog", "params": {"category": "Drone"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'catalog', 'params': {'category': 'Drone'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Contrast Ecovacs WINBOT W2 Omni and Roborock S8 MaxV Ultra on warranty trade-offs'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": [6,
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1330 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 44 | latency: 1456ms
+[FC_MODEL]   raw output   : '{"tool": "compare_products", "arguments": {"product_id_1": 6, "product_id_2": 5, "focus": "warranty"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='compare_products' args={'product_id_1': 6, 'product_id_2': 5, 'focus': 'warranty'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Ee category lo anni products list cheyyi'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Drone", "lastSearch": "home patrol drone", "viewedProducts": [9, 7], "ca
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 33 | latency: 1096ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Ee category lo anni products list cheyyi", "category": "Drone"}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Ee category lo anni products list cheyyi', 'category': 'Drone'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Give me details of Roborock S8 MaxV Ultra'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1322 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 26 | latency: 865ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 5}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 5} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Store mein Aiper Surfer S1 locate karo'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Drone", "lastSearch": "home patrol drone", "viewedProducts": [9, 7], "ca
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1321 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 970ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "catalog", "params": {"category": "Drone"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'catalog', 'params': {'category': 'Drone'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Samsung Ballie chupinchu'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "smart kitchen robots", "viewedProducts": [2, 3]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 963ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 2}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 2} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : '$350 limit lo best-fit Humanoid suggest cheyyi for programming lessons'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Humanoid", "lastSearch": "kids coding robot", "viewedProducts": [12, 10], "
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1330 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 46 | latency: 1584ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "cheyyi for programming lessons", "budget": 350, "category": "Humanoid"}, "ui_guide": "open_support/new_ticket"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'cheyyi for programming lessons', 'budget': 350, 'category': 'Humanoid'} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Can you tell me a joke?'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1316 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 958ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "orders", "params": {"check_orders": "true"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'orders', 'params': {'check_orders': 'true'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'I want to know about Miko 3'
+[FC_MODEL]   context  : {"currentPage": "home", "selectedCategory": "Humanoid", "lastSearch": "classroom robot kit", "viewedProducts": [10, 12],
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1323 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 28 | latency: 970ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 10}, "ui_guide": "find_humanoid"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 10} ui_guide='find_humanoid'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Enabot EBO X ka complete technical profile do'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [3, 1], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1318 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 921ms
+[FC_MODEL]   raw output   : '{"tool": "get_product", "arguments": {"product_id": 3}, "ui_guide": "find_kitchen"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='get_product' args={'product_id': 3} ui_guide='find_kitchen'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'I need a Home Cleaner robot for deep mopping, can spend up to $1650'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Home Cleaner", "lastSearch": "window cleaning robot", "viewedProducts": 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1328 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 40 | latency: 1334ms
+[FC_MODEL]   raw output   : '{"tool": "search_products", "arguments": {"query": "Home Cleaner robot for deep mopping", "category": "Home Cleaner"}, "ui_guide": "find_home_cleaner"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='search_products' args={'query': 'Home Cleaner robot for deep mopping', 'category': 'Home Cleaner'} ui_guide='find_home_cleaner'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Open Kitchen product listing'
+[FC_MODEL]   context  : {"currentPage": "product", "selectedCategory": "Kitchen", "lastSearch": "kitchen monitoring", "viewedProducts": [2, 3], 
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1311 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 902ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "catalog", "params": {"category": "Kitchen"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'catalog', 'params': {'category': 'Kitchen'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Filter Humanoid inventory by available units'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Humanoid", "lastSearch": "programming robot", "viewedProducts": [11, 10]
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1317 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 43 | latency: 1445ms
+[FC_MODEL]   raw output   : '{"tool": "recommend", "arguments": {"need": "Humanoid inventory", "budget": 20000, "category": "Humanoid"}, "ui_guide": "compare_products"}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='recommend' args={'need': 'Humanoid inventory', 'budget': 20000, 'category': 'Humanoid'} ui_guide='compare_products'
+[FC_MODEL] --- Inference END ---
+[FC_MODEL] --- Inference START ---
+[FC_MODEL]   language : 'en'
+[FC_MODEL]   query    : 'Where to find Samsung Ballie?'
+[FC_MODEL]   context  : {"currentPage": "catalog", "selectedCategory": "Kitchen", "lastSearch": "voice controlled kitchen robot", "viewedProduct
+[FC_MODEL]   thinking mode: DISABLED (enable_thinking=False)
+[FC_MODEL]   input tokens : 1314 | max_new_tokens: 300
+[FC_MODEL]   output tokens: 27 | latency: 903ms
+[FC_MODEL]   raw output   : '{"tool": "navigate_to", "arguments": {"page": "catalog", "params": {"category": "Kitchen"}}}'
+[FC_MODEL]   VRAM used    : 1.12 GB
+[FC_MODEL]   result       : tool='navigate_to' args={'page': 'catalog', 'params': {'category': 'Kitchen'}} ui_guide=None
+[FC_MODEL] --- Inference END ---
+  Overall: {'tool_acc': 0.61, 'arg_f1': 0.4558, 'ui_guide_acc': 0.26, 'p50_latency_ms': 976.1, 'count': 100}
+B1 results → /data1/cs24mtech14020/home/TDL/NexusBots-TDL-Project/research/results/b1_function_calling.csv
+B1 table  → /data1/cs24mtech14020/home/TDL/NexusBots-TDL-Project/research/results/b1_function_calling.md
+B4 results → /data1/cs24mtech14020/home/TDL/NexusBots-TDL-Project/research/results/b4_multilingual.csv
+B4 table  → /data1/cs24mtech14020/home/TDL/NexusBots-TDL-Project/research/results/b4_multilingual.md
+
+Raw results → /data1/cs24mtech14020/home/TDL/NexusBots-TDL-Project/research/results/b1_b4_raw.json

@@ -3,7 +3,7 @@ Nexus Bots — Dataset preparation (raw v2 → ChatML v2).
 
 1. Reads function_calls_raw_v2.jsonl (1000 rows from template_generator_v2)
 2. Adds ui_guide field based on tool/args heuristic
-3. Converts to Qwen3.5 ChatML format with JSON assistant output
+3. Converts to Qwen3 ChatML format with JSON assistant output
 4. Splits into stratified train/test (900/100)
 5. Writes to finetune/data/
 """
@@ -47,6 +47,7 @@ def compute_ui_guide(tool_name: str, args: dict) -> str | None:
 
 
 RAW_V2_PATH = PROJECT_ROOT / "research" / "dataset" / "raw" / "function_calls_raw_v2.jsonl"
+B2_LABELED_PATH = PROJECT_ROOT / "research" / "dataset" / "raw" / "function_calls_b2_labeled.jsonl"
 
 
 def convert_row(row: dict) -> dict:
@@ -165,7 +166,21 @@ def main():
             if line:
                 rows_raw.append(json.loads(line))
 
-    print(f"Loaded {len(rows_raw)} rows from raw v2")
+    print(f"Loaded {len(rows_raw)} rows from raw v2 (template)")
+
+    # Merge B2 real-world labeled sessions if available
+    if B2_LABELED_PATH.exists():
+        b2_rows = []
+        with open(B2_LABELED_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    b2_rows.append(json.loads(line))
+        print(f"Loaded {len(b2_rows)} rows from B2 labeled sessions")
+        rows_raw = rows_raw + b2_rows
+        print(f"Combined: {len(rows_raw)} rows total")
+    else:
+        print(f"No B2 labeled file found at {B2_LABELED_PATH} — using template data only")
 
     # Convert to ChatML v2
     rows_v2 = [convert_row(row) for row in rows_raw]

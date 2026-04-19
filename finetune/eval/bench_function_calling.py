@@ -199,6 +199,35 @@ def predict_heuristic(query: str, context: dict) -> tuple[dict, float]:
     return {"tool": tool, "arguments": args, "ui_guide": None}, latency
 
 
+# ── System: Base Qwen3-0.6B (no fine-tune, via fc_model.py) ─────────────────
+
+def predict_base_model(query: str, context_str: str) -> tuple[dict, float]:
+    """Run inference with the BASE Qwen3-0.6B model using fc_model.py.
+    This uses the same ChatML prompt as fine-tuning but with no LoRA adapter.
+    The model is loaded once as a singleton (FC_MODEL_ID env var).
+    """
+    import sys
+    import time
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "server" / "ai"))
+    import fc_model as fc
+
+    if fc._model is None:
+        fc.load_model()
+
+    start = time.perf_counter()
+    try:
+        context = json.loads(context_str) if context_str else {}
+    except Exception:
+        context = {}
+
+    result = fc.predict_tool_call(query, "en", context)
+    latency = (time.perf_counter() - start) * 1000
+
+    if result is None:
+        return {}, latency
+    return {"tool": result.get("tool", ""), "arguments": result.get("arguments", {}), "ui_guide": result.get("ui_guide")}, latency
+
+
 # ── System: GPT-4o zero-shot ─────────────────────────────────────────────────
 
 def predict_gpt4o(query: str, context_str: str) -> tuple[dict, float]:
@@ -417,6 +446,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--all-models", action="store_true", help="Include frontier models")
     parser.add_argument("--skip-ours", action="store_true", help="Skip fine-tuned model")
+    parser.add_argument("--skip-base", action="store_true", help="Skip base model evaluation")
     parser.add_argument("--model-path", type=str, default=None, help="Path to fine-tuned model")
     args = parser.parse_args()
 
@@ -471,6 +501,17 @@ def main():
         "Heuristic", predict_heuristic, test_rows, needs_context_str=False
     )
     print(f"  Overall: {all_results['Heuristic Router']['overall']}")
+
+    # 3. Base Qwen3-0.6B (no fine-tune)
+    if not args.skip_base:
+        print("\n=== Evaluating: Qwen3-0.6B BASE (no fine-tune) ===")
+        try:
+            all_results["Qwen3-0.6B BASE"] = evaluate_system(
+                "Qwen3-0.6B BASE", predict_base_model, test_rows
+            )
+            print(f"  Overall: {all_results['Qwen3-0.6B BASE']['overall']}")
+        except Exception as e:
+            print(f"  Base model eval failed: {e}")
 
     # 3-5. Frontier models (optional)
     if args.all_models:

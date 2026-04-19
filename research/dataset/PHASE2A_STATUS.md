@@ -15,9 +15,13 @@
 - [ ] Generate a second-pass higher-diversity set with GPT-4 prompt pack.
 - [ ] Human review and correction of sampled records.
 - [ ] Freeze cleaned release as `function_calling_v1_clean.jsonl`.
-- [ ] Optional: add test split and holdout benchmark set.
+- [x] Test split and holdout benchmark set — done (`finetune/data/test.jsonl`, 100 rows stratified).
 
 ## Current practical completion estimate
 
-- Phase 2A implementation readiness: ~85%
+- Phase 2A implementation readiness: ~90%
 - Phase 2A research-grade quality (after GPT-4 + manual cleanup): ~100%
+
+## Scope note (2026-04-19)
+
+Sales agent functionality is **out of scope** due to time constraints. The dataset covers 6 tools only (search, get_product, compare, recommend, add_to_cart, navigate_to). No sales-agent tool entries should be added.

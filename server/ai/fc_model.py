@@ -74,7 +74,9 @@ Rules:
 - For product names, resolve ID from catalog above
 - Support/ticket queries → navigate_to page=orders + ui_guide=open_support/new_ticket/view_tickets
 - Location queries ("where is X", "kahan", "ekkada") → navigate_to page=catalog with product_id
-- Out-of-scope queries (not about robots) → search_products query=robot"""
+- Out-of-scope queries (not about robots) → search_products query=robot
+- Queries may be in English (EN), romanized Hindi (HI), or romanized Telugu (TE). Always respond in JSON only.
+- If the query has no category name, read selectedCategory from Context to determine the correct category."""
 
 SYSTEM_PROMPT = (
     "You are a robotics commerce assistant. Given a user query and page context, "
@@ -94,7 +96,9 @@ SYSTEM_PROMPT = (
     '- For navigate_to page=cart, set ui_guide to "update_cart".\n'
     '- For compare_products, set ui_guide to "compare_products".\n'
     '- For support/ticket queries, set ui_guide to open_support/new_ticket/view_tickets.\n'
-    "- Otherwise set ui_guide to null."
+    "- Otherwise set ui_guide to null.\n"
+    "- Queries may be in English (EN), romanized Hindi (HI), or romanized Telugu (TE). Always respond in JSON only.\n"
+    "- If the query has no category name, read selectedCategory from Context to determine the correct category."
 )
 
 ALLOWED_TOOLS = {"search_products", "get_product", "compare_products", "recommend", "add_to_cart", "navigate_to"}

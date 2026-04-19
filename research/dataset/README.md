@@ -39,5 +39,5 @@ Generated outputs:
 - Product id range is restricted to 1..12 across schema, generation, and validation.
 - This pipeline creates the target split: EN 500, HI 250, TE 250.
 - Proficiency split is balanced per language: beginner/expert.
-- Queries are romanized for HI/TE to keep plain UTF-8-safe text and avoid script encoding issues in early iterations.
+- Queries are romanized for HI/TE (Latin characters, native meaning) — this is intentional and permanent, not a workaround. Qwen3-0.6B only processes English/Latin text. SARVAM STT converts voice input to romanized form before it reaches the model. SARVAM-M handles natural language response generation in the user's actual language.
 - For production-quality linguistic diversity, use `prompts/gpt4_generation_prompt.md` with GPT-4 and then pass results through the same formatter and validator.

@@ -48,12 +48,14 @@ PER_DEVICE_BATCH_SIZE = 4
 GRADIENT_ACCUMULATION_STEPS = 4  # effective batch = 16
 LEARNING_RATE = 2e-4
 WARMUP_RATIO = 0.03
+# Warmup steps = ceil(WARMUP_RATIO × total_steps); total_steps ≈ (1113 / 16) × 3 ≈ 209
+WARMUP_STEPS = max(1, int(WARMUP_RATIO * (1113 // (4 * 4)) * 3))  # ≈ 6
 LR_SCHEDULER = "cosine"
 WEIGHT_DECAY = 0.01
 SAVE_STEPS = 200
 LOGGING_STEPS = 10
 FP16 = False
-BF16 = True  # Qwen3.5 works well with bf16
+BF16 = True  # Qwen3 works well with bf16
 
 # ── Dataset split ────────────────────────────────────────────────────────────
 TEST_SIZE = 100  # holdout rows for evaluation
@@ -187,7 +189,9 @@ Rules:
 - For navigate_to page=cart, set ui_guide to "update_cart".
 - For compare_products, set ui_guide to "compare_products".
 - For support/ticket queries, set ui_guide to open_support/new_ticket/view_tickets.
-- Otherwise set ui_guide to null."""
+- Otherwise set ui_guide to null.
+- Queries may be in English (EN), romanized Hindi (HI), or romanized Telugu (TE). Always respond in JSON only — never in the query language.
+- If the query has no category name, read selectedCategory from Context to determine the correct category."""
 
 
 # PIPELINE_PROMPT_TEMPLATE: matches pipeline.py _build_function_prompt() EXACTLY.

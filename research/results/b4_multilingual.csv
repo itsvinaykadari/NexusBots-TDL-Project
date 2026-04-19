@@ -1,0 +1,10 @@
+System,Language,Tool Acc,Arg F1,Count
+Heuristic Router,EN,0.4727,0.2518,55
+Heuristic Router,HI,0.3333,0.2142,27
+Heuristic Router,TE,0.5556,0.3102,18
+Qwen3-0.6B BASE,EN,0.6182,0.4606,55
+Qwen3-0.6B BASE,HI,0.6296,0.4907,27
+Qwen3-0.6B BASE,TE,0.5556,0.3611,18
+Qwen3-0.6B FC (ours),EN,0.0,0.0,55
+Qwen3-0.6B FC (ours),HI,0.0,0.0,27
+Qwen3-0.6B FC (ours),TE,0.0,0.0,18

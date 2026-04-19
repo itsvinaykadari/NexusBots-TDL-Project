@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
 """
-Nexus Bots — Python template dataset generator v2.
+Nexus Bots — Python template dataset generator v2 (B3-revised).
 
-Covers all intent groups from the PLAN.md target distribution (970 rows):
+Covers all intent groups from the PLAN.md target distribution (~1050 rows):
   1.  browse_category       → search_products + find_{category}
-  2.  search_by_name        → search_products + find_{category}
+  2.  search_by_name        → search_products + find_{category}   (specific product-name queries)
   3.  get_product           → get_product + null
   4.  compare_products      → compare_products + compare_products
-  5.  recommend             → recommend + find_{category}
+  5.  recommend             → recommend + find_{category}          (incl. cheapest/sasta/takkuva)
   6.  add_to_cart           → add_to_cart + null
   7.  nav_orders_support    → navigate_to orders + open_support/new_ticket/view_tickets/check_orders
   8.  nav_cart_home         → navigate_to cart|home + update_cart|null
   9.  nav_location          → navigate_to catalog + locate_path:{cat}:{id}
   10. out_of_scope          → search_products query=robot + null
 
-Improvements over JS v1:
-  - ui_guide field embedded in raw data (no heuristic needed in prepare_dataset.py)
-  - Support flows: open_support / new_ticket / view_tickets
-  - Location intent: "drone kahan milega" → navigate_to + locate_path
-  - Out-of-scope robustness set
-  - Proficiency ~50/50 split per language per intent
+B3 improvements (based on B2 base-model failure analysis):
+  - Cheapest/budget-only → recommend: "sasta X", "takkuva X", "cheapest X" patterns
+  - Home navigation args: no empty params ({"page":"home"} not {"page":"home","params":{}})
+  - nav_support sub-intents: cycle-distributed evenly across all 4 sub-intents
+  - search_by_name: uses actual product names as queries (not just generic category terms)
+  - add_to_cart: adds "the current robot" context-based patterns
+  - Bumped HI/TE rows in failing categories (recommend, add_to_cart, get_product)
 """
 
 import json
@@ -91,7 +92,6 @@ def realistic_budget(cat):
     return round(raw / 50) * 50
 
 def page_context(cat, p1, p2=None):
-    cat_ids = [p["id"] for p in BY_CAT[cat]]
     viewed = [p1["id"]]
     if p2:
         viewed.append(p2["id"])
@@ -110,19 +110,60 @@ def page_context(cat, p1, p2=None):
         "currentProduct": p1["id"],
     }
 
+def page_context_on_catalog(cat, p1):
+    """Force currentPage='catalog' — user is BROWSING the category page.
+    Used for context-implicit rows where the query has no category name.
+    """
+    others = [p["id"] for p in BY_CAT[cat] if p["id"] != p1["id"]]
+    viewed = [p1["id"]]
+    if others:
+        viewed.append(pick(others))
+    cart = [pick(PRODUCTS)["id"]] if RNG.random() > 0.7 else []
+    return {
+        "currentPage": "catalog",
+        "selectedCategory": cat,
+        "lastSearch": pick(SEARCH_BY_CAT[cat]),
+        "viewedProducts": viewed,
+        "cart": cart,
+        "currentProduct": None,
+    }
+
+def page_context_on_product(cat, p1):
+    """Force currentPage='product' and currentProduct=p1 — user is on a product detail page.
+    Used for context-implicit add_to_cart rows.
+    """
+    others = [p["id"] for p in BY_CAT[cat] if p["id"] != p1["id"]]
+    viewed = [p1["id"]]
+    if others:
+        viewed.append(pick(others))
+    cart = [pick(PRODUCTS)["id"]] if RNG.random() > 0.7 else []
+    return {
+        "currentPage": "product",
+        "selectedCategory": cat,
+        "lastSearch": pick(SEARCH_BY_CAT[cat]),
+        "viewedProducts": viewed,
+        "cart": cart,
+        "currentProduct": p1["id"],
+    }
+
 # ── Target distribution ───────────────────────────────────────────────────────
-# (intent, tool): {lang: count}
+# B3 revised — bumped HI/TE and failing categories based on B2 analysis.
+# context_recommend / context_browse: user query has NO category name; model must read context.
 TARGETS = {
-    "browse_category":    {"en": 70, "hi": 35, "te": 25},
-    "search_by_name":     {"en": 50, "hi": 25, "te": 15},
-    "get_product":        {"en": 60, "hi": 30, "te": 20},
-    "compare":            {"en": 65, "hi": 30, "te": 15},
-    "recommend":          {"en": 65, "hi": 30, "te": 15},
-    "add_to_cart":        {"en": 50, "hi": 25, "te": 15},
-    "nav_support":        {"en": 70, "hi": 35, "te": 25},
-    "nav_cart_home":      {"en": 40, "hi": 20, "te": 10},
-    "nav_location":       {"en": 50, "hi": 25, "te": 15},
-    "out_of_scope":       {"en": 25, "hi": 10, "te":  5},
+    "browse_category":    {"en": 70,  "hi": 35, "te": 25},
+    "search_by_name":     {"en": 55,  "hi": 28, "te": 17},  # +10 for product-name specificity
+    "get_product":        {"en": 65,  "hi": 35, "te": 22},  # +12 HI/TE (get_product confusion)
+    "compare":            {"en": 65,  "hi": 30, "te": 15},
+    "recommend":          {"en": 75,  "hi": 38, "te": 22},  # +20 for cheapest/budget variants
+    "add_to_cart":        {"en": 55,  "hi": 30, "te": 18},  # +18 for name→ID teaching
+    "nav_support":        {"en": 72,  "hi": 36, "te": 24},  # even multiples of 4 sub-intents
+    "nav_cart_home":      {"en": 40,  "hi": 20, "te": 10},
+    "nav_location":       {"en": 50,  "hi": 25, "te": 15},
+    "out_of_scope":       {"en": 25,  "hi": 10, "te":  5},
+    # Context-implicit: query has NO category name, model must read selectedCategory from context
+    "context_recommend":  {"en": 20,  "hi": 12, "te":  8},  # "which is cheapest here?" on catalog page
+    "context_browse":     {"en": 15,  "hi":  8, "te":  5},  # "show me all of them" on catalog page
+    "context_add_cart":   {"en": 15,  "hi":  8, "te":  5},  # "add this to cart" on product page
 }
 
 # ── Query templates ───────────────────────────────────────────────────────────
@@ -182,45 +223,50 @@ def query_browse_category(lang, prof, cat, p1):
     return _q({"en": en, "hi": hi, "te": te}[lang], prof)
 
 def query_search_by_name(lang, prof, cat, p1):
+    # B3 fix: use actual product name p1["name"] so model learns name→search mapping
+    n = p1["name"]
     q = pick(SEARCH_BY_CAT[cat])
     en = {
         "beginner": [
-            f"Find {q}",
-            f"Search for {q}",
+            f"Search for {n}",
+            f"Find {n}",
+            f"I'm looking for {n}",
+            f"Show me {n}",
+            f"Find me {q}",
             f"Looking for {q}",
-            f"Show me {q}",
-            f"I need {q}",
         ],
         "expert": [
-            f"Search catalog for {q}",
-            f"Filter products by {q}",
+            f"Search catalog for {n}",
+            f"Filter {cat} by {n}",
+            f"Find {n} in inventory",
             f"Query for {q} in {cat}",
-            f"Find {q} listings",
         ],
     }
     hi = {
         "beginner": [
-            f"{q} dhundho",
-            f"Mujhe {q} chahiye",
-            f"{q} search karo",
+            f"{n} dhundho",
+            f"{n} search karo",
+            f"Mujhe {n} chahiye",
             f"{q} dikhao",
+            f"{n} dikhao",
         ],
         "expert": [
-            f"{q} ke liye catalog search karo",
-            f"{cat} mein {q} filter karo",
+            f"{n} ke liye catalog search karo",
+            f"{cat} mein {n} filter karo",
             f"{q} listings fetch karo",
         ],
     }
     te = {
         "beginner": [
+            f"{n} search cheyyi",
+            f"{n} chupinchu",
+            f"Naaku {n} kavali",
             f"{q} search cheyyi",
-            f"Naaku {q} kavali",
-            f"{q} chupinchu",
-            f"{q} dorikutundo cheppu",
+            f"{n} dorikutundo cheppu",
         ],
         "expert": [
-            f"{q} catalog lo search cheyyi",
-            f"{cat} lo {q} filter cheyyi",
+            f"{n} catalog lo search cheyyi",
+            f"{cat} lo {n} filter cheyyi",
             f"{q} listings fetch cheyyi",
         ],
     }
@@ -366,6 +412,57 @@ def query_recommend(lang, prof, cat, budget, need):
     }
     return _q({"en": en, "hi": hi, "te": te}[lang], prof)
 
+
+def query_recommend_cheapest(lang, prof, cat):
+    """B3 addition: cheapest/sasta/takkuva → recommend patterns.
+    These are short queries without explicit budget — the model must learn
+    that 'cheapest/sasta/takkuva' keywords → recommend tool, not search_products.
+    """
+    en = {
+        "beginner": [
+            f"What is the cheapest {cat} robot?",
+            f"Most affordable {cat} option",
+            f"Cheapest {cat} robot you have",
+            f"Budget {cat} robot please",
+            f"Lowest price {cat} option",
+            f"Show me the most affordable {cat} robot",
+        ],
+        "expert": [
+            f"Minimum cost {cat} in catalog",
+            f"Most cost-effective {cat} available",
+            f"Entry-level {cat} recommendation",
+        ],
+    }
+    hi = {
+        "beginner": [
+            f"Sabse sasta {cat} robot kaun sa hai?",
+            f"{cat} mein sasta kya hai?",
+            f"Sasta {cat} robot dikhao",
+            f"Budget-friendly {cat} chahiye",
+            f"{cat} robot saste mein chahiye",
+        ],
+        "expert": [
+            f"Minimum cost {cat} option suggest karo",
+            f"Sabse affordable {cat} recommend karo",
+            f"Entry-level {cat} platform kaunsa hai?",
+        ],
+    }
+    te = {
+        "beginner": [
+            f"{cat} lo cheepa robot edi?",
+            f"Takkuva dhara lo {cat} kavali",
+            f"Sasta {cat} robot chupinchu",
+            f"Budget lo {cat} robot suggest cheyyi",
+            f"{cat} lo affordable option edi?",
+        ],
+        "expert": [
+            f"Minimum cost {cat} suggest cheyyi",
+            f"{cat} lo most affordable option cheppu",
+            f"Entry-level {cat} platform edi?",
+        ],
+    }
+    return _q({"en": en, "hi": hi, "te": te}[lang], prof)
+
 def query_add_to_cart(lang, prof, p1):
     n = p1["name"]
     en = {
@@ -375,12 +472,15 @@ def query_add_to_cart(lang, prof, p1):
             f"I want to buy {n}",
             f"Add {n} please",
             f"Buy {n}",
+            f"Add this robot to cart",
+            f"I'll take {n}, add it",
         ],
         "expert": [
             f"Add {n} to checkout shortlist",
             f"Queue {n} in cart",
             f"Stage {n} for purchase",
             f"Insert {n} into purchase cart",
+            f"Cart: add {n}",
         ],
     }
     hi = {
@@ -389,6 +489,8 @@ def query_add_to_cart(lang, prof, p1):
             f"Mere cart mein {n} daal do",
             f"{n} kharidna hai, cart mein dalo",
             f"{n} add karo cart mein",
+            f"Is robot ko cart mein daal do",
+            f"{n} le lena hai",
         ],
         "expert": [
             f"{n} ko cart shortlist mein add karo",
@@ -402,6 +504,8 @@ def query_add_to_cart(lang, prof, p1):
             f"{n} na cart lo pettu",
             f"{n} konali, cart lo add cheyyi",
             f"{n} add cheyyi cart lo",
+            f"Ee robot ni cart lo add cheyyi",
+            f"{n} teesukuntanu, add cheyyi",
         ],
         "expert": [
             f"{n} ni cart shortlist lo add cheyyi",
@@ -412,12 +516,8 @@ def query_add_to_cart(lang, prof, p1):
     return _q({"en": en, "hi": hi, "te": te}[lang], prof)
 
 # Support intent queries — ui_guide varies by sub-intent
-SUPPORT_SUBINTENTS = [
-    ("check_orders",   0.30),  # check order status
-    ("open_support",   0.30),  # open a support ticket
-    ("new_ticket",     0.20),  # file a new ticket
-    ("view_tickets",   0.20),  # view existing tickets
-]
+# B3 fix: cycle-distributed instead of weighted random for even coverage
+SUPPORT_SUBINTENTS = ["check_orders", "open_support", "new_ticket", "view_tickets"]
 
 def query_nav_support(lang, prof, sub):
     en = {
@@ -602,9 +702,160 @@ def query_out_of_scope(lang, prof):
     }
     return _q({"en": en, "hi": hi, "te": te}[lang], prof)
 
+
+# ── Context-implicit query templates ─────────────────────────────────────────
+# These queries do NOT mention the product category — the model must read
+# selectedCategory from the page context to answer correctly.
+
+def query_context_recommend(lang, prof):
+    """User is on a catalog page and asks for a recommendation WITHOUT naming the category."""
+    en = {
+        "beginner": [
+            "Which one is cheapest here?",
+            "What's the most affordable option?",
+            "Which robot should I buy?",
+            "Suggest me one from this section",
+            "What's the best one here?",
+            "I want the budget-friendly option",
+            "Show me something affordable",
+        ],
+        "expert": [
+            "Most cost-effective option in this section",
+            "Recommend one from the current category",
+            "Best value pick here",
+            "Entry-level option from this section",
+        ],
+    }
+    hi = {
+        "beginner": [
+            "Yahan sabse sasta kaun sa hai?",
+            "Iska koi suggest karo",
+            "Konsa lena chahiye yahan?",
+            "Budget mein kaun sa accha hai?",
+            "Sasta wala dikhao",
+            "Koi ek suggest karo yahan se",
+        ],
+        "expert": [
+            "Is category mein best-value option suggest karo",
+            "Yahan best-fit recommend karo",
+            "Is section mein entry-level kaunsa hai?",
+        ],
+    }
+    te = {
+        "beginner": [
+            "Ikkada cheapest edi?",
+            "Naaku oka suggest cheyyi",
+            "Ikkada best edi?",
+            "Budget lo emi konali ikkada?",
+            "Takkuva dhara lo oka cheppu",
+        ],
+        "expert": [
+            "Ee category lo best value suggest cheyyi",
+            "Ikkada entry-level option edi?",
+            "Is section lo best pick recommend cheyyi",
+        ],
+    }
+    return _q({"en": en, "hi": hi, "te": te}[lang], prof)
+
+
+def query_context_browse(lang, prof):
+    """User is on a catalog page and asks to see everything — no category name in query."""
+    en = {
+        "beginner": [
+            "Show me all of them",
+            "List everything here",
+            "What do you have in this section?",
+            "Show all robots",
+            "I want to see all options",
+            "Display everything available",
+        ],
+        "expert": [
+            "List all products in this category",
+            "Show full inventory for this section",
+            "Filter: show all in current category",
+        ],
+    }
+    hi = {
+        "beginner": [
+            "Yahan ke sab robots dikhao",
+            "Sab kuch list karo",
+            "Is section mein kya hai?",
+            "Sab options dikhao",
+        ],
+        "expert": [
+            "Is category ke sab products list karo",
+            "Is section ka full inventory dikhao",
+            "Current category mein sab filter karo",
+        ],
+    }
+    te = {
+        "beginner": [
+            "Ikkada unna anni chupinchu",
+            "Anni list cheyyi",
+            "Ee section lo emi undi?",
+            "Anni options chupinchu",
+        ],
+        "expert": [
+            "Ee category lo anni products list cheyyi",
+            "Is section full inventory chupinchu",
+        ],
+    }
+    return _q({"en": en, "hi": hi, "te": te}[lang], prof)
+
+
+def query_context_add_cart(lang, prof, p1):
+    """User is on a product page and asks to add THE CURRENT product — no product name in query."""
+    n = p1["name"]
+    en = {
+        "beginner": [
+            "Add this to my cart",
+            "I'll buy this one",
+            "Put this in cart",
+            "Add this robot to cart",
+            "I want to buy this",
+            f"Order this ({n})",
+        ],
+        "expert": [
+            "Add current product to cart",
+            "Stage this for purchase",
+            f"Cart: add {n}",
+            "Add this to checkout list",
+        ],
+    }
+    hi = {
+        "beginner": [
+            "Isko cart mein daalo",
+            "Yeh wala lena hai",
+            "Ise cart mein add karo",
+            "Yeh robot kharidna hai",
+            "Is wale ko cart mein daalo",
+        ],
+        "expert": [
+            "Current product ko cart mein add karo",
+            "Ise checkout list mein add karo",
+            f"{n} ko cart mein daalo",
+        ],
+    }
+    te = {
+        "beginner": [
+            "Idi cart lo add cheyyi",
+            "Ee robot konali",
+            "Ee robot cart lo pettu",
+            "Idi konali, cart lo add cheyyi",
+            "Ee robot ni cart lo add cheyyi",
+        ],
+        "expert": [
+            "Current product ni cart lo add cheyyi",
+            "Idi checkout list lo add cheyyi",
+            f"{n} ni cart lo pettu",
+        ],
+    }
+    return _q({"en": en, "hi": hi, "te": te}[lang], prof)
+
+
 # ── Row builders ──────────────────────────────────────────────────────────────
 
-def make_row(idx, intent, lang, prof, cat=None):
+def make_row(idx, intent, lang, prof, cat=None, sub_idx=0):
     p1 = pick(BY_CAT[cat]) if cat else pick(PRODUCTS)
     p2 = None
     tool, args, ui_guide, query = None, {}, None, ""
@@ -617,6 +868,7 @@ def make_row(idx, intent, lang, prof, cat=None):
         ui_guide = CATEGORY_GUIDE[cat]
 
     elif intent == "search_by_name":
+        # B3 fix: pass p1 so the query uses the actual product name
         query = query_search_by_name(lang, prof, cat, p1)
         q = pick(SEARCH_BY_CAT[cat])
         tool = "search_products"
@@ -639,9 +891,17 @@ def make_row(idx, intent, lang, prof, cat=None):
         ui_guide = "compare_products"
 
     elif intent == "recommend":
-        budget = realistic_budget(cat)
+        # B3 fix: ~30% of rows use cheapest/sasta/takkuva patterns (no explicit budget in query)
+        if RNG.random() < 0.30:
+            query = query_recommend_cheapest(lang, prof, cat)
+            # Budget = cheapest product in this category + small buffer
+            min_price = min(p["price"] for p in BY_CAT[cat])
+            budget = int(min_price * 1.15) + 50
+        else:
+            budget = realistic_budget(cat)
+            need = pick(NEEDS_BY_CAT[cat])
+            query = query_recommend(lang, prof, cat, budget, need)
         need = pick(NEEDS_BY_CAT[cat])
-        query = query_recommend(lang, prof, cat, budget, need)
         tool = "recommend"
         args = {"need": need, "budget": budget, "category": cat}
         ui_guide = CATEGORY_GUIDE[cat]
@@ -653,8 +913,8 @@ def make_row(idx, intent, lang, prof, cat=None):
         ui_guide = None
 
     elif intent == "nav_support":
-        weights = [w for _, w in SUPPORT_SUBINTENTS]
-        sub = RNG.choices([s for s, _ in SUPPORT_SUBINTENTS], weights=weights, k=1)[0]
+        # B3 fix: cycle through sub-intents evenly instead of weighted random
+        sub = SUPPORT_SUBINTENTS[sub_idx % len(SUPPORT_SUBINTENTS)]
         query = query_nav_support(lang, prof, sub)
         tool = "navigate_to"
         args = {"page": "orders", "params": {}}
@@ -664,8 +924,14 @@ def make_row(idx, intent, lang, prof, cat=None):
         page = RNG.choice(["cart", "home"])
         query = query_nav_cart_home(lang, prof, page)
         tool = "navigate_to"
-        args = {"page": page, "params": {}}
-        ui_guide = "update_cart" if page == "cart" else None
+        if page == "cart":
+            # B3 fix: explicit params for cart (consistent with pipeline expectations)
+            args = {"page": "cart", "params": {}}
+            ui_guide = "update_cart"
+        else:
+            # B3 fix: home navigation has NO params ({"page":"home"} only)
+            args = {"page": "home"}
+            ui_guide = None
 
     elif intent == "nav_location":
         cat = cat or pick(CATEGORIES)
@@ -682,6 +948,65 @@ def make_row(idx, intent, lang, prof, cat=None):
         args = {"query": "robot", "category": None}
         ui_guide = None
 
+    elif intent == "context_recommend":
+        # Query has NO category name; model must use selectedCategory from context.
+        # Force currentPage=catalog so the context clearly shows the user's location.
+        query = query_context_recommend(lang, prof)
+        budget = realistic_budget(cat)
+        need = pick(NEEDS_BY_CAT[cat])
+        tool = "recommend"
+        args = {"need": need, "budget": budget, "category": cat}
+        ui_guide = CATEGORY_GUIDE[cat]
+        ctx = page_context_on_catalog(cat, p1)
+        return {
+            "id": f"v2_{lang}_{intent}_{idx:04d}",
+            "language": lang,
+            "proficiency": prof,
+            "user_query": query,
+            "page_context": ctx,
+            "function_call": {"name": tool, "arguments": args},
+            "ui_guide": ui_guide,
+            "metadata": {"intent": intent, "source": "template_generator_v2_py_b3", "split": "train"},
+        }
+
+    elif intent == "context_browse":
+        # Query has NO category name; model must use selectedCategory from context.
+        query = query_context_browse(lang, prof)
+        q = pick(SEARCH_BY_CAT[cat])
+        tool = "search_products"
+        args = {"query": q, "category": cat}
+        ui_guide = CATEGORY_GUIDE[cat]
+        ctx = page_context_on_catalog(cat, p1)
+        return {
+            "id": f"v2_{lang}_{intent}_{idx:04d}",
+            "language": lang,
+            "proficiency": prof,
+            "user_query": query,
+            "page_context": ctx,
+            "function_call": {"name": tool, "arguments": args},
+            "ui_guide": ui_guide,
+            "metadata": {"intent": intent, "source": "template_generator_v2_py_b3", "split": "train"},
+        }
+
+    elif intent == "context_add_cart":
+        # User is on a product page and says "add this" — no product name in query.
+        # Force currentPage=product, currentProduct=p1["id"] so the model can resolve it.
+        query = query_context_add_cart(lang, prof, p1)
+        tool = "add_to_cart"
+        args = {"product_id": p1["id"]}
+        ui_guide = None
+        ctx = page_context_on_product(cat, p1)
+        return {
+            "id": f"v2_{lang}_{intent}_{idx:04d}",
+            "language": lang,
+            "proficiency": prof,
+            "user_query": query,
+            "page_context": ctx,
+            "function_call": {"name": tool, "arguments": args},
+            "ui_guide": ui_guide,
+            "metadata": {"intent": intent, "source": "template_generator_v2_py_b3", "split": "train"},
+        }
+
     ctx = page_context(cat or pick(CATEGORIES), p1, p2)
 
     return {
@@ -694,7 +1019,7 @@ def make_row(idx, intent, lang, prof, cat=None):
         "ui_guide": ui_guide,
         "metadata": {
             "intent": intent,
-            "source": "template_generator_v2_py",
+            "source": "template_generator_v2_py_b3",
             "split": "train",
         },
     }
@@ -711,7 +1036,8 @@ def main():
             for i in range(total):
                 prof = "beginner" if i % 2 == 0 else "expert"
                 cat = pick(CATEGORIES)
-                row = make_row(global_idx, intent, lang, prof, cat)
+                # Pass i as sub_idx so nav_support cycles evenly through all 4 sub-intents
+                row = make_row(global_idx, intent, lang, prof, cat, sub_idx=i)
                 rows.append(row)
                 global_idx += 1
 
@@ -732,12 +1058,17 @@ def main():
     by_prof = Counter(r["proficiency"] for r in rows)
     ui_guide_null = sum(1 for r in rows if r["ui_guide"] is None)
 
+    # Verify nav_support sub-intent distribution
+    nav_support_rows = [r for r in rows if r["metadata"]["intent"] == "nav_support"]
+    nav_sub_counts = Counter(r["ui_guide"] for r in nav_support_rows)
+
     print(f"Written {len(rows)} rows → {out_path}")
     print(f"By language:   {dict(by_lang)}")
     print(f"By intent:     {dict(by_intent)}")
     print(f"By tool:       {dict(by_tool)}")
     print(f"By proficiency:{dict(by_prof)}")
     print(f"ui_guide null: {ui_guide_null}")
+    print(f"nav_support sub-intents: {dict(nav_sub_counts)}")
 
 if __name__ == "__main__":
     main()
