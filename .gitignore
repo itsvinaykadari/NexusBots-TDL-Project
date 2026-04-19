@@ -6,3 +6,6 @@ models/
 .env
 .env.local
 .env.*.local
+finetune/output/
+server/logs/
+server/database/nexusbots.db
