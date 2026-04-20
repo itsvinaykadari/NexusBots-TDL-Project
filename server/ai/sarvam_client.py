@@ -117,7 +117,11 @@ def _build_user_prompt(tool_payload: Dict[str, Any], context: Dict[str, Any], la
 
 def _strip_thinking_tags(text: str) -> str:
     """Remove <think>...</think> reasoning blocks from model output."""
-    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    # Strip complete blocks
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    # Strip unclosed blocks — happens when max_tokens cuts response mid-thought
+    text = re.sub(r"<think>.*$", "", text, flags=re.DOTALL)
+    return text.strip()
 
 
 def _extract_text_from_response(data: Dict[str, Any]) -> Optional[str]:

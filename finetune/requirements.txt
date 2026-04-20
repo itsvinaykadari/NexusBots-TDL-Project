@@ -1,25 +1,18 @@
-# Core training
+# Core training and inference
 unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git
+torch>=2.2.0
 transformers>=4.46.0
 datasets>=3.0.0
 peft>=0.13.0
 trl>=0.12.0
-torch>=2.2.0
-
-# Quantization
 bitsandbytes>=0.44.0
 
-# Evaluation
-scikit-learn>=1.5.0
-pandas>=2.2.0
+# Evaluation and dataset utilities
 numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.5.0
 
-# RAG benchmark
-sentence-transformers>=2.7.0
-faiss-cpu>=1.8.0
-rank_bm25>=0.2.2
-
-# Frontier model benchmarks (optional)
+# Optional frontier model benchmarks
 openai>=1.50.0
 anthropic>=0.40.0
 google-generativeai>=0.8.0
