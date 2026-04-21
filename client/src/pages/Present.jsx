@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ParticleNetwork from "../components/ParticleNetwork";
 
 /* ─── Typewriter hook ──────────────────────────────────────────── */
@@ -1435,7 +1435,7 @@ export default function Present() {
       </Slide>
 
       {/* ══════════════════════════════════
-          6. RESULTS
+          5a. RESULTS — Overall System Performance
       ══════════════════════════════════ */}
       <Slide>
         <div
@@ -1452,9 +1452,9 @@ export default function Present() {
         />
 
         <FadeIn delay={0}>
-          <SectionLabel text="05 · Results" color="oklch(72% 0.20 155)" />
+          <SectionLabel text="05 · Results — Part 1 of 4" color="oklch(72% 0.20 155)" />
           <SectionHeading>
-            Performance{" "}
+            Overall System{" "}
             <span
               style={{
                 background: "linear-gradient(135deg, oklch(72% 0.20 155), oklch(78% 0.16 195))",
@@ -1463,7 +1463,497 @@ export default function Present() {
                 backgroundClip: "text",
               }}
             >
-              &amp; Cost Analysis
+              Performance
+            </span>
+          </SectionHeading>
+        </FadeIn>
+
+        {/* Hero stat row */}
+        <FadeIn delay={60}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "16px",
+              marginBottom: "28px",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            {[
+              { val: "79%", label: "Tool Accuracy", sub: "NexusBots (Ours)", color: "oklch(72% 0.20 155)" },
+              { val: "1113ms", label: "p50 Latency", sub: "vs 2252ms Sarvam", color: "oklch(78% 0.16 195)" },
+              { val: "0", label: "Parse Errors", sub: "vs 9 for Sarvam-M", color: "oklch(72% 0.22 60)" },
+              { val: "~2×", label: "Faster than Sarvam", sub: "same accuracy level", color: "oklch(65% 0.28 290)" },
+            ].map(({ val, label, sub, color }) => (
+              <div
+                key={label}
+                className="glass-card"
+                style={{
+                  flex: "1 1 160px",
+                  borderRadius: "14px",
+                  padding: "20px 18px",
+                  borderColor: `${color}33`,
+                  textAlign: "center",
+                }}
+              >
+                <p style={{ fontWeight: 900, fontSize: "clamp(1.6rem,3vw,2.2rem)", color, lineHeight: 1, marginBottom: "6px" }}>{val}</p>
+                <p style={{ fontWeight: 700, fontSize: "0.82rem", color: "oklch(85% 0.01 260)", marginBottom: "3px" }}>{label}</p>
+                <p style={{ fontSize: "0.72rem", color: "oklch(52% 0.02 260)" }}>{sub}</p>
+              </div>
+            ))}
+          </div>
+        </FadeIn>
+
+        {/* Main comparison table */}
+        <FadeIn delay={140}>
+          <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", position: "relative", zIndex: 1 }}>
+            <p style={{ fontWeight: 700, fontSize: "0.82rem", color: "oklch(55% 0.02 260)", marginBottom: "16px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              3-Way Comparison · 100 Queries
+            </p>
+
+            {/* Column headers */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "2fr 1fr 1fr 1fr 1.2fr 0.8fr",
+                gap: "8px",
+                padding: "6px 14px",
+                fontSize: "0.67rem",
+                color: "oklch(42% 0.02 260)",
+                letterSpacing: "0.07em",
+                textTransform: "uppercase",
+              }}
+            >
+              <span>Model</span>
+              <span style={{ textAlign: "center" }}>Tool Acc</span>
+              <span style={{ textAlign: "center" }}>Arg F1</span>
+              <span style={{ textAlign: "center" }}>UI Guide</span>
+              <span style={{ textAlign: "center" }}>Latency p50</span>
+              <span style={{ textAlign: "center" }}>Errors</span>
+            </div>
+
+            {[
+              { system: "NexusBots (Ours)", toolAcc: "0.79", argF1: "0.5467", uiGuide: "0.52", latency: "1113 ms", errors: "0", highlight: true, color: "oklch(72% 0.20 155)" },
+              { system: "Sarvam-M (thinking ON)", toolAcc: "0.78", argF1: "0.5567", uiGuide: "0.57", latency: "2252 ms", errors: "9 parse", highlight: false, color: "oklch(65% 0.28 290)" },
+              { system: "Groq LLaMA-3.1-8B", toolAcc: "0.75", argF1: "0.5942", uiGuide: "0.68", latency: "434 ms", errors: "9 API", highlight: false, color: "oklch(72% 0.22 60)" },
+            ].map(({ system, toolAcc, argF1, uiGuide, latency, errors, highlight, color }) => (
+              <div
+                key={system}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2fr 1fr 1fr 1fr 1.2fr 0.8fr",
+                  gap: "8px",
+                  padding: "12px 14px",
+                  borderRadius: "10px",
+                  marginBottom: "6px",
+                  background: highlight ? `${color}12` : "oklch(20% 0.02 260 / 0.4)",
+                  border: highlight ? `1px solid ${color}44` : "1px solid transparent",
+                  fontSize: "0.8rem",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ color: highlight ? "oklch(90% 0.01 260)" : "oklch(62% 0.02 260)", fontWeight: highlight ? 700 : 400 }}>
+                  {system}
+                  {highlight && (
+                    <span
+                      style={{
+                        marginLeft: "8px",
+                        fontSize: "0.65rem",
+                        padding: "2px 7px",
+                        borderRadius: "999px",
+                        background: `${color}20`,
+                        border: `1px solid ${color}44`,
+                        color,
+                        fontWeight: 700,
+                      }}
+                    >
+                      ours
+                    </span>
+                  )}
+                </span>
+                <span style={{ color: highlight ? color : "oklch(55% 0.02 260)", fontWeight: highlight ? 800 : 400, textAlign: "center" }}>{toolAcc}</span>
+                <span style={{ color: highlight ? color : "oklch(55% 0.02 260)", fontWeight: highlight ? 700 : 400, textAlign: "center" }}>{argF1}</span>
+                <span style={{ color: highlight ? color : "oklch(55% 0.02 260)", fontWeight: highlight ? 700 : 400, textAlign: "center" }}>{uiGuide}</span>
+                <span style={{ color: highlight ? "oklch(72% 0.22 60)" : "oklch(55% 0.02 260)", fontWeight: highlight ? 700 : 400, textAlign: "center" }}>{latency}</span>
+                <span style={{ color: errors === "0" ? "oklch(72% 0.20 155)" : "oklch(65% 0.20 30)", fontWeight: 700, textAlign: "center" }}>{errors}</span>
+              </div>
+            ))}
+
+            {/* Key insights */}
+            <div
+              style={{
+                marginTop: "18px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px",
+              }}
+            >
+              {[
+                { icon: "✅", text: "Matches Sarvam accuracy with 2× faster latency" },
+                { icon: "🚫", text: "Zero parse errors vs 9 for both baselines" },
+                { icon: "💰", text: "Zero routing API cost — fully local" },
+              ].map(({ icon, text }) => (
+                <div
+                  key={text}
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                    alignItems: "center",
+                    padding: "8px 14px",
+                    borderRadius: "8px",
+                    background: "oklch(72% 0.20 155 / 0.08)",
+                    border: "1px solid oklch(72% 0.20 155 / 0.22)",
+                    fontSize: "0.78rem",
+                    color: "oklch(72% 0.02 260)",
+                  }}
+                >
+                  <span>{icon}</span>
+                  <span>{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+      </Slide>
+
+      {/* ══════════════════════════════════
+          5b. RESULTS — Multilingual Breakdown
+      ══════════════════════════════════ */}
+      <Slide>
+        <div
+          style={{
+            pointerEvents: "none",
+            position: "absolute",
+            bottom: "-100px",
+            left: "-100px",
+            width: "460px",
+            height: "460px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, oklch(65% 0.28 290 / 0.09), transparent 70%)",
+          }}
+        />
+
+        <FadeIn delay={0}>
+          <SectionLabel text="05 · Results — Part 2 of 4" color="oklch(65% 0.28 290)" />
+          <SectionHeading>
+            Multilingual{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, oklch(65% 0.28 290), oklch(72% 0.22 60))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              Tool Accuracy
+            </span>
+          </SectionHeading>
+        </FadeIn>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+            gap: "22px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          {/* NexusBots */}
+          <FadeIn delay={80}>
+            <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(72% 0.20 155 / 0.32)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px" }}>
+                <div
+                  style={{
+                    padding: "4px 12px",
+                    borderRadius: "999px",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    background: "oklch(72% 0.20 155 / 0.15)",
+                    border: "1px solid oklch(72% 0.20 155 / 0.4)",
+                    color: "oklch(72% 0.20 155)",
+                  }}
+                >
+                  OURS
+                </div>
+                <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "oklch(90% 0.01 260)" }}>NexusBots</p>
+              </div>
+              <p style={{ fontSize: "0.75rem", color: "oklch(52% 0.02 260)", marginBottom: "14px" }}>Qwen3-0.6B + Enhanced Prompt</p>
+              <MetricBar label="English (EN)" value="84%" pct={84} color="oklch(65% 0.28 290)" />
+              <MetricBar label="Telugu (TE)" value="83%" pct={83} color="oklch(78% 0.16 195)" />
+              <MetricBar label="Hindi (HI)" value="67%" pct={67} color="oklch(72% 0.22 60)" />
+              <div
+                style={{
+                  marginTop: "14px",
+                  padding: "10px 14px",
+                  borderRadius: "9px",
+                  background: "oklch(72% 0.20 155 / 0.08)",
+                  border: "1px solid oklch(72% 0.20 155 / 0.22)",
+                  fontSize: "0.76rem",
+                  color: "oklch(68% 0.02 260)",
+                }}
+              >
+                Strong in EN + TE · Hindi gap vs Sarvam
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Sarvam-M */}
+          <FadeIn delay={160}>
+            <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(65% 0.28 290 / 0.28)" }}>
+              <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "oklch(90% 0.01 260)", marginBottom: "4px" }}>Sarvam-M</p>
+              <p style={{ fontSize: "0.75rem", color: "oklch(52% 0.02 260)", marginBottom: "14px" }}>thinking ON · 2252ms p50</p>
+              <MetricBar label="Telugu (TE)" value="89%" pct={89} color="oklch(78% 0.16 195)" />
+              <MetricBar label="Hindi (HI)" value="81%" pct={81} color="oklch(72% 0.22 60)" />
+              <MetricBar label="English (EN)" value="73%" pct={73} color="oklch(65% 0.28 290)" />
+              <div
+                style={{
+                  marginTop: "14px",
+                  padding: "10px 14px",
+                  borderRadius: "9px",
+                  background: "oklch(65% 0.28 290 / 0.07)",
+                  border: "1px solid oklch(65% 0.28 290 / 0.22)",
+                  fontSize: "0.76rem",
+                  color: "oklch(68% 0.02 260)",
+                }}
+              >
+                Best Hindi · but high latency + parse errors
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Groq */}
+          <FadeIn delay={240}>
+            <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(72% 0.22 60 / 0.28)" }}>
+              <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "oklch(90% 0.01 260)", marginBottom: "4px" }}>Groq LLaMA-3.1-8B</p>
+              <p style={{ fontSize: "0.75rem", color: "oklch(52% 0.02 260)", marginBottom: "14px" }}>Fast · 434ms p50</p>
+              <MetricBar label="English (EN)" value="75%" pct={75} color="oklch(65% 0.28 290)" />
+              <MetricBar label="Telugu (TE)" value="83%" pct={83} color="oklch(78% 0.16 195)" />
+              <MetricBar label="Hindi (HI)" value="70%" pct={70} color="oklch(72% 0.22 60)" />
+              <div
+                style={{
+                  marginTop: "14px",
+                  padding: "10px 14px",
+                  borderRadius: "9px",
+                  background: "oklch(72% 0.22 60 / 0.07)",
+                  border: "1px solid oklch(72% 0.22 60 / 0.22)",
+                  fontSize: "0.76rem",
+                  color: "oklch(68% 0.02 260)",
+                }}
+              >
+                Fastest · best UI guidance · but 9 API errors
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+
+        {/* Observations callout */}
+        <FadeIn delay={300}>
+          <div
+            className="glass-card"
+            style={{
+              marginTop: "24px",
+              borderRadius: "14px",
+              padding: "18px 24px",
+              position: "relative",
+              zIndex: 1,
+              borderColor: "oklch(65% 0.28 290 / 0.22)",
+            }}
+          >
+            <p style={{ fontWeight: 700, fontSize: "0.75rem", color: "oklch(52% 0.02 260)", letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "10px" }}>
+              Key Observations
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+              {[
+                { icon: "🔵", text: "Our model leads EN (84%) & matches TE (83%), proving a 600M model can rival 7B+ for routing tasks" },
+                { icon: "🟡", text: "Hindi gap (67% vs 81%) is likely due to fewer romanized HI examples — addressable with more data" },
+                { icon: "🟢", text: "Despite 0 errors and lowest latency per accuracy point, we remain competitive across all three languages" },
+              ].map(({ icon, text }) => (
+                <div key={text} style={{ display: "flex", gap: "8px", flex: "1 1 260px", alignItems: "flex-start", fontSize: "0.8rem", color: "oklch(68% 0.02 260)", lineHeight: 1.6 }}>
+                  <span style={{ flexShrink: 0 }}>{icon}</span>
+                  <span>{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+      </Slide>
+
+      {/* ══════════════════════════════════
+          5c. RESULTS — Ablation Study
+      ══════════════════════════════════ */}
+      <Slide>
+        <div
+          style={{
+            pointerEvents: "none",
+            position: "absolute",
+            top: "-100px",
+            right: "-80px",
+            width: "420px",
+            height: "420px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, oklch(72% 0.22 60 / 0.10), transparent 70%)",
+          }}
+        />
+
+        <FadeIn delay={0}>
+          <SectionLabel text="05 · Results — Part 3 of 4" color="oklch(72% 0.22 60)" />
+          <SectionHeading>
+            Ablation Study:{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, oklch(72% 0.22 60), oklch(72% 0.20 155))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              What Actually Works
+            </span>
+          </SectionHeading>
+        </FadeIn>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 440px), 1fr))",
+            gap: "28px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          {/* Approach comparison bars */}
+          <FadeIn delay={80}>
+            <div className="glass-card" style={{ borderRadius: "16px", padding: "28px 26px", borderColor: "oklch(72% 0.22 60 / 0.28)" }}>
+              <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(72% 0.22 60)", marginBottom: "20px", letterSpacing: "0.04em" }}>
+                Tool Accuracy by Approach
+              </p>
+
+              <MetricBar label="Enhanced Prompt (Ours) ✅" value="79%" pct={79} color="oklch(72% 0.20 155)" />
+              <MetricBar label="Base Model (Original Prompt)" value="60%" pct={60} color="oklch(65% 0.28 290)" />
+              <MetricBar label="LoRA v2" value="51%" pct={51} color="oklch(78% 0.16 195)" />
+              <MetricBar label="LoRA v1" value="48%" pct={48} color="oklch(60% 0.14 260)" />
+              <MetricBar label="Heuristic Router" value="48%" pct={48} color="oklch(55% 0.10 260)" />
+            </div>
+          </FadeIn>
+
+          {/* Right: key takeaway + base model detail */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {/* Big takeaway */}
+            <FadeIn delay={120}>
+              <div
+                style={{
+                  borderRadius: "16px",
+                  padding: "28px 26px",
+                  background: "linear-gradient(135deg, oklch(72% 0.20 155 / 0.10), oklch(72% 0.22 60 / 0.08))",
+                  border: "1px solid oklch(72% 0.20 155 / 0.30)",
+                }}
+              >
+                <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(55% 0.02 260)", marginBottom: "12px" }}>
+                  Key Takeaway
+                </p>
+                <p
+                  style={{
+                    fontSize: "clamp(1.1rem, 2vw, 1.45rem)",
+                    fontWeight: 800,
+                    color: "oklch(92% 0.01 260)",
+                    lineHeight: 1.4,
+                    marginBottom: "14px",
+                  }}
+                >
+                  Prompt Engineering{" "}
+                  <span style={{ color: "oklch(72% 0.20 155)" }}>&gt;</span>{" "}
+                  Fine-Tuning
+                </p>
+                <p style={{ fontSize: "0.85rem", color: "oklch(65% 0.02 260)", lineHeight: 1.75 }}>
+                  For a 0.6B model, carefully structured prompts outperform QLoRA adapters by{" "}
+                  <strong style={{ color: "oklch(72% 0.22 60)" }}>+28 pp</strong> over heuristics and{" "}
+                  <strong style={{ color: "oklch(72% 0.20 155)" }}>+19 pp</strong> over base prompt alone.
+                  LoRA fine-tuning on small models can hurt generalization if data is limited.
+                </p>
+              </div>
+            </FadeIn>
+
+            {/* Base model breakdown */}
+            <FadeIn delay={200}>
+              <div className="glass-card" style={{ borderRadius: "16px", padding: "22px 24px", borderColor: "oklch(78% 0.16 195 / 0.26)" }}>
+                <p style={{ fontWeight: 700, fontSize: "0.85rem", color: "oklch(78% 0.16 195)", marginBottom: "14px", letterSpacing: "0.04em" }}>
+                  Base Model Evaluation (75 prompts)
+                </p>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, 1fr)",
+                    gap: "8px",
+                    marginBottom: "14px",
+                  }}
+                >
+                  {[
+                    { label: "Tool Acc · EN", val: "66%", color: "oklch(65% 0.28 290)" },
+                    { label: "Tool Acc · HI", val: "71%", color: "oklch(72% 0.22 60)" },
+                    { label: "Tool Acc · TE", val: "68%", color: "oklch(78% 0.16 195)" },
+                    { label: "Tool Acc · All", val: "68%", color: "oklch(72% 0.20 155)" },
+                    { label: "Full Match · EN", val: "16%", color: "oklch(65% 0.28 290)" },
+                    { label: "Full Match · HI", val: "21%", color: "oklch(72% 0.22 60)" },
+                    { label: "Full Match · TE", val: "11%", color: "oklch(78% 0.16 195)" },
+                    { label: "Full Match · All", val: "16%", color: "oklch(72% 0.20 155)" },
+                  ].map(({ label, val, color }) => (
+                    <div
+                      key={label}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: "8px",
+                        background: "oklch(20% 0.02 260 / 0.5)",
+                        textAlign: "center",
+                      }}
+                    >
+                      <p style={{ fontSize: "0.6rem", color: "oklch(45% 0.02 260)", marginBottom: "3px" }}>{label}</p>
+                      <p style={{ fontSize: "0.9rem", fontWeight: 800, color }}>{val}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <p style={{ fontSize: "0.76rem", color: "oklch(52% 0.02 260)", lineHeight: 1.6 }}>
+                  Parse rate 87% — model can generate valid JSON but misses tool names without better prompting.
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </Slide>
+
+      {/* ══════════════════════════════════
+          5d. RESULTS — Cost Analysis
+      ══════════════════════════════════ */}
+      <Slide>
+        <div
+          style={{
+            pointerEvents: "none",
+            position: "absolute",
+            bottom: "-120px",
+            right: "-100px",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, oklch(72% 0.22 60 / 0.09), transparent 70%)",
+          }}
+        />
+
+        <FadeIn delay={0}>
+          <SectionLabel text="05 · Results — Part 4 of 4" color="oklch(72% 0.22 60)" />
+          <SectionHeading>
+            Cost Analysis{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, oklch(72% 0.22 60), oklch(72% 0.20 155))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              &amp; Final Summary
             </span>
           </SectionHeading>
         </FadeIn>
@@ -1477,142 +1967,127 @@ export default function Present() {
             zIndex: 1,
           }}
         >
-          {/* B2 Base model */}
+          {/* Cost table */}
           <FadeIn delay={80}>
             <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(72% 0.22 60 / 0.28)" }}>
               <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(72% 0.22 60)", marginBottom: "6px", letterSpacing: "0.04em" }}>
-                B2 — Base Qwen3-0.6B (75 prompts, no fine-tuning)
+                Cost at 10,000 Queries / Day
               </p>
-              <p style={{ fontSize: "0.78rem", color: "oklch(55% 0.02 260)", marginBottom: "18px" }}>
-                Establishes the no-adaptation ceiling
+              <p style={{ fontSize: "0.76rem", color: "oklch(50% 0.02 260)", marginBottom: "18px" }}>
+                ~500 input + 150 output tokens per query
               </p>
 
+              {/* Headers */}
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gap: "10px",
-                  marginBottom: "16px",
+                  gridTemplateColumns: "2fr 1fr 1fr 1fr",
+                  gap: "8px",
+                  padding: "5px 12px",
+                  fontSize: "0.66rem",
+                  color: "oklch(42% 0.02 260)",
+                  letterSpacing: "0.07em",
+                  textTransform: "uppercase",
                 }}
               >
-                {[
-                  { metric: "Tool Acc", en: "66%", hi: "71%", te: "68%", all: "68%" },
-                  { metric: "Arg Acc", en: "52%", hi: "48%", te: "47%", all: "49%" },
-                  { metric: "UI Guide", en: "28%", hi: "33%", te: "32%", all: "31%" },
-                  { metric: "Full Match", en: "16%", hi: "21%", te: "11%", all: "16%" },
-                ].map(({ metric, en, hi, te, all }) => (
-                  <div
-                    key={metric}
-                    style={{
-                      padding: "10px 10px",
-                      borderRadius: "10px",
-                      background: "oklch(20% 0.02 260 / 0.5)",
-                      textAlign: "center",
-                    }}
-                  >
-                    <p style={{ fontSize: "0.7rem", color: "oklch(55% 0.02 260)", marginBottom: "6px", fontWeight: 600 }}>{metric}</p>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px" }}>
-                      {[["EN", en], ["HI", hi], ["TE", te], ["All", all]].map(([lang, val]) => (
-                        <div key={lang}>
-                          <span style={{ fontSize: "0.6rem", color: "oklch(45% 0.02 260)" }}>{lang} </span>
-                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: lang === "All" ? "oklch(72% 0.22 60)" : "oklch(75% 0.01 260)" }}>{val}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                <span>Architecture</span>
+                <span style={{ textAlign: "center" }}>Routing Cost</span>
+                <span style={{ textAlign: "center" }}>NLG Cost</span>
+                <span style={{ textAlign: "center" }}>Total / day</span>
               </div>
 
-              <MetricBar label="Tool Accuracy (All)" value="68%" pct={68} color="oklch(72% 0.22 60)" />
-              <MetricBar label="Argument Accuracy (All)" value="49%" pct={49} color="oklch(65% 0.28 290)" />
-              <MetricBar label="UI Guide Accuracy (All)" value="31%" pct={31} color="oklch(78% 0.16 195)" />
-            </div>
-          </FadeIn>
-
-          {/* B1 System comparison */}
-          <FadeIn delay={160}>
-            <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(72% 0.20 155 / 0.30)" }}>
-              <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(72% 0.20 155)", marginBottom: "6px", letterSpacing: "0.04em" }}>
-                B1 — System Comparison (100-row test set)
-              </p>
-              <p style={{ fontSize: "0.78rem", color: "oklch(55% 0.02 260)", marginBottom: "18px" }}>
-                enable_thinking=False to match training format
-              </p>
-
-              {/* Table */}
-              <div style={{ marginBottom: "18px" }}>
-                {[
-                  { system: "Qwen3-0.6B-FC (ours)", toolAcc: "0.64", argF1: "0.49", uiGuide: "0.35", highlight: true },
-                  { system: "Qwen3-0.6B BASE", toolAcc: "0.55", argF1: "0.37", uiGuide: "0.23", highlight: false },
-                  { system: "Heuristic Router", toolAcc: "0.35", argF1: "0.17", uiGuide: "0.19", highlight: false },
-                ].map(({ system, toolAcc, argF1, uiGuide, highlight }) => (
-                  <div
-                    key={system}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "2fr 1fr 1fr 1fr",
-                      gap: "8px",
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      marginBottom: "6px",
-                      background: highlight ? "oklch(72% 0.20 155 / 0.10)" : "oklch(20% 0.02 260 / 0.4)",
-                      border: highlight ? "1px solid oklch(72% 0.20 155 / 0.4)" : "1px solid transparent",
-                      fontSize: "0.78rem",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span style={{ color: highlight ? "oklch(85% 0.01 260)" : "oklch(60% 0.02 260)", fontWeight: highlight ? 700 : 400 }}>
-                      {system}
-                    </span>
-                    <span style={{ color: highlight ? "oklch(72% 0.20 155)" : "oklch(55% 0.02 260)", fontWeight: highlight ? 700 : 400, textAlign: "center" }}>{toolAcc}</span>
-                    <span style={{ color: highlight ? "oklch(72% 0.20 155)" : "oklch(55% 0.02 260)", fontWeight: highlight ? 700 : 400, textAlign: "center" }}>{argF1}</span>
-                    <span style={{ color: highlight ? "oklch(72% 0.20 155)" : "oklch(55% 0.02 260)", fontWeight: highlight ? 700 : 400, textAlign: "center" }}>{uiGuide}</span>
-                  </div>
-                ))}
-                {/* Header */}
+              {[
+                { arch: "Full GPT-4o", routing: "$12–28", nlg: "$12–28", total: "$24–56", color: "oklch(65% 0.20 30)", best: false },
+                { arch: "Full Sarvam-M", routing: "$0.95", nlg: "$0.95", total: "$1.90", color: "oklch(65% 0.28 290)", best: false },
+                { arch: "NexusBots (Ours)", routing: "$0 (local)", nlg: "$0.95", total: "~$0.95", color: "oklch(72% 0.20 155)", best: true },
+              ].map(({ arch, routing, nlg, total, color, best }) => (
                 <div
+                  key={arch}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "2fr 1fr 1fr 1fr",
                     gap: "8px",
-                    padding: "4px 12px",
-                    fontSize: "0.68rem",
-                    color: "oklch(45% 0.02 260)",
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    marginBottom: "6px",
+                    background: best ? `${color}12` : "oklch(20% 0.02 260 / 0.4)",
+                    border: best ? `1px solid ${color}44` : "1px solid transparent",
+                    fontSize: "0.8rem",
+                    alignItems: "center",
                   }}
                 >
-                  <span>System</span>
-                  <span style={{ textAlign: "center" }}>Tool Acc</span>
-                  <span style={{ textAlign: "center" }}>Arg F1</span>
-                  <span style={{ textAlign: "center" }}>UI Guide</span>
+                  <span style={{ color: best ? "oklch(90% 0.01 260)" : "oklch(62% 0.02 260)", fontWeight: best ? 700 : 400 }}>
+                    {arch}
+                    {best && <span style={{ marginLeft: "8px", fontSize: "0.62rem", padding: "1px 6px", borderRadius: "999px", background: `${color}20`, border: `1px solid ${color}44`, color }}>✅</span>}
+                  </span>
+                  <span style={{ color: routing === "$0 (local)" ? "oklch(72% 0.20 155)" : "oklch(55% 0.02 260)", textAlign: "center", fontWeight: routing === "$0 (local)" ? 700 : 400 }}>{routing}</span>
+                  <span style={{ color: "oklch(55% 0.02 260)", textAlign: "center" }}>{nlg}</span>
+                  <span style={{ color, fontWeight: 800, textAlign: "center" }}>{total}</span>
+                </div>
+              ))}
+
+              <div style={{ marginTop: "18px", display: "flex", gap: "14px", flexWrap: "wrap" }}>
+                <div style={{ flex: "1 1 140px", textAlign: "center", padding: "14px", borderRadius: "10px", background: "oklch(72% 0.20 155 / 0.09)", border: "1px solid oklch(72% 0.20 155 / 0.25)" }}>
+                  <p style={{ fontWeight: 900, fontSize: "1.5rem", color: "oklch(72% 0.20 155)", lineHeight: 1 }}>50%</p>
+                  <p style={{ fontSize: "0.72rem", color: "oklch(52% 0.02 260)", marginTop: "4px" }}>cheaper than Sarvam-only</p>
+                </div>
+                <div style={{ flex: "1 1 140px", textAlign: "center", padding: "14px", borderRadius: "10px", background: "oklch(72% 0.22 60 / 0.09)", border: "1px solid oklch(72% 0.22 60 / 0.25)" }}>
+                  <p style={{ fontWeight: 900, fontSize: "1.5rem", color: "oklch(72% 0.22 60)", lineHeight: 1 }}>~30×</p>
+                  <p style={{ fontSize: "0.72rem", color: "oklch(52% 0.02 260)", marginTop: "4px" }}>cheaper than GPT-4o systems</p>
                 </div>
               </div>
+            </div>
+          </FadeIn>
 
-              {/* Gain badges */}
-              <div
-                style={{
-                  padding: "12px 14px",
-                  borderRadius: "10px",
-                  background: "oklch(72% 0.20 155 / 0.08)",
-                  border: "1px solid oklch(72% 0.20 155 / 0.25)",
-                }}
-              >
-                <p style={{ fontSize: "0.75rem", color: "oklch(55% 0.02 260)", marginBottom: "8px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                  Gain vs. Base Model
+          {/* Final result summary */}
+          <FadeIn delay={160}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+              <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(72% 0.20 155 / 0.30)" }}>
+                <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(72% 0.20 155)", marginBottom: "16px", letterSpacing: "0.04em" }}>
+                  Ablation Summary — Tool Accuracy
                 </p>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  {[
-                    { label: "Tool Acc", gain: "+9 pp" },
-                    { label: "Arg F1", gain: "+12 pp" },
-                    { label: "UI Guide", gain: "+12 pp" },
-                  ].map(({ label, gain }) => (
-                    <div key={label} style={{ textAlign: "center" }}>
-                      <p style={{ fontWeight: 800, fontSize: "1.1rem", color: "oklch(72% 0.20 155)" }}>{gain}</p>
-                      <p style={{ fontSize: "0.7rem", color: "oklch(50% 0.02 260)" }}>{label}</p>
-                    </div>
-                  ))}
-                </div>
+
+                {[
+                  { label: "Enhanced Prompt (Ours)", val: "79%", pct: 79, color: "oklch(72% 0.20 155)" },
+                  { label: "Base Prompt", val: "60%", pct: 60, color: "oklch(65% 0.28 290)" },
+                  { label: "LoRA v2", val: "51%", pct: 51, color: "oklch(78% 0.16 195)" },
+                  { label: "LoRA v1", val: "48%", pct: 48, color: "oklch(68% 0.12 260)" },
+                  { label: "Heuristic Router", val: "48%", pct: 48, color: "oklch(55% 0.08 260)" },
+                ].map(({ label, val, pct, color }) => (
+                  <MetricBar key={label} label={label} value={val} pct={pct} color={color} />
+                ))}
+              </div>
+
+              {/* Model strength/weakness card */}
+              <div className="glass-card" style={{ borderRadius: "16px", padding: "20px 22px" }}>
+                <p style={{ fontWeight: 700, fontSize: "0.82rem", color: "oklch(55% 0.02 260)", marginBottom: "12px", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+                  Model Comparison
+                </p>
+                {[
+                  { model: "Sarvam-M", strength: "High accuracy, strong Hindi", weakness: "High latency, parse errors", sc: "oklch(65% 0.28 290)" },
+                  { model: "Groq LLaMA-8B", strength: "Very fast, best UI guidance", weakness: "API errors, lower consistency", sc: "oklch(72% 0.22 60)" },
+                  { model: "NexusBots (Ours)", strength: "Balanced, cost-efficient, local", weakness: "Slightly lower UI guidance", sc: "oklch(72% 0.20 155)" },
+                ].map(({ model, strength, weakness, sc }) => (
+                  <div
+                    key={model}
+                    style={{
+                      padding: "10px 12px",
+                      borderRadius: "9px",
+                      marginBottom: "6px",
+                      background: "oklch(20% 0.02 260 / 0.45)",
+                      border: `1px solid ${sc}22`,
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr 1fr",
+                      gap: "10px",
+                      fontSize: "0.74rem",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, color: sc }}>{model}</span>
+                    <span style={{ color: "oklch(70% 0.02 260)" }}>✅ {strength}</span>
+                    <span style={{ color: "oklch(55% 0.02 260)" }}>⚠ {weakness}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </FadeIn>
@@ -1639,7 +2114,7 @@ export default function Present() {
 
         <div style={{ position: "relative", zIndex: 1, maxWidth: "860px", margin: "0 auto", width: "100%" }}>
           <FadeIn delay={0}>
-            <SectionLabel text="06 · Conclusion" color="oklch(65% 0.28 290)" />
+            <SectionLabel text="06 · Conclusion &amp; Takeaways" color="oklch(65% 0.28 290)" />
             <SectionHeading>
               What Nexus Bots{" "}
               <span

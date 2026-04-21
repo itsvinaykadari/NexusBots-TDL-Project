@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# Ensure local imports resolve when this script is run as a file path.
+FINETUNE_ROOT = Path(__file__).resolve().parent.parent
+if str(FINETUNE_ROOT) not in sys.path:
+    sys.path.insert(0, str(FINETUNE_ROOT))
+
 from eval.enhanced_prompt import ENHANCED_SYSTEM_PROMPT
 from config import BASE_MODEL, SYSTEM_PROMPT, TEST_PATH, RESULTS_DIR
 from peft import PeftModel
@@ -7,13 +15,8 @@ import argparse
 import csv
 import json
 import re
-import sys
 import time
 from collections import defaultdict
-from pathlib import Path
-
-# Add project root to sys.path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 def parse_json(text):
@@ -77,9 +80,9 @@ def load_base_model(base_model_name, requested_device="auto"):
             model = AutoModelForCausalLM.from_pretrained(
                 base_model_name,
                 torch_dtype=torch.float16,
-                device_map="cuda:0",
                 low_cpu_mem_usage=True,
             )
+            model = model.to("cuda:0")
             model.eval()
             return model, "cuda"
         except Exception as ex:
@@ -90,9 +93,9 @@ def load_base_model(base_model_name, requested_device="auto"):
     model = AutoModelForCausalLM.from_pretrained(
         base_model_name,
         torch_dtype=torch.float32,
-        device_map="cpu",
         low_cpu_mem_usage=True,
     )
+    model = model.to("cpu")
     model.eval()
     return model, "cpu"
 
@@ -183,6 +186,15 @@ def summarise(label, stats):
     n = sum(v["n"] for v in stats.values())
     lats = sorted(l for v in stats.values() for l in v["lats"])
     p50 = lats[len(lats)//2] if lats else 0
+    if n == 0:
+        return {
+            "system": label,
+            "tool_acc": 0.0,
+            "arg_f1": 0.0,
+            "ui_guide_acc": 0.0,
+            "p50_ms": round(p50, 1),
+            "count": 0,
+        }
     return {"system": label,
             "tool_acc": round(ok/n, 4), "arg_f1": round(f1/n, 4),
             "ui_guide_acc": round(gok/n, 4), "p50_ms": round(p50, 1), "count": n}
