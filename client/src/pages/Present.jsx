@@ -460,9 +460,9 @@ export default function Present() {
                 margin: "18px auto 0",
               }}
             >
-              A hybrid architecture where a fine-tuned <strong style={{ color: "oklch(78% 0.16 290)" }}>0.6B model</strong> handles
-              all structured tool-call routing locally, while a cloud LLM is invoked only for free-text generation —
-              reducing per-query cost by up to <strong style={{ color: "oklch(78% 0.16 195)" }}>30×</strong> over GPT-4o.
+              A hybrid architecture where a <strong style={{ color: "oklch(78% 0.16 290)" }}>small LLM model</strong> guided by enhanced prompting,
+              performs structured tool-call routing locally, while a cloud LLM is used only for natural-language generation
+              reducing overall system cost by up to <strong style={{ color: "oklch(78% 0.16 195)" }}>2× compared to fully cloud-based LLM pipelines</strong>.
             </p>
           </FadeIn>
 
@@ -584,22 +584,24 @@ export default function Present() {
             </FadeIn>
             <FadeIn delay={100}>
               <p style={{ color: "oklch(68% 0.02 260)", lineHeight: 1.85, fontSize: "0.95rem", marginBottom: "18px" }}>
-                Consumer robotics — humanoid robots, vacuum cleaners, delivery drones, educational platforms — is a fast-growing
-                product category requiring <strong style={{ color: "oklch(85% 0.01 260)" }}>intelligent discovery assistance</strong>.
-                Users expect chatbots that not only answer queries but also navigate catalog pages, compare products, and update carts.
+                Consumer robotics including humanoid robots, vacuum cleaners, delivery drones, and educational platforms is a rapidly growing
+                product category that requires <strong style={{ color: "oklch(85% 0.01 260)" }}>intelligent discovery assistance</strong>.
+                Users increasingly expect conversational systems that not only answer queries but also navigate catalog pages, compare products, and update carts.
               </p>
             </FadeIn>
+
             <FadeIn delay={180}>
               <p style={{ color: "oklch(68% 0.02 260)", lineHeight: 1.85, fontSize: "0.95rem", marginBottom: "18px" }}>
-                Current systems route <em>every</em> query through large LLM APIs (GPT-4, Claude, Gemini) for both intent
-                classification and generation. This is <strong style={{ color: "oklch(78% 0.16 290)" }}>unnecessarily expensive</strong> —
-                intent parsing is fundamentally a structured classification task.
+                Existing solutions rely on routing <em>every</em> query through large cloud-hosted LLMs (e.g., GPT-4, Claude, Gemini) for both intent
+                classification and response generation. This approach is <strong style={{ color: "oklch(78% 0.16 290)" }}>cost-inefficient</strong>,
+                as intent parsing is fundamentally a structured classification task that does not require large-scale models.
               </p>
             </FadeIn>
+
             <FadeIn delay={260}>
               <p style={{ color: "oklch(68% 0.02 260)", lineHeight: 1.85, fontSize: "0.95rem" }}>
-                Serving Hindi and Telugu speakers further complicates the pipeline, since no existing
-                system routes romanized voice input (e.g., <em>"drone kahan milega?"</em>) through an English-trained model.
+                Supporting multilingual users particularly Hindi and Telugu speakers introduces additional challenges, as current systems
+                struggle to handle romanized inputs (e.g., <em>"drone kahan milega?"</em>) with models primarily trained on English data.
               </p>
             </FadeIn>
           </div>
@@ -610,7 +612,7 @@ export default function Present() {
               <InfoCard
                 icon="🤖"
                 title="Consumer Robotics Boom"
-                desc="Humanoid robots, vacuum cleaners, delivery drones, and educational platforms demand intelligent, conversational discovery."
+                desc="Humanoid robots, vacuum cleaners, delivery drones, and educational platforms require intelligent, conversational discovery."
                 color="oklch(65% 0.28 290)"
               />
             </FadeIn>
@@ -618,7 +620,7 @@ export default function Present() {
               <InfoCard
                 icon="💬"
                 title="Conversational Interfaces"
-                desc="Users expect AI that performs actions — navigate catalog, compare specs, update cart — not just answer questions."
+                desc="Users expect AI systems that not only answer questions but also perform actions such as navigating catalogs, comparing products, and updating carts."
                 color="oklch(78% 0.16 195)"
               />
             </FadeIn>
@@ -626,7 +628,7 @@ export default function Present() {
               <InfoCard
                 icon="🌐"
                 title="Multilingual Complexity"
-                desc="Hindi and Telugu speakers require voice-to-romanized-text pipelines before any routing can occur."
+                desc="Hindi and Telugu queries introduce additional complexity, especially with romanized inputs (e.g., 'drone kahan milega?') that must be handled by English-trained models."
                 color="oklch(72% 0.22 60)"
               />
             </FadeIn>
@@ -634,8 +636,7 @@ export default function Present() {
               <InfoCard
                 icon="⚡"
                 title="Nexus Bots: Our Approach"
-                desc="Fine-tuned 0.6B model routes locally. Cloud LLM invoked only for NLG. Two novel contributions: romanized multilingual routing + UI guidance output."
-                color="oklch(72% 0.20 155)"
+                desc="A small LLM model with enhanced prompting performs local tool routing, while a cloud LLM is used only for natural-language generation. Key contributions: romanized multilingual routing and UI-guided outputs."
               />
             </FadeIn>
           </div>
@@ -725,7 +726,7 @@ export default function Present() {
                   fontWeight: 600,
                 }}
               >
-                Intent parsing is classification — not generation
+                Intent parsing is fundamentally a classification task, not a generative one.
               </div>
             </div>
           </FadeIn>
@@ -770,7 +771,7 @@ export default function Present() {
                   fontWeight: 600,
                 }}
               >
-                No system models UI guidance as structured output
+                No existing system explicitly models UI guidance as a structured output.
               </div>
             </div>
           </FadeIn>
@@ -801,8 +802,8 @@ export default function Present() {
                 2.3 — Multilingual Gap
               </p>
               <p style={{ fontSize: "0.85rem", color: "oklch(62% 0.02 260)", lineHeight: 1.7, marginBottom: "12px" }}>
-                Hindi and Telugu speakers are excluded unless <strong style={{ color: "oklch(78% 0.16 195)" }}>separate per-language models</strong>{" "}
-                are deployed. No system routes romanized voice input through an English-trained model.
+                Hindi and Telugu support typically requires <strong style={{ color: "oklch(78% 0.16 195)" }}>separate per-language models</strong>{" "}
+                Existing systems do not effectively handle romanized inputs
               </p>
               <div
                 style={{
@@ -814,7 +815,7 @@ export default function Present() {
                   fontWeight: 600,
                 }}
               >
-                e.g., "drone kahan milega?" → unrouted
+                e.g., "drone kahan milega?" using English-trained models.
               </div>
             </div>
           </FadeIn>
@@ -920,15 +921,16 @@ export default function Present() {
                 style={{ borderRadius: "16px", padding: "28px 24px", marginBottom: "20px", borderColor: "oklch(72% 0.20 155 / 0.30)" }}
               >
                 <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(72% 0.20 155)", marginBottom: "12px", letterSpacing: "0.04em" }}>
-                  §3.1 — Dual-Model Agentic Architecture
+                  3.1 — Dual-Model Agentic Architecture
                 </p>
                 <p style={{ fontSize: "0.85rem", color: "oklch(65% 0.02 260)", lineHeight: 1.75, marginBottom: "16px" }}>
-                  A fine-tuned <strong style={{ color: "oklch(85% 0.01 260)" }}>Qwen3-0.6B-FC</strong> runs locally,
+                  A <strong style={{ color: "oklch(85% 0.01 260)" }}>Qwen3-0.6B model</strong> with enhanced prompting runs locally,
                   outputting a structured JSON <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px", fontSize: "0.8rem" }}>
                     {"{tool, arguments, ui_guide}"}
                   </code> per user turn.
                   <strong style={{ color: "oklch(78% 0.16 195)" }}> SARVAM-M</strong> (cloud) is called only for
-                  natural-language generation — reducing cost by up to <strong style={{ color: "oklch(72% 0.22 60)" }}>30×</strong> over GPT-4o.
+                  natural-language generation reducing cost significantly.
+                  {/* <strong style={{ color: "oklch(72% 0.22 60)" }}>30×</strong> over GPT-4o. */}
                 </p>
 
                 {/* Pipeline */}
@@ -951,7 +953,7 @@ export default function Present() {
                     "→",
                     { label: "STT", sub: "SARVAM", c: "oklch(72% 0.22 60)" },
                     "→",
-                    { label: "Qwen3 FC", sub: "0.6B local", c: "oklch(72% 0.20 155)" },
+                    { label: "Small Model", sub: "Qwen3-0.6B local", c: "oklch(72% 0.20 155)" },
                     "→",
                     { label: "Tool Exec", sub: "SQLite", c: "oklch(78% 0.16 195)" },
                     "→",
@@ -1006,7 +1008,7 @@ export default function Present() {
                 style={{ borderRadius: "16px", padding: "28px 24px", borderColor: "oklch(78% 0.16 195 / 0.30)" }}
               >
                 <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(78% 0.16 195)", marginBottom: "12px", letterSpacing: "0.04em" }}>
-                  §3.2 — UI Guidance as Structured Output
+                  3.2 — UI Guidance as Structured Output
                 </p>
                 <p style={{ fontSize: "0.85rem", color: "oklch(65% 0.02 260)", lineHeight: 1.75, marginBottom: "20px" }}>
                   The FC model emits a <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px", fontSize: "0.8rem" }}>ui_guide</code>{" "}
@@ -1043,23 +1045,59 @@ export default function Present() {
                   <span style={{ color: "oklch(65% 0.28 290)" }}>{"}"}</span>
                 </div>
 
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "16px" }}>
-                  {["find_drone", "compare_mode", "cart_open", "search_bar", "filter_panel", "product_detail", "checkout", "recommend_panel", "category_nav", "voice_input", "help_overlay"].map((key) => (
-                    <span
-                      key={key}
-                      style={{
-                        padding: "3px 10px",
-                        borderRadius: "999px",
-                        fontSize: "0.7rem",
-                        fontWeight: 600,
-                        background: "oklch(78% 0.16 195 / 0.10)",
-                        border: "1px solid oklch(78% 0.16 195 / 0.3)",
-                        color: "oklch(78% 0.16 195)",
-                      }}
-                    >
-                      {key}
-                    </span>
-                  ))}
+                <div
+                  style={{
+                    marginTop: "16px",
+                  }}
+                >
+                  <p
+                    style={{
+                      marginBottom: "8px",
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      color: "oklch(70% 0.02 260)",
+                    }}
+                  >
+                    Available UI Guide Flows:
+                  </p>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "8px",
+                    }}
+                  >
+                    {[
+                      "find_drone",
+                      "compare_mode",
+                      "cart_open",
+                      "search_bar",
+                      "filter_panel",
+                      "product_detail",
+                      "checkout",
+                      "recommend_panel",
+                      "category_nav",
+                      "voice_input",
+                      "help_overlay",
+                    ].map((key) => (
+                      <span
+                        key={key}
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: "999px",
+                          fontSize: "0.72rem",
+                          fontWeight: 600,
+                          background: "oklch(78% 0.16 195 / 0.10)",
+                          border: "1px solid oklch(78% 0.16 195 / 0.3)",
+                          color: "oklch(78% 0.16 195)",
+                          letterSpacing: "0.2px",
+                        }}
+                      >
+                        {key}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </FadeIn>
@@ -1119,24 +1157,24 @@ export default function Present() {
                 style={{ borderRadius: "16px", padding: "28px 24px", borderColor: "oklch(65% 0.28 290 / 0.30)", marginBottom: "20px" }}
               >
                 <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(65% 0.28 290)", marginBottom: "12px", letterSpacing: "0.04em" }}>
-                  §3.3 — Romanized Multilingual Routing
+                  3.3 — Romanized Multilingual Routing
                 </p>
                 <p style={{ fontSize: "0.85rem", color: "oklch(65% 0.02 260)", lineHeight: 1.75, marginBottom: "16px" }}>
                   Rather than deploying a 7B+ multilingual model, we use a two-step approach that enables an
-                  <strong style={{ color: "oklch(85% 0.01 260)" }}> English-trained 0.6B model</strong> to serve Hindi and Telugu speakers without modification.
+                  <strong style={{ color: "oklch(85% 0.01 260)" }}> English-trained 0.6B model</strong> to serve Hindi and Telugu speakers without requiring a separate multilingual model.
                 </p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                   <StepCard
                     num="1"
                     title="SARVAM STT Transcription"
-                    desc='HI/TE voice → romanized Latin: "drone kahan milega" — no script conversion needed.'
+                    desc='HI/TE voice → romanized Latin: "drone kahan milega" - no native script handling required.'
                     color="oklch(65% 0.28 290)"
                   />
                   <StepCard
                     num="2"
                     title="Romanized Training Examples"
-                    desc="500 romanized examples included in fine-tuning data, enabling the model to route multilingual queries natively."
+                    desc="Romanized examples are included to help the model handle multilingual queries effectively."
                     color="oklch(72% 0.22 60)"
                   />
                 </div>
@@ -1196,11 +1234,11 @@ export default function Present() {
                 style={{ borderRadius: "16px", padding: "28px 24px", borderColor: "oklch(78% 0.16 195 / 0.30)" }}
               >
                 <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(78% 0.16 195)", marginBottom: "12px", letterSpacing: "0.04em" }}>
-                  §3.4 — Tool Schema
+                  3.4 — Tool Schema
                 </p>
                 <p style={{ fontSize: "0.85rem", color: "oklch(65% 0.02 260)", lineHeight: 1.75, marginBottom: "20px" }}>
-                  Six tools are defined with schemas shared identically between training and inference —
-                  eliminating drift. Each tool maps to a deterministic backend action.
+                  Six tools are defined with schemas shared consistently between training and inference,
+                  eliminating schema drift. Each tool maps to a deterministic backend action.
                 </p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -1293,19 +1331,18 @@ export default function Present() {
           <FadeIn delay={80}>
             <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(70% 0.24 320 / 0.30)" }}>
               <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(70% 0.24 320)", marginBottom: "14px", letterSpacing: "0.04em" }}>
-                §4.1 — Dataset Construction
+                4.1 — Dataset Construction
               </p>
               <p style={{ fontSize: "0.83rem", color: "oklch(65% 0.02 260)", lineHeight: 1.7, marginBottom: "16px" }}>
-                <strong style={{ color: "oklch(85% 0.01 260)" }}>1,113 rows</strong> in ChatML format.
-                100 manually authored golden examples → GPT-4 generated remaining via structured templates.
-                Each row is a <em>three-turn conversation</em>.
+                The dataset consists of <strong style={{ color: "oklch(85% 0.01 260)" }}>1,113 rows</strong>training examples and a 100-row held-out test set, all in ChatML format. 
+                Each example is a three-turn conversation designed for function-calling.
               </p>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
                 {[
-                  { label: "English", train: 501, test: 55, color: "oklch(65% 0.28 290)" },
-                  { label: "Hindi", train: 373, test: 27, color: "oklch(72% 0.22 60)" },
-                  { label: "Telugu", train: 239, test: 18, color: "oklch(78% 0.16 195)" },
+                  { label: "English", train: 607, test: 55, color: "oklch(65% 0.28 290)" },
+                  { label: "Hindi", train: 313, test: 27, color: "oklch(72% 0.22 60)" },
+                  { label: "Telugu", train: 193,test: 18, color: "oklch(78% 0.16 195)" },
                 ].map(({ label, train, test, color }) => (
                   <div
                     key={label}
@@ -1329,13 +1366,13 @@ export default function Present() {
                   }}
                 >
                   <p style={{ fontWeight: 700, fontSize: "0.82rem", color: "oklch(75% 0.01 260)", marginBottom: "4px" }}>Total</p>
-                  <p style={{ fontSize: "0.75rem", color: "oklch(55% 0.02 260)" }}>1,113 · Test: 100</p>
+                  <p style={{ fontSize: "0.75rem", color: "oklch(55% 0.02 260)" }}>Train: 1,113 · Test: 100</p>
                 </div>
               </div>
 
-              <p style={{ fontSize: "0.78rem", color: "oklch(55% 0.02 260)", lineHeight: 1.6 }}>
+              {/* <p style={{ fontSize: "0.78rem", color: "oklch(55% 0.02 260)", lineHeight: 1.6 }}>
                 Difficulty split: 400 Simple · 380 Medium · 280 Complex · 53 Edge
-              </p>
+              </p> */}
             </div>
           </FadeIn>
 
@@ -1343,12 +1380,12 @@ export default function Present() {
           <FadeIn delay={160}>
             <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(65% 0.28 290 / 0.30)" }}>
               <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(65% 0.28 290)", marginBottom: "14px", letterSpacing: "0.04em" }}>
-                §4.2 — Fine-Tuning (QLoRA)
+                4.2 — Fine-Tuning (QLoRA)
               </p>
               <p style={{ fontSize: "0.83rem", color: "oklch(65% 0.02 260)", lineHeight: 1.7, marginBottom: "16px" }}>
-                <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px" }}>Qwen/Qwen3-0.6B</code> via
-                HF PEFT/TRL · LoRA <em>r</em>=16, α=32 · <strong style={{ color: "oklch(78% 0.16 290)" }}>1.67% trainable params</strong> ·
-                LR 2×10⁻⁴ cosine · 1 epoch · batch 16 · bf16
+                <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px" }}>Qwen3-0.6B</code> was fine-tuned using HF PEFT/TRL with:
+                LoRA (r=16, α=32),<strong style={{ color: "oklch(78% 0.16 290)" }}>1.67% trainable params</strong> ·
+                LR 5×10⁻⁴ (cosine schedule) 1 epoch, effective batch size 16, bf16 precision  
               </p>
 
               <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "oklch(55% 0.02 260)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>
@@ -1391,7 +1428,7 @@ export default function Present() {
           <FadeIn delay={240}>
             <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(78% 0.16 195 / 0.30)" }}>
               <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(78% 0.16 195)", marginBottom: "14px", letterSpacing: "0.04em" }}>
-                §4.3 — Benchmark Suite
+                4.3 — Benchmark Suite
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -1407,8 +1444,9 @@ export default function Present() {
                     B1 — Function-Calling Accuracy
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "oklch(60% 0.02 260)", lineHeight: 1.65 }}>
-                    100-row held-out test set across 3 systems: fine-tuned FC, base model, heuristic router.
-                    Metrics: Tool Accuracy, Argument F1, UI Guide Accuracy. Broken down by EN / HI / TE.
+                    Evaluated on a 100-row held-out test set across multiple systems:
+                    Enhanced Prompt, Original Prompt, LoRA v2, LoRA v1, and Heuristic Router.  
+                    Metrics: Tool Accuracy, Argument F1, UI Guide Accuracy, with breakdown by EN / HI / TE.
                   </p>
                 </div>
 
@@ -1424,8 +1462,8 @@ export default function Present() {
                     B2 — Base-Model Baseline
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "oklch(60% 0.02 260)", lineHeight: 1.65 }}>
-                    75 hand-crafted prompts across all 6 tools × 3 languages × 3 difficulty levels,
-                    run on base Qwen3-0.6B to establish the no-adaptation ceiling and identify failure modes.
+                    75 hand-crafted prompts covering all 6 tools, 3 languages, and multiple difficulty levels 
+                    (including edge cases), used to evaluate the base model without adaptation.
                   </p>
                 </div>
               </div>
