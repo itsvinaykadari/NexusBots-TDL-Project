@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import AISidePanel from "./components/AISidePanel";
 import CartDrawer from "./components/CartDrawer";
 import Home from "./pages/Home";
+import Present from "./pages/Present";
 import CategoryPage from "./pages/CategoryPage";
 import RobotDetail from "./pages/RobotDetail";
 import OrderHistory from "./pages/OrderHistory";
@@ -54,6 +55,7 @@ function App() {
               >
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/present" element={<Present />} />
                   <Route path="/catalog" element={<Navigate to="/catalog/kitchen" replace />} />
                   <Route path="/catalog/:slug" element={<CategoryPage />} />
                   <Route path="/robot/:id" element={<RobotDetail />} />

@@ -155,6 +155,22 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
                 Home
               </Link>
 
+              {/* Present */}
+              <Link
+                to="/present"
+                className="px-3 py-2 rounded-lg text-sm font-medium"
+                style={{
+                  color: location.pathname === "/present" ? "#fff" : "var(--color-text-muted)",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={(e) => {
+                  if (location.pathname !== "/present") e.currentTarget.style.color = "var(--color-text-muted)";
+                }}
+              >
+                Present
+              </Link>
+
               {/* Robots — mega-menu trigger (click-only) */}
               <button
                 ref={triggerRef}
@@ -331,6 +347,12 @@ export default function Navbar({ onCartClick, onAIClick, isAIOpen }) {
                   className="px-3 py-2.5 rounded-lg text-sm font-medium"
                   style={{ color: location.pathname === "/" ? "#fff" : "var(--color-text-muted)" }}>
                   Home
+                </Link>
+
+                <Link to="/present" onClick={() => setMobileOpen(false)}
+                  className="px-3 py-2.5 rounded-lg text-sm font-medium"
+                  style={{ color: location.pathname === "/present" ? "#fff" : "var(--color-text-muted)" }}>
+                  Present
                 </Link>
 
                 {/* Mobile categories */}
