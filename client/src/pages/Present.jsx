@@ -758,7 +758,7 @@ export default function Present() {
               </p>
               <p style={{ fontSize: "0.85rem", color: "oklch(62% 0.02 260)", lineHeight: 1.7, marginBottom: "12px" }}>
                 Existing chatbots return free-text only. A user asking{" "}
-                <em style={{ color: "oklch(78% 0.02 260)" }}>"how do I compare two robots?"</em>{" "}
+                <em style={{ color: "oklch(78% 0.02 260)" }}>"where is the cheapest drone?"</em>{" "}
                 needs an <strong style={{ color: "oklch(65% 0.28 290)" }}>on-screen highlight</strong>, not a paragraph.
               </p>
               <div
@@ -841,10 +841,10 @@ export default function Present() {
               2.4 · Scope of This Work
             </p>
             {[
-              { val: "12", label: "Products" },
+              // { val: "12", label: "Products" },
               { val: "4", label: "Categories" },
               { val: "6", label: "Tool Calls" },
-              { val: "11", label: "UI Flows" },
+              // { val: "11", label: "UI Flows" },
               { val: "EN / HI / TE", label: "Languages" },
               { val: "React + Node.js", label: "Stack" },
             ].map(({ val, label }) => (
@@ -1011,7 +1011,7 @@ export default function Present() {
                   3.2 — UI Guidance as Structured Output
                 </p>
                 <p style={{ fontSize: "0.85rem", color: "oklch(65% 0.02 260)", lineHeight: 1.75, marginBottom: "20px" }}>
-                  The FC model emits a <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px", fontSize: "0.8rem" }}>ui_guide</code>{" "}
+                  The small model emits a <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px", fontSize: "0.8rem" }}>ui_guide</code>{" "}
                   key alongside each tool call, selecting one of <strong style={{ color: "oklch(78% 0.16 195)" }}>11 predefined flows</strong>.
                   React's <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px", fontSize: "0.8rem" }}>UIGuideProvider</code>{" "}
                   maps this key to a DOM element and highlights it via Floating UI tooltips. No frontend conditional logic required.
@@ -1285,7 +1285,7 @@ export default function Present() {
       </Slide>
 
       {/* ══════════════════════════════════
-          5. EXPERIMENTS
+          4. EXPERIMENTS
       ══════════════════════════════════ */}
       <Slide>
         <div
@@ -1334,7 +1334,7 @@ export default function Present() {
                 4.1 — Dataset Construction
               </p>
               <p style={{ fontSize: "0.83rem", color: "oklch(65% 0.02 260)", lineHeight: 1.7, marginBottom: "16px" }}>
-                The dataset consists of <strong style={{ color: "oklch(85% 0.01 260)" }}>1,113 rows</strong>training examples and a 100-row held-out test set, all in ChatML format. 
+                The dataset consists of <strong style={{ color: "oklch(85% 0.01 260)" }}>1,113 rows</strong>training examples and a 100-row held-out test set, all in ChatML format.
                 Each example is a three-turn conversation designed for function-calling.
               </p>
 
@@ -1342,7 +1342,7 @@ export default function Present() {
                 {[
                   { label: "English", train: 607, test: 55, color: "oklch(65% 0.28 290)" },
                   { label: "Hindi", train: 313, test: 27, color: "oklch(72% 0.22 60)" },
-                  { label: "Telugu", train: 193,test: 18, color: "oklch(78% 0.16 195)" },
+                  { label: "Telugu", train: 193, test: 18, color: "oklch(78% 0.16 195)" },
                 ].map(({ label, train, test, color }) => (
                   <div
                     key={label}
@@ -1383,11 +1383,8 @@ export default function Present() {
                 4.2 — Fine-Tuning (QLoRA)
               </p>
               <p style={{ fontSize: "0.83rem", color: "oklch(65% 0.02 260)", lineHeight: 1.7, marginBottom: "16px" }}>
-                <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px" }}>Qwen3-0.6B</code> was fine-tuned using HF PEFT/TRL with:
-                LoRA (r=16, α=32),<strong style={{ color: "oklch(78% 0.16 290)" }}>1.67% trainable params</strong> ·
-                LR 5×10⁻⁴ (cosine schedule) 1 epoch, effective batch size 16, bf16 precision  
+                <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px" }}>Qwen3-0.6B</code> was fine-tuned using parameter-efficient methods (LoRA via HF PEFT/TRL), enabling lightweight adaptation with minimal compute overhead.
               </p>
-
               <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "oklch(55% 0.02 260)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>
                 Training Dynamics
               </p>
@@ -1445,7 +1442,7 @@ export default function Present() {
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "oklch(60% 0.02 260)", lineHeight: 1.65 }}>
                     Evaluated on a 100-row held-out test set across multiple systems:
-                    Enhanced Prompt, Original Prompt, LoRA v2, LoRA v1, and Heuristic Router.  
+                    Enhanced Prompt, Original Prompt, LoRA v2, LoRA v1, and Heuristic Router.
                     Metrics: Tool Accuracy, Argument F1, UI Guide Accuracy, with breakdown by EN / HI / TE.
                   </p>
                 </div>
@@ -1462,7 +1459,7 @@ export default function Present() {
                     B2 — Base-Model Baseline
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "oklch(60% 0.02 260)", lineHeight: 1.65 }}>
-                    75 hand-crafted prompts covering all 6 tools, 3 languages, and multiple difficulty levels 
+                    75 hand-crafted prompts covering all 6 tools, 3 languages, and multiple difficulty levels
                     (including edge cases), used to evaluate the base model without adaptation.
                   </p>
                 </div>
@@ -1572,7 +1569,7 @@ export default function Present() {
             </div>
 
             {[
-              { system: "NexusBots (Ours)", toolAcc: "0.79", argF1: "0.5467", uiGuide: "0.52", latency: "1113 ms", errors: "0", highlight: true, color: "oklch(72% 0.20 155)" },
+              { system: "NexusBots (Ours)", toolAcc: "0.79", argF1: "0.5467", uiGuide: "0.72", latency: "1113 ms", errors: "0", highlight: true, color: "oklch(72% 0.20 155)" },
               { system: "Sarvam-M (thinking ON)", toolAcc: "0.78", argF1: "0.5567", uiGuide: "0.57", latency: "2252 ms", errors: "9 parse", highlight: false, color: "oklch(65% 0.28 290)" },
               { system: "Groq LLaMA-3.1-8B", toolAcc: "0.75", argF1: "0.5942", uiGuide: "0.68", latency: "434 ms", errors: "9 API", highlight: false, color: "oklch(72% 0.22 60)" },
             ].map(({ system, toolAcc, argF1, uiGuide, latency, errors, highlight, color }) => (
@@ -1868,11 +1865,11 @@ export default function Present() {
                 Tool Accuracy by Approach
               </p>
 
-              <MetricBar label="Enhanced Prompt (Ours) ✅" value="79%" pct={79} color="oklch(72% 0.20 155)" />
-              <MetricBar label="Base Model (Original Prompt)" value="60%" pct={60} color="oklch(65% 0.28 290)" />
-              <MetricBar label="LoRA v2" value="51%" pct={51} color="oklch(78% 0.16 195)" />
-              <MetricBar label="LoRA v1" value="48%" pct={48} color="oklch(60% 0.14 260)" />
-              <MetricBar label="Heuristic Router" value="48%" pct={48} color="oklch(55% 0.10 260)" />
+              <MetricBar label="Base Model +Enhanced Prompt (Ours)" value="79%" pct={79} color="oklch(72% 0.20 155)" />
+              <MetricBar label="Qwen3 FC v2" value="64%" pct={64} color="oklch(65% 0.28 290)" />
+              <MetricBar label="Base Model (Original Prompt)" value="55%" pct={55} color="oklch(78% 0.16 195)" />
+              <MetricBar label="Qwen3 FC v1" value="48%" pct={48} color="oklch(60% 0.14 260)" />
+              <MetricBar label="Heuristic Router" value="35%" pct={35} color="oklch(55% 0.10 260)" />
             </div>
           </FadeIn>
 
@@ -1905,10 +1902,10 @@ export default function Present() {
                   Fine-Tuning
                 </p>
                 <p style={{ fontSize: "0.85rem", color: "oklch(65% 0.02 260)", lineHeight: 1.75 }}>
-                  For a 0.6B model, carefully structured prompts outperform QLoRA adapters by{" "}
-                  <strong style={{ color: "oklch(72% 0.22 60)" }}>+28 pp</strong> over heuristics and{" "}
-                  <strong style={{ color: "oklch(72% 0.20 155)" }}>+19 pp</strong> over base prompt alone.
-                  LoRA fine-tuning on small models can hurt generalization if data is limited.
+                  For a small llm model, carefully structured prompts outperform QLoRA adapters (Qwen3 FC v2) by up to <strong style={{ color: "oklch(72% 0.22 60)" }}>+15 pp</strong>,{" "}
+                  as well as <strong style={{ color: "oklch(72% 0.22 60)" }}>+24 pp</strong> over the Base Model (Original Prompt) and{" "}
+                  <strong style={{ color: "oklch(72% 0.20 155)" }}>+44 pp</strong> over Heuristics Router.
+                  These results suggest that fine-tuning small models with limited data can degrade generalization, while structured prompting better preserves pre-trained capabilities.
                 </p>
               </div>
             </FadeIn>
@@ -2080,20 +2077,34 @@ export default function Present() {
           {/* Final result summary */}
           <FadeIn delay={160}>
             <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-              <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(72% 0.20 155 / 0.30)" }}>
-                <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(72% 0.20 155)", marginBottom: "16px", letterSpacing: "0.04em" }}>
+              <div
+                className="glass-card"
+                style={{
+                  borderRadius: "16px",
+                  padding: "26px 24px",
+                  borderColor: "oklch(72% 0.20 155 / 0.30)",
+                }}
+              >
+                <p
+                  style={{
+                    fontWeight: 700,
+                    fontSize: "0.88rem",
+                    color: "oklch(72% 0.20 155)",
+                    marginBottom: "16px",
+                    letterSpacing: "0.04em",
+                  }}
+                >
                   Ablation Summary — Tool Accuracy
                 </p>
 
-                {[
-                  { label: "Enhanced Prompt (Ours)", val: "79%", pct: 79, color: "oklch(72% 0.20 155)" },
-                  { label: "Base Prompt", val: "60%", pct: 60, color: "oklch(65% 0.28 290)" },
-                  { label: "LoRA v2", val: "51%", pct: 51, color: "oklch(78% 0.16 195)" },
-                  { label: "LoRA v1", val: "48%", pct: 48, color: "oklch(68% 0.12 260)" },
-                  { label: "Heuristic Router", val: "48%", pct: 48, color: "oklch(55% 0.08 260)" },
-                ].map(({ label, val, pct, color }) => (
-                  <MetricBar key={label} label={label} value={val} pct={pct} color={color} />
-                ))}
+                {/* Removed glass-card here */}
+                <div style={{ padding: "28px 26px" }}>
+                  <MetricBar label="Base Model +Enhanced Prompt (Ours)" value="79%" pct={79} color="oklch(72% 0.20 155)" />
+                  <MetricBar label="Qwen3 FC v2" value="64%" pct={64} color="oklch(65% 0.28 290)" />
+                  <MetricBar label="Base Model (Original Prompt)" value="55%" pct={55} color="oklch(78% 0.16 195)" />
+                  <MetricBar label="Qwen3 FC v1" value="48%" pct={48} color="oklch(60% 0.14 260)" />
+                  <MetricBar label="Heuristic Router" value="35%" pct={35} color="oklch(55% 0.10 260)" />
+                </div>
               </div>
 
               {/* Model strength/weakness card */}
@@ -2171,9 +2182,9 @@ export default function Present() {
           <FadeIn delay={80}>
             <p style={{ fontSize: "1rem", color: "oklch(68% 0.02 260)", lineHeight: 1.85, marginBottom: "36px" }}>
               Full-LLM routing is <strong style={{ color: "oklch(85% 0.01 260)" }}>unnecessary</strong> for structured commerce intent.
-              Offloading tool-call classification to a fine-tuned 0.6B model reduces per-query cost by up to
+              Offloading tool-call classification to a 0.6B model with enhanced prompting enables local routing, reducing per-query cost by up to
               <strong style={{ color: "oklch(72% 0.22 60)" }}> 30×</strong> compared to GPT-4o and
-              <strong style={{ color: "oklch(78% 0.16 195)" }}> 2×</strong> compared to full SARVAM-M, while keeping routing local.
+              <strong style={{ color: "oklch(78% 0.16 195)" }}> 2×</strong> compared to full SARVAM-M, while maintaining competitive accuracy.
             </p>
           </FadeIn>
 
@@ -2186,7 +2197,7 @@ export default function Present() {
                   Romanized Multilingual Routing
                 </p>
                 <p style={{ fontSize: "0.82rem", color: "oklch(60% 0.02 260)", lineHeight: 1.65 }}>
-                  English-trained 0.6B model serves Hindi and Telugu speakers via SARVAM STT + 500 romanized training examples. No separate multilingual model needed.
+                  An English-trained 0.6B model serves Hindi and Telugu users via SARVAM STT and romanized inputs, eliminating the need for a separate multilingual model.
                 </p>
               </div>
             </FadeIn>
@@ -2197,7 +2208,7 @@ export default function Present() {
                   UI Guidance as Structured Output
                 </p>
                 <p style={{ fontSize: "0.82rem", color: "oklch(60% 0.02 260)", lineHeight: 1.65 }}>
-                  First-class ui_guide key emitted alongside every tool call bridges AI intent with on-screen interaction via Floating UI tooltips.
+                  A first-class `ui_guide` key is emitted alongside each tool call, directly mapping model intent to on-screen interaction using Floating UI tooltips.
                 </p>
               </div>
             </FadeIn>
@@ -2208,7 +2219,7 @@ export default function Present() {
                   30× Cost Reduction
                 </p>
                 <p style={{ fontSize: "0.82rem", color: "oklch(60% 0.02 260)", lineHeight: 1.65 }}>
-                  Local Qwen3-0.6B-FC eliminates all routing API costs. Only SARVAM-M NLG calls incur cloud expense — ~$0.95/day at 10k queries.
+                  Local routing eliminates all routing API costs. Only SARVAM-M is used for natural-language generation, resulting in ~$0.95/day at 10k queries.
                 </p>
               </div>
             </FadeIn>
@@ -2230,10 +2241,10 @@ export default function Present() {
               }}
             >
               {[
-                { val: "0.6B", label: "Local FC Model" },
-                { val: "30×", label: "Cost Saving vs GPT-4o" },
-                { val: "99.1%", label: "Token Accuracy" },
-                { val: "3", label: "Languages Served" },
+                { val: "0.6B", label: "Local Routing Model" },
+                { val: "30×", label: "Cost Reduction vs GPT-4o" },
+                { val: "79%", label: "Tool Accuracy" },
+                { val: "3", label: "Languages Supported" },
                 { val: "11", label: "UI Guidance Flows" },
               ].map(({ val, label }) => (
                 <div key={label} style={{ textAlign: "center" }}>
