@@ -592,8 +592,8 @@ export default function Present() {
 
             <FadeIn delay={180}>
               <p style={{ color: "oklch(68% 0.02 260)", lineHeight: 1.85, fontSize: "0.95rem", marginBottom: "18px" }}>
-                Existing solutions rely on routing <em>every</em> query through large cloud-hosted LLMs (e.g., GPT-4, Claude, Gemini) for both intent
-                classification and response generation. This approach is <strong style={{ color: "oklch(78% 0.16 290)" }}>cost-inefficient</strong>,
+                Many existing systems route user queries through large cloud-hosted LLMs (e.g., GPT-4, Claude, Gemini) for both intent
+                classification and response generation. While effective, this approach is <strong style={{ color: "oklch(78% 0.16 290)" }}>cost-inefficient</strong>,
                 as intent parsing is fundamentally a structured classification task that does not require large-scale models.
               </p>
             </FadeIn>
