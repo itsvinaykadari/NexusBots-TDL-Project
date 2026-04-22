@@ -1304,7 +1304,7 @@ export default function Present() {
         <FadeIn delay={0}>
           <SectionLabel text="04 · Experiments" color="oklch(70% 0.24 320)" />
           <SectionHeading>
-            Dataset, Fine-Tuning{" "}
+            Dataset, Enhanced Prompt{" "}
             <span
               style={{
                 background: "linear-gradient(135deg, oklch(70% 0.24 320), oklch(65% 0.28 290))",
@@ -1376,45 +1376,43 @@ export default function Present() {
             </div>
           </FadeIn>
 
-          {/* Fine-tuning */}
+          {/* Enhanced Prompt Specification */}
           <FadeIn delay={160}>
             <div className="glass-card" style={{ borderRadius: "16px", padding: "26px 24px", borderColor: "oklch(65% 0.28 290 / 0.30)" }}>
               <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "oklch(65% 0.28 290)", marginBottom: "14px", letterSpacing: "0.04em" }}>
-                4.2 — Fine-Tuning (QLoRA)
+                4.2 — Enhanced Prompt Specification
               </p>
               <p style={{ fontSize: "0.83rem", color: "oklch(65% 0.02 260)", lineHeight: 1.7, marginBottom: "16px" }}>
-                <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px" }}>Qwen3-0.6B</code> was fine-tuned using parameter-efficient methods (LoRA via HF PEFT/TRL), enabling lightweight adaptation with minimal compute overhead.
+                We replaced fine-tuning with a highly structured <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px" }}>few-shot prompt</code> template. This specification guides the base <code style={{ background: "oklch(25% 0.02 260)", padding: "2px 6px", borderRadius: "5px" }}>Qwen3-0.6B</code> without modifying weights, preserving pre-trained generalization while maximizing tool accuracy.
               </p>
               <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "oklch(55% 0.02 260)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>
-                Training Dynamics
+                Prompt Components
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {[
-                  { epoch: "0.14", loss: "2.053", acc: "63.8%", highlight: false },
-                  { epoch: "0.71 (eval)", loss: "0.097", acc: "98.2%", highlight: false },
-                  { epoch: "0.86", loss: "0.075", acc: "98.9%", highlight: false },
-                  { epoch: "1.00", loss: "0.054", acc: "99.1%", highlight: true },
-                ].map(({ epoch, loss, acc, highlight }) => (
+                  { component: "System Role", desc: "Defines the assistant as a strict routing engine", highlight: false },
+                  { component: "Tool Schema", desc: "JSON-Schema definitions for available APIs", highlight: false },
+                  { component: "Golden Examples", desc: "Hand-crafted multishot demos of tool use", highlight: false },
+                  { component: "Output Format", desc: "Forces single JSON string with ui_guide", highlight: true },
+                ].map(({ component, desc, highlight }) => (
                   <div
-                    key={epoch}
+                    key={component}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1.5fr 1fr 1fr",
+                      gridTemplateColumns: "1.1fr 2fr",
                       gap: "8px",
-                      padding: "8px 12px",
+                      padding: "10px 12px",
                       borderRadius: "8px",
                       background: highlight ? "oklch(65% 0.28 290 / 0.10)" : "oklch(20% 0.02 260 / 0.4)",
                       border: highlight ? "1px solid oklch(65% 0.28 290 / 0.4)" : "1px solid transparent",
                       fontSize: "0.78rem",
+                      alignItems: "center",
                     }}
                   >
                     <span style={{ color: highlight ? "oklch(78% 0.16 290)" : "oklch(65% 0.02 260)", fontWeight: highlight ? 700 : 400 }}>
-                      Epoch {epoch}
+                      {component}
                     </span>
-                    <span style={{ color: "oklch(62% 0.02 260)", textAlign: "center" }}>Loss: {loss}</span>
-                    <span style={{ color: highlight ? "oklch(72% 0.20 155)" : "oklch(62% 0.02 260)", fontWeight: highlight ? 700 : 400, textAlign: "right" }}>
-                      Acc: {acc}
-                    </span>
+                    <span style={{ color: "oklch(62% 0.02 260)" }}>{desc}</span>
                   </div>
                 ))}
               </div>
@@ -1718,7 +1716,7 @@ export default function Present() {
               <MetricBar label="English (EN)" value="84%" pct={84} color="oklch(65% 0.28 290)" />
               <MetricBar label="Telugu (TE)" value="83%" pct={83} color="oklch(78% 0.16 195)" />
               <MetricBar label="Hindi (HI)" value="67%" pct={67} color="oklch(72% 0.22 60)" />
-              <div
+              {/* <div
                 style={{
                   marginTop: "14px",
                   padding: "10px 14px",
@@ -1730,7 +1728,7 @@ export default function Present() {
                 }}
               >
                 Strong in EN + TE · Hindi gap vs Sarvam
-              </div>
+              </div> */}
             </div>
           </FadeIn>
 
@@ -1742,7 +1740,7 @@ export default function Present() {
               <MetricBar label="Telugu (TE)" value="89%" pct={89} color="oklch(78% 0.16 195)" />
               <MetricBar label="Hindi (HI)" value="81%" pct={81} color="oklch(72% 0.22 60)" />
               <MetricBar label="English (EN)" value="73%" pct={73} color="oklch(65% 0.28 290)" />
-              <div
+              {/* <div
                 style={{
                   marginTop: "14px",
                   padding: "10px 14px",
@@ -1754,7 +1752,7 @@ export default function Present() {
                 }}
               >
                 Best Hindi · but high latency + parse errors
-              </div>
+              </div> */}
             </div>
           </FadeIn>
 
@@ -1766,7 +1764,7 @@ export default function Present() {
               <MetricBar label="English (EN)" value="75%" pct={75} color="oklch(65% 0.28 290)" />
               <MetricBar label="Telugu (TE)" value="83%" pct={83} color="oklch(78% 0.16 195)" />
               <MetricBar label="Hindi (HI)" value="70%" pct={70} color="oklch(72% 0.22 60)" />
-              <div
+              {/* <div
                 style={{
                   marginTop: "14px",
                   padding: "10px 14px",
@@ -1778,7 +1776,7 @@ export default function Present() {
                 }}
               >
                 Fastest · best UI guidance · but 9 API errors
-              </div>
+              </div> */}
             </div>
           </FadeIn>
         </div>
@@ -1801,9 +1799,9 @@ export default function Present() {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
               {[
-                { icon: "🔵", text: "Our model leads EN (84%) & matches TE (83%), proving a 600M model can rival 7B+ for routing tasks" },
-                { icon: "🟡", text: "Hindi gap (67% vs 81%) is likely due to fewer romanized HI examples — addressable with more data" },
-                { icon: "🟢", text: "Despite 0 errors and lowest latency per accuracy point, we remain competitive across all three languages" },
+                { icon: "🔵", text: "Our model leads in English (84%) and matches Groq in Telugu (83%), while remaining competitive in Hindi (67%)." },
+                // { icon: "🟡", text: "Hindi gap (67% vs 81%) is likely due to fewer romanized HI examples — addressable with more data" },
+                { icon: "🟢", text: "Despite using a significantly smaller 0.6B model with local routing, our system achieves comparable multilingual performance to larger API-based models, with lower latency and zero routing errors." },
               ].map(({ icon, text }) => (
                 <div key={text} style={{ display: "flex", gap: "8px", flex: "1 1 260px", alignItems: "flex-start", fontSize: "0.8rem", color: "oklch(68% 0.02 260)", lineHeight: 1.6 }}>
                   <span style={{ flexShrink: 0 }}>{icon}</span>
@@ -1951,7 +1949,7 @@ export default function Present() {
                 </div>
 
                 <p style={{ fontSize: "0.76rem", color: "oklch(52% 0.02 260)", lineHeight: 1.6 }}>
-                  Parse rate 87% — model can generate valid JSON but misses tool names without better prompting.
+                  Parse rate 87% model can generate valid JSON but misses tool names without better prompting.
                 </p>
               </div>
             </FadeIn>
