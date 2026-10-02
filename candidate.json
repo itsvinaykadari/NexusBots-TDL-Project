@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Nexus Bots Runtime Architecture",
+    "subtitle": "Dual-model robotics commerce · Qwen3-0.6B routes · SARVAM-M responds",
+    "output": "nexusbots-architecture.html",
+    "repository": {
+      "url": "https://github.com/itsvinaykadari/NexusBots-TDL-Project",
+      "provider": "github",
+      "revision": "768b61025b65506fa87e93583761b6baadf17341"
+    }
+  },
+  "components": [
+    {
+      "id": "shopper",
+      "type": "external",
+      "label": "Shopper",
+      "sublabel": "Browser · text / voice",
+      "pos": [40, 300],
+      "size": [130, 60]
+    },
+    {
+      "id": "react-spa",
+      "type": "frontend",
+      "label": "React SPA",
+      "sublabel": "Vite · Tailwind · AI panel",
+      "tag": "UI guide + activity",
+      "pos": [320, 300],
+      "size": [160, 64],
+      "sources": [
+        { "path": "client/src/App.jsx", "line": 45, "end_line": 66, "label": "Providers + routes" },
+        { "path": "client/src/components/AISidePanel.jsx", "line": 149, "end_line": 185, "label": "POST /api/ai/chat" },
+        { "path": "client/src/ui-guide/UIGuideProvider.jsx", "line": 1, "end_line": 26, "label": "ui_guide flows" }
+      ]
+    },
+    {
+      "id": "catalog-static",
+      "type": "database",
+      "label": "Static Catalog",
+      "sublabel": "robots.js · 12 robots",
+      "tag": "UI browse source",
+      "pos": [325, 110],
+      "size": [150, 60],
+      "sources": [
+        { "path": "client/src/data/robots.js", "line": 1, "end_line": 27, "label": "Embedded catalog" },
+        { "path": "client/src/pages/CategoryPage.jsx", "line": 10, "end_line": 10, "label": "Import robots" }
+      ]
+    },
+    {
+      "id": "express-api",
+      "type": "backend",
+      "label": "Express API",
+      "sublabel": "Node · :5000 · CORS",
+      "tag": "products · orders · chats · AI",
+      "pos": [630, 300],
+      "size": [170, 64],
+      "sources": [
+        { "path": "server/index.js", "line": 17, "end_line": 30, "label": "Route mounts" },
+        { "path": "server/routes/ai.js", "line": 314, "end_line": 319, "label": "Python workers" },
+        { "path": "server/routes/orders.js", "line": 5, "end_line": 22, "label": "Create order" }
+      ]
+    },
+    {
+      "id": "pipeline",
+      "type": "backend",
+      "label": "AI Pipeline",
+      "sublabel": "pipeline.py · JSON IPC",
+      "tag": "6 tools · ui_guide",
+      "pos": [980, 300],
+      "size": [170, 64],
+      "sources": [
+        { "path": "server/ai/pipeline.py", "line": 1369, "end_line": 1469, "label": "run_pipeline" },
+        { "path": "server/ai/pipeline.py", "line": 1236, "end_line": 1248, "label": "decide_tool" },
+        { "path": "server/routes/ai.js", "line": 417, "end_line": 421, "label": "Worker send" }
+      ]
+    },
+    {
+      "id": "qwen-router",
+      "type": "backend",
+      "label": "Qwen3-0.6B Router",
+      "sublabel": "fc_model.py · ChatML",
+      "tag": "ENABLE_FC_MODEL",
+      "pos": [985, 110],
+      "size": [160, 64],
+      "sources": [
+        { "path": "server/ai/fc_model.py", "line": 165, "end_line": 174, "label": "predict_tool_call" },
+        { "path": "server/ai/pipeline.py", "line": 847, "end_line": 861, "label": "Model then heuristic" }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "nexusbots.db",
+      "tag": "products · chats · orders",
+      "pos": [985, 520],
+      "size": [160, 60],
+      "sources": [
+        { "path": "server/config/db.js", "line": 1, "end_line": 9, "label": "better-sqlite3" },
+        { "path": "server/database/schema.sql", "line": 1, "end_line": 70, "label": "Schema" },
+        { "path": "server/ai/pipeline.py", "line": 459, "end_line": 486, "label": "Pipeline DB load" }
+      ]
+    },
+    {
+      "id": "session-log",
+      "type": "database",
+      "label": "AI Session Log",
+      "sublabel": "logs/ai_sessions.jsonl",
+      "pos": [480, 520],
+      "size": [150, 60],
+      "sources": [
+        { "path": "server/ai-session-log.js", "line": 1, "end_line": 22, "label": "Append JSONL" },
+        { "path": "server/routes/ai.js", "line": 468, "end_line": 477, "label": "logSession call" }
+      ]
+    },
+    {
+      "id": "sarvam",
+      "type": "external",
+      "label": "Sarvam AI",
+      "sublabel": "SARVAM-M · STT",
+      "tag": "api.sarvam.ai",
+      "pos": [680, 520],
+      "size": [150, 64],
+      "sources": [
+        { "path": "server/ai/sarvam_client.py", "line": 148, "end_line": 180, "label": "Chat completions" },
+        { "path": "server/routes/ai.js", "line": 507, "end_line": 514, "label": "Speech-to-text" },
+        { "path": "server/routes/ai.js", "line": 428, "end_line": 438, "label": "NLG worker" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Browser client",
+      "wraps": ["react-spa", "catalog-static"]
+    },
+    {
+      "kind": "region",
+      "label": "Node.js Express process",
+      "wraps": ["express-api", "session-log"]
+    },
+    {
+      "kind": "region",
+      "label": "Python AI workers",
+      "wraps": ["pipeline", "qwen-router"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "shopper-spa",
+      "from": "shopper",
+      "to": "react-spa",
+      "label": "UI + chat",
+      "variant": "emphasis",
+      "labelDy": -28
+    },
+    {
+      "id": "spa-catalog",
+      "from": "react-spa",
+      "to": "catalog-static",
+      "label": "import",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDx": 36
+    },
+    {
+      "id": "spa-api",
+      "from": "react-spa",
+      "to": "express-api",
+      "label": "REST",
+      "variant": "emphasis",
+      "labelDy": -28
+    },
+    {
+      "id": "api-pipeline",
+      "from": "express-api",
+      "to": "pipeline",
+      "label": "IPC",
+      "variant": "emphasis",
+      "labelDy": -28
+    },
+    {
+      "id": "pipeline-qwen",
+      "from": "pipeline",
+      "to": "qwen-router",
+      "label": "route",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDx": 36
+    },
+    {
+      "id": "pipeline-sqlite",
+      "from": "pipeline",
+      "to": "sqlite",
+      "label": "tools SQL",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDx": 40,
+      "labelDy": 24
+    },
+    {
+      "id": "api-sqlite",
+      "from": "express-api",
+      "to": "sqlite",
+      "label": "REST SQL",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 40
+    },
+    {
+      "id": "api-sarvam",
+      "from": "express-api",
+      "to": "sarvam",
+      "label": "NLG + STT",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDx": 48
+    },
+    {
+      "id": "api-log",
+      "from": "express-api",
+      "to": "session-log",
+      "label": "JSONL",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDx": -48
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Dual-model agent",
+      "items": [
+        "ai.js runs pipeline first, then sarvam_client with the tool payload for multilingual NLG",
+        "Qwen3-0.6B (fc_model) selects tools + ui_guide when ENABLE_FC_MODEL=1; else heuristic router"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Two catalog sources",
+      "items": [
+        "UI catalog browse uses client/src/data/robots.js (no client /api/products calls observed)",
+        "AI tool execution and Express product/order/chat models read SQLite nexusbots.db"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Out of runtime path",
+      "items": [
+        "finetune/ and research/ are training/eval artifacts, not request-path services",
+        "Optional ENABLE_SEMANTIC_RAG (FAISS) stays inside pipeline when enabled"
+      ]
+    }
+  ]
+}

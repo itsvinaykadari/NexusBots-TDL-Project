@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "9d8b0b99-440a-4227-871d-fafb4e1acf5d",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "c:\\Users\\Vinaykumar\\Downloads\\Vinay\\GAXL\\NexusBots-TDL-Project\\candidate.json",
+  "output": "C:\\Users\\Vinaykumar\\Downloads\\Vinay\\GAXL\\NexusBots-TDL-Project\\nexusbots-architecture.html",
+  "specification": {
+    "sha256": "d58b900079855c2ca2c7339c4f6021c13fd36070fc969317b75696199a4a86e5",
+    "bytes": 8026
+  },
+  "artifact": {
+    "sha256": "1776ba7347f1e83afcb478bebc199a5315552368ca75eed7c100a91900c18a0f",
+    "bytes": 770383
+  }
+}
